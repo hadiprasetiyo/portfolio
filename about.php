@@ -23,16 +23,16 @@
           </div>
         </div>
         <div class="row">
-          <div class="col-md-3 animate-box" data-animate-effect="fadeInLeft">
-            <div class="services color-1">
-              <span class="icon2"><i class="icon-bulb"></i></span>
-              <h3>UI/UX Design</h3>
-            </div>
-          </div>
           <div class="col-md-3 animate-box" data-animate-effect="fadeInRight">
             <div class="services color-2">
               <span class="icon2"><i class="icon-globe-outline"></i></span>
               <h3>Web Design</h3>
+            </div>
+          </div>
+          <div class="col-md-3 animate-box" data-animate-effect="fadeInLeft">
+            <div class="services color-1">
+              <span class="icon2"><i class="icon-bulb"></i></span>
+              <h3>UI/UX Design</h3>
             </div>
           </div>
           <div class="col-md-3 animate-box" data-animate-effect="fadeInTop">

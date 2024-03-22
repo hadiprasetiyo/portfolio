@@ -17,6 +17,9 @@ $brand-color-5: #2fa499 !default;
 $brand-color-6: #4054b2 !default;
 $brand-color-7: #FF3FA4 !default;
 $brand-color-8: #FFFF00 !default;
+$brand-color-9: #FF0000 !default;
+$brand-color-10: #00FFFF !default;
+$brand-color-11: #FF00FF !default;
 
 
 $brand-white: #fff;
@@ -1072,6 +1075,33 @@ margin-left: -20px;
 		}
 		span{
 			color: $brand-color-8;
+		}
+	}
+	&.color-9{
+		background: $brand-color-9;
+		&:after{
+			background: $brand-color-9;
+		}
+		span{
+			color: $brand-color-9;
+		}
+	}
+	&.color-10{
+		background: $brand-color-10;
+		&:after{
+			background: $brand-color-10;
+		}
+		span{
+			color: $brand-color-10;
+		}
+	}
+	&.color-11{
+		background: $brand-color-11;
+		&:after{
+			background: $brand-color-11;
+		}
+		span{
+			color: $brand-color-11;
 		}
 	}
 }

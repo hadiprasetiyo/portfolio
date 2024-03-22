@@ -633,19 +633,19 @@ body.offcanvas {
     font-size: 16px;
     font-weight: 500; }
   .services.color-2 {
-    border-bottom: 2px solid #ec5453; }
+    border-bottom: 2px solid #967BB6; }
     .services.color-2 .icon2 i {
-      color: #ec5453; }
+      color: #967BB6; }
   .services.color-3 {
-    border-bottom: 2px solid #f9bf3f; }
+    border-bottom: 2px solid #4CAF50; }
     .services.color-3 .icon2 i {
-      color: #f9bf3f; }
+      color: #4CAF50; }
   .services.color-4 {
-    border-bottom: 2px solid #a84cb8; }
+    border-bottom: 2px solid #FFEB3B; }
     .services.color-4 .icon2 i {
-      color: #a84cb8; }
+      color: #FFEB3B; }
   .services.color-5 {
-    border-bottom: 2px solid #2fa499; }
+    border-bottom: 2px solid #34495E; }
   .services.color-6 {
     border-bottom: 2px solid #4054b2; }
 
@@ -698,29 +698,29 @@ body.offcanvas {
       font-weight: 700;
       text-transform: uppercase; }
   .services.color-2 .icon {
-    background: #ec5453; }
+    background: #967BB6; }
     .services.color-2 .icon:before {
-      border-color: transparent transparent #ec5453 transparent; }
+      border-color: transparent transparent #967BB6 transparent; }
     .services.color-2 .icon:after {
-      border-color: #ec5453 transparent transparent transparent; }
+      border-color: #967BB6 transparent transparent transparent; }
   .services.color-3 .icon {
-    background: #f9bf3f; }
+    background: #4CAF50; }
     .services.color-3 .icon:before {
-      border-color: transparent transparent #f9bf3f transparent; }
+      border-color: transparent transparent #4CAF50 transparent; }
     .services.color-3 .icon:after {
-      border-color: #f9bf3f transparent transparent transparent; }
+      border-color: #4CAF50 transparent transparent transparent; }
   .services.color-4 .icon {
-    background: #a84cb8; }
+    background: #FFEB3B; }
     .services.color-4 .icon:before {
-      border-color: transparent transparent #a84cb8 transparent; }
+      border-color: transparent transparent #FFEB3B transparent; }
     .services.color-4 .icon:after {
-      border-color: #a84cb8 transparent transparent transparent; }
+      border-color: #FFEB3B transparent transparent transparent; }
   .services.color-5 .icon {
-    background: #2fa499; }
+    background: #34495E; }
     .services.color-5 .icon:before {
-      border-color: transparent transparent #2fa499 transparent; }
+      border-color: transparent transparent #34495E transparent; }
     .services.color-5 .icon:after {
-      border-color: #2fa499 transparent transparent transparent; }
+      border-color: #34495E transparent transparent transparent; }
   .services.color-6 .icon {
     background: #4054b2; }
     .services.color-6 .icon:before {
@@ -819,6 +819,24 @@ body.offcanvas {
       background: #FFFF00; }
     .progress-bar.color-8 span {
       color: #FFFF00; }
+  .progress-bar.color-9 {
+    background: #FF0000; }
+    .progress-bar.color-9:after {
+      background: #FF0000; }
+    .progress-bar.color-9 span {
+      color: #FF0000; }
+  .progress-bar.color-10 {
+    background: #00FFFF; }
+    .progress-bar.color-10:after {
+      background: #00FFFF; }
+    .progress-bar.color-10 span {
+      color: #00FFFF; }
+  .progress-bar.color-11 {
+    background: #FF00FF; }
+    .progress-bar.color-11:after {
+      background: #FF00FF; }
+    .progress-bar.color-11 span {
+      color: #FF00FF; }
 
 .colorlib-feature {
   text-align: left;

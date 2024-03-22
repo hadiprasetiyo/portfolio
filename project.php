@@ -23,6 +23,20 @@
     </div>
     <div class="row work-item">
       <!-- card 1 -->
+      <div class="col-md-6 animate-box web" data-animate-effect="fadeInTop">
+        <div class="project" style="background-image: url(images/laravel.jpg)">
+          <div class="desc">
+            <div class="con">
+              <h3><a href="work.html">Project Akhir</a></h3>
+              <span>Laravel</span>
+              <p class="icon">
+                <span><a href="https://peserta39-fwd.sib5.nurulfikri.com/CivicPulse/" target="_blank"><i class="icon-eye"></i> Visite</a></span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- card 2 -->
       <div class="col-md-6 animate-box web" data-animate-effect="fadeInLeft">
         <div class="project" style="background-image: url(images/tugas4.png)">
           <div class="desc">
@@ -36,7 +50,7 @@
           </div>
         </div>
       </div>
-      <!-- card 2 -->
+      <!-- card 3 -->
       <div class="col-md-6 animate-box uiux" data-animate-effect="fadeInRight">
         <div class="project" style="background-image: url(images/pa-uiux.png)">
           <div class="desc">
@@ -50,7 +64,7 @@
           </div>
         </div>
       </div>
-      <!-- card 3 -->
+      <!-- card 4 -->
       <div class="col-md-6 animate-box web" data-animate-effect="fadeInTop">
         <div class="project" style="background-image: url(images/adminpage.png)">
           <div class="desc">
@@ -64,7 +78,7 @@
           </div>
         </div>
       </div>
-      <!-- card 4 -->
+      <!-- card 5 -->
       <div class="col-md-6 animate-box web" data-animate-effect="fadeInBottom">
         <div class="project" style="background-image: url(images/landingpage.png)">
           <div class="desc">
@@ -78,7 +92,7 @@
           </div>
         </div>
       </div>
-      <!-- card 5 -->
+      <!-- card 6 -->
       <div class="col-md-6 animate-box uiux" data-animate-effect="fadeInLeft">
         <div class="project" style="background-image: url(images/tugasUIUX.png)">
           <div class="desc">
@@ -92,7 +106,7 @@
           </div>
         </div>
       </div>
-      <!-- card 6 -->
+      <!-- card 7 -->
       <div class="col-md-6 animate-box web" data-animate-effect="fadeInRight">
         <div class="project" style="background-image: url(images/tugas5.png)">
           <div class="desc">
