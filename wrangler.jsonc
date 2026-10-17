@@ -1,7 +1,9 @@
 {
 	"$schema": "./node_modules/wrangler/config-schema.json",
 	"compatibility_date": "2026-09-26",
-	"compatibility_flags": ["global_fetch_strictly_public"],
+	"compatibility_flags": [
+		"global_fetch_strictly_public"
+	],
 	"name": "portfolio",
 	"main": "@astrojs/cloudflare/entrypoints/server",
 	"assets": {
@@ -10,5 +12,19 @@
 	},
 	"observability": {
 		"enabled": true
-	}
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "portfolio",
+			"migrations_dir": "migrations",
+			"database_id": "ccb89c21-62fd-49a3-a582-e7cc9b41dd91"
+		}
+	],
+	"kv_namespaces": [
+		{
+			"binding": "MEDIA",
+			"id": "a5a7991710574d2d99951ceda3c6f99a"
+		}
+	]
 }
