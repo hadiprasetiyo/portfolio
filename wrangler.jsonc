@@ -26,5 +26,26 @@
 			"binding": "MEDIA",
 			"id": "a5a7991710574d2d99951ceda3c6f99a"
 		}
-	]
+	],
+	// build production membaca D1 asli; tanpa CLOUDFLARE_ENV semua binding tetap lokal
+	"env": {
+		"production": {
+			"name": "portfolio",
+			"d1_databases": [
+				{
+					"binding": "DB",
+					"database_name": "portfolio",
+					"migrations_dir": "migrations",
+					"database_id": "ccb89c21-62fd-49a3-a582-e7cc9b41dd91",
+					"remote": true
+				}
+			],
+			"kv_namespaces": [
+				{
+					"binding": "MEDIA",
+					"id": "a5a7991710574d2d99951ceda3c6f99a"
+				}
+			]
+		}
+	}
 }
