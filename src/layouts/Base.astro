@@ -1,18 +1,21 @@
 ---
 import { Font } from 'astro:assets';
 import ThemeSwitcher from '../components/ThemeSwitcher.astro';
-import { getSettings, getThemes, type Locale } from '../lib/db';
+import { getDictionary, LOCALES, type Locale } from '../i18n';
+import { getProfile, getSettings, getThemes } from '../lib/db';
 import '../styles/global.css';
 
 type Props = {
   title: string;
+  description?: string;
   lang: Locale;
-  // path tanpa awalan bahasa, dipakai switcher EN · ID; kosongkan kalau halaman tidak bilingual
-  path?: string;
+  // path tanpa awalan bahasa, dipakai switcher EN · ID dan nav
+  path: string;
 };
 
-const { title, lang, path } = Astro.props;
-const [themes, settings] = await Promise.all([getThemes(), getSettings()]);
+const { title, description, lang, path } = Astro.props;
+const [themes, settings, profile] = await Promise.all([getThemes(), getSettings(), getProfile()]);
+const dictionary = getDictionary(lang);
 
 // warna aman di-inline: kolomnya dijaga CHECK hex di database
 const themeCss = themes
@@ -21,9 +24,13 @@ const themeCss = themes
       `[data-theme="${theme.id}"]{--color-bg:${theme.color_bg};--color-text:${theme.color_text};--color-accent:${theme.color_accent};--color-highlight:${theme.color_highlight}}`,
   )
   .join('');
-const languages: { code: Locale; label: string }[] = [
-  { code: 'en', label: 'English' },
-  { code: 'id', label: 'Bahasa Indonesia' },
+const languageNames: Record<Locale, string> = { en: 'English', id: 'Bahasa Indonesia' };
+const home = `/${lang}/`;
+const navigation = [
+  { href: `${home}#about`, label: dictionary.nav.about },
+  { href: `${home}#projects`, label: dictionary.nav.projects },
+  { href: `${home}#experience`, label: dictionary.nav.experience },
+  { href: `${home}#contact`, label: dictionary.nav.contact },
 ];
 ---
 
@@ -32,6 +39,7 @@ const languages: { code: Locale; label: string }[] = [
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
+    {description && <meta name="description" content={description} />}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <Font cssVariable="--font-sans" preload />
     <style set:html={themeCss}></style>
@@ -44,32 +52,42 @@ const languages: { code: Locale; label: string }[] = [
     </script>
   </head>
   <body>
-    <a class="skip-link" href="#main">Skip to content</a>
+    <a class="skip-link" href="#main">{dictionary.skipToContent}</a>
     <header class="site-header">
       <div class="container site-header__inner">
-        <slot name="brand" />
+        <a class="brand" href={home}>{profile?.full_name ?? 'Portfolio'}</a>
+        <nav class="site-nav" aria-label={dictionary.mainNavigation}>
+          <ul role="list">
+            {
+              navigation.map((item) => (
+                <li>
+                  <a href={item.href}>{item.label}</a>
+                </li>
+              ))
+            }
+            <li><a href={`/${lang}/cv`} aria-current={path === '/cv' ? 'page' : undefined}>{dictionary.nav.cv}</a></li>
+          </ul>
+        </nav>
         <div class="site-header__controls">
-          {
-            path !== undefined && (
-              <nav class="language-switcher" aria-label="Language">
-                {languages.map((language, index) => (
-                  <>
-                    {index > 0 && <span aria-hidden="true">·</span>}
-                    <a
-                      href={`/${language.code}${path}`}
-                      hreflang={language.code}
-                      lang={language.code}
-                      aria-label={language.label}
-                      aria-current={language.code === lang ? 'page' : undefined}
-                    >
-                      {language.code.toUpperCase()}
-                    </a>
-                  </>
-                ))}
-              </nav>
-            )
-          }
-          <ThemeSwitcher themes={themes} />
+          <nav class="language-switcher" aria-label={dictionary.languageSwitcher}>
+            {
+              LOCALES.map((code, index) => (
+                <>
+                  {index > 0 && <span aria-hidden="true">·</span>}
+                  <a
+                    href={`/${code}${path}`}
+                    hreflang={code}
+                    lang={code}
+                    aria-label={languageNames[code]}
+                    aria-current={code === lang ? 'page' : undefined}
+                  >
+                    {code.toUpperCase()}
+                  </a>
+                </>
+              ))
+            }
+          </nav>
+          <ThemeSwitcher themes={themes} label={dictionary.themeSwitcher} />
         </div>
       </div>
     </header>
@@ -77,8 +95,9 @@ const languages: { code: Locale; label: string }[] = [
       <slot />
     </main>
     <footer class="site-footer">
-      <div class="container">
-        <slot name="footer" />
+      <div class="container site-footer__inner">
+        <p>© {new Date().getFullYear()} {profile?.full_name}</p>
+        <p>{dictionary.footer.builtWith}</p>
       </div>
     </footer>
   </body>
@@ -112,38 +131,54 @@ const languages: { code: Locale; label: string }[] = [
   .site-header__inner {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: var(--space-4);
+    gap: var(--space-6);
     min-height: 4rem;
+  }
+
+  .brand {
+    color: var(--color-text);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .site-nav ul {
+    display: flex;
+    gap: var(--space-1);
+    padding: 0;
+    list-style: none;
+  }
+
+  .site-nav a,
+  .language-switcher a {
+    display: inline-grid;
+    place-items: center;
+    min-height: 2.75rem;
+    padding-inline: var(--space-2);
+    color: var(--color-muted);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .site-nav a:hover,
+  .language-switcher a:hover,
+  .site-nav a[aria-current='page'] {
+    color: var(--color-text);
   }
 
   .site-header__controls {
     display: flex;
     align-items: center;
-    gap: var(--space-6);
+    gap: var(--space-4);
     margin-inline-start: auto;
   }
 
   .language-switcher {
     display: flex;
     align-items: center;
-    gap: var(--space-2);
-    font-size: var(--text-sm);
     color: var(--color-muted);
-  }
-
-  .language-switcher a {
-    display: inline-grid;
-    place-items: center;
-    min-width: 2.75rem;
-    min-height: 2.75rem;
-    color: var(--color-muted);
-    text-decoration: none;
-    font-weight: 500;
-  }
-
-  .language-switcher a:hover {
-    color: var(--color-text);
   }
 
   .language-switcher a[aria-current='page'] {
@@ -154,8 +189,15 @@ const languages: { code: Locale; label: string }[] = [
     text-underline-offset: 0.35em;
   }
 
+  /* di layar sempit nav anchor disembunyikan; halaman utama cukup di-scroll, CV tetap terjangkau dari hero */
+  @media (max-width: 56rem) {
+    .site-nav {
+      display: none;
+    }
+  }
+
   main {
-    padding-block: var(--space-16);
+    padding-block: var(--space-16) var(--space-24);
   }
 
   main:focus {
@@ -167,5 +209,12 @@ const languages: { code: Locale; label: string }[] = [
     padding-block: var(--space-8);
     color: var(--color-muted);
     font-size: var(--text-sm);
+  }
+
+  .site-footer__inner {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-2);
   }
 </style>

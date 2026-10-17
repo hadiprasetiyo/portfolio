@@ -1,0 +1,401 @@
+---
+import Button from '../../components/Button.astro';
+import ContactForm from '../../components/ContactForm.astro';
+import Base from '../../layouts/Base.astro';
+import { formatMonth, getDictionary, LOCALES, localized, type Locale } from '../../i18n';
+import { getCertifications, getExperiences, getProfile, getPublishedProjects, getSkills, type Skill } from '../../lib/db';
+
+export function getStaticPaths() {
+  return LOCALES.map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as Locale;
+const dictionary = getDictionary(lang);
+const [profile, skills, experiences, certifications, projects] = await Promise.all([
+  getProfile(),
+  getSkills(),
+  getExperiences(),
+  getCertifications(),
+  getPublishedProjects(),
+]);
+
+const skillGroups = Object.entries(Object.groupBy(skills, (skill) => skill.category)) as [Skill['category'], Skill[]][];
+const work = experiences.filter((experience) => experience.kind === 'work');
+const education = experiences.filter((experience) => experience.kind === 'education');
+const period = (start: string, end: string | null) => `${formatMonth(start, lang)} – ${end ? formatMonth(end, lang) : dictionary.present}`;
+const title = profile ? `${profile.full_name} · ${localized(profile, 'headline', lang)}` : 'Portfolio';
+---
+
+<Base title={title} description={profile ? localized(profile, 'headline', lang) : dictionary.meta.homeDescription} lang={lang} path="/">
+  <div class="container">
+    <section class="hero" aria-labelledby="hero-name">
+      <h1 id="hero-name">{profile?.full_name}</h1>
+      {profile && <p class="hero__headline">{localized(profile, 'headline', lang)}</p>}
+      {profile?.location && <p class="hero__meta">{profile.location}</p>}
+      <div class="hero__actions">
+        <Button href={`/${lang}/cv`}>{dictionary.hero.viewCv}</Button>
+        <Button href="#contact" variant="secondary">{dictionary.hero.getInTouch}</Button>
+      </div>
+    </section>
+
+    {
+      profile && localized(profile, 'bio', lang) && (
+        <section class="section" id="about" aria-labelledby="about-heading">
+          <h2 id="about-heading" class="section__label">{dictionary.sections.about}</h2>
+          <div class="section__body">
+            <p class="bio">{localized(profile, 'bio', lang)}</p>
+          </div>
+        </section>
+      )
+    }
+
+    {
+      skillGroups.length > 0 && (
+        <section class="section" id="skills" aria-labelledby="skills-heading">
+          <h2 id="skills-heading" class="section__label">{dictionary.sections.skills}</h2>
+          <dl class="section__body skills">
+            {skillGroups.map(([category, items]) => (
+              <div class="skills__group">
+                <dt>{dictionary.skillCategories[category]}</dt>
+                <dd>{items.map((skill) => skill.name).join(', ')}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      )
+    }
+
+    {
+      projects.length > 0 && (
+        <section class="section" id="projects" aria-labelledby="projects-heading">
+          <h2 id="projects-heading" class="section__label">{dictionary.sections.projects}</h2>
+          <ol class="section__body project-list" role="list">
+            {projects.map((project, index) => (
+              <li class="project-row">
+                <span class="project-row__index" aria-hidden="true">
+                  {String(index + 1).padStart(2, '0')}
+                </span>
+                <div>
+                  <h3 class="project-row__title">
+                    <a href={`/${lang}/projects/${project.slug}`}>{localized(project, 'title', lang)}</a>
+                  </h3>
+                  <p class="project-row__summary">{localized(project, 'summary', lang)}</p>
+                  {project.skills.length > 0 && <p class="meta">{project.skills.join(' · ')}</p>}
+                </div>
+                <time class="meta" datetime={project.published_at.slice(0, 7)}>
+                  {project.published_at.slice(0, 4)}
+                </time>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )
+    }
+
+    {
+      experiences.length > 0 && (
+        <section class="section" id="experience" aria-labelledby="experience-heading">
+          <h2 id="experience-heading" class="section__label">{dictionary.sections.experience}</h2>
+          <div class="section__body timeline-groups">
+            {[
+              { heading: dictionary.sections.work, items: work },
+              { heading: dictionary.sections.education, items: education },
+            ]
+              .filter((group) => group.items.length > 0)
+              .map((group) => (
+                <div>
+                  <h3 class="timeline__heading">{group.heading}</h3>
+                  <ol class="timeline" role="list">
+                    {group.items.map((experience) => (
+                      <li class="timeline__item">
+                        <p class="meta timeline__period">{period(experience.started_on, experience.ended_on)}</p>
+                        <div>
+                          <h4 class="timeline__title">{localized(experience, 'title', lang)}</h4>
+                          <p class="timeline__organization">
+                            {experience.organization}
+                            {experience.location && <span class="meta"> · {experience.location}</span>}
+                          </p>
+                          {localized(experience, 'description', lang) && (
+                            <p class="timeline__description">{localized(experience, 'description', lang)}</p>
+                          )}
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              ))}
+          </div>
+        </section>
+      )
+    }
+
+    {
+      certifications.length > 0 && (
+        <section class="section" id="certifications" aria-labelledby="certifications-heading">
+          <h2 id="certifications-heading" class="section__label">{dictionary.sections.certifications}</h2>
+          <ul class="section__body certifications" role="list">
+            {certifications.map((certification) => (
+              <li class="certification">
+                <div>
+                  <h3 class="certification__name">{certification.name}</h3>
+                  <p class="certification__issuer">{certification.issuer}</p>
+                </div>
+                <div class="certification__aside">
+                  <time class="meta" datetime={certification.issued_on}>
+                    {formatMonth(certification.issued_on, lang)}
+                  </time>
+                  {certification.credential_url && (
+                    <a href={certification.credential_url} rel="noopener noreferrer">
+                      {dictionary.certification.viewCredential}
+                      <span class="visually-hidden">: {certification.name}</span>
+                    </a>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    <section class="section" id="contact" aria-labelledby="contact-heading">
+      <h2 id="contact-heading" class="section__label">{dictionary.sections.contact}</h2>
+      <div class="section__body">
+        <p class="contact__intro">{dictionary.contact.intro}</p>
+        <ContactForm lang={lang} />
+      </div>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .hero {
+    display: grid;
+    gap: var(--space-4);
+    padding-block: var(--space-16) var(--space-24);
+  }
+
+  .hero__headline {
+    font-size: var(--text-xl);
+    line-height: 1.4;
+    color: var(--color-muted);
+    max-width: 34ch;
+  }
+
+  .hero__meta,
+  .meta {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-block-start: var(--space-4);
+  }
+
+  /* grid editorial: label section di kolom kiri, isi di kanan; menumpuk di layar sempit */
+  .section {
+    display: grid;
+    grid-template-columns: minmax(10rem, 14rem) 1fr;
+    gap: var(--space-8);
+    padding-block: var(--space-16);
+    border-top: 1px solid var(--color-border);
+    scroll-margin-top: 4rem;
+  }
+
+  .section__label {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--color-muted);
+    padding-block-start: 0.35em;
+  }
+
+  .section__body {
+    min-width: 0;
+  }
+
+  @media (max-width: 48rem) {
+    .section {
+      grid-template-columns: 1fr;
+      gap: var(--space-4);
+    }
+  }
+
+  .bio {
+    font-size: var(--text-lg);
+    line-height: 1.55;
+  }
+
+  .skills {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .skills__group {
+    display: grid;
+    grid-template-columns: 12rem 1fr;
+    gap: var(--space-4);
+  }
+
+  .skills dt {
+    color: var(--color-muted);
+  }
+
+  .skills dd {
+    margin: 0;
+  }
+
+  @media (max-width: 36rem) {
+    .skills__group {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+  }
+
+  .project-list {
+    padding: 0;
+    list-style: none;
+  }
+
+  .project-row {
+    display: grid;
+    grid-template-columns: 2.5rem 1fr auto;
+    gap: var(--space-6);
+    padding-block: var(--space-6);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .project-row:first-child {
+    padding-block-start: 0;
+  }
+
+  .project-row__index {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+    padding-block-start: 0.4em;
+  }
+
+  .project-row__title {
+    font-size: var(--text-xl);
+    margin-block-end: var(--space-2);
+  }
+
+  .project-row__title a {
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  .project-row__title a:hover {
+    color: var(--color-accent);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+  }
+
+  .project-row__summary {
+    color: var(--color-muted);
+    margin-block-end: var(--space-2);
+  }
+
+  @media (max-width: 36rem) {
+    .project-row {
+      grid-template-columns: 1fr;
+      gap: var(--space-1);
+    }
+
+    .project-row__index {
+      display: none;
+    }
+  }
+
+  .timeline-groups {
+    display: grid;
+    gap: var(--space-12);
+  }
+
+  .timeline__heading {
+    font-size: var(--text-base);
+    font-weight: 600;
+    margin-block-end: var(--space-4);
+  }
+
+  .timeline {
+    display: grid;
+    gap: var(--space-8);
+    padding: 0;
+    list-style: none;
+  }
+
+  .timeline__item {
+    display: grid;
+    grid-template-columns: 11rem 1fr;
+    gap: var(--space-4);
+  }
+
+  .timeline__period {
+    padding-block-start: 0.2em;
+  }
+
+  .timeline__title {
+    font-size: var(--text-lg);
+    letter-spacing: -0.01em;
+  }
+
+  .timeline__organization {
+    color: var(--color-muted);
+  }
+
+  .timeline__description {
+    margin-block-start: var(--space-2);
+  }
+
+  @media (max-width: 36rem) {
+    .timeline__item {
+      grid-template-columns: 1fr;
+      gap: var(--space-1);
+    }
+  }
+
+  .certifications {
+    padding: 0;
+    list-style: none;
+  }
+
+  .certification {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-6);
+    padding-block: var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .certification:first-child {
+    padding-block-start: 0;
+  }
+
+  .certification__name {
+    font-size: var(--text-base);
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+
+  .certification__issuer {
+    color: var(--color-muted);
+  }
+
+  .certification__aside {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-4);
+    font-size: var(--text-sm);
+  }
+
+  .contact__intro {
+    margin-block-end: var(--space-8);
+  }
+</style>

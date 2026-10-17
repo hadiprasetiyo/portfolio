@@ -1,0 +1,142 @@
+---
+import Button from '../../components/Button.astro';
+import Base from '../../layouts/Base.astro';
+import { getDictionary, LOCALES, type Locale } from '../../i18n';
+import { getCv, getProfile } from '../../lib/db';
+
+export function getStaticPaths() {
+  return LOCALES.map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as Locale;
+const dictionary = getDictionary(lang);
+const [cv, profile] = await Promise.all([getCv(lang), getProfile()]);
+
+const sizeLabel = (bytes: number) => (bytes >= 1024 * 1024 ? `${(bytes / 1024 / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`);
+const updated = cv
+  ? new Intl.DateTimeFormat(lang === 'id' ? 'id-ID' : 'en-GB', { month: 'short', year: 'numeric', timeZone: 'UTC' }).format(new Date(cv.created_at))
+  : '';
+const title = `${dictionary.cv.title}${profile ? ` · ${profile.full_name}` : ''}`;
+---
+
+<Base title={title} lang={lang} path="/cv">
+  <div class="cv">
+    <div class="cv__bar">
+      <div class="container cv__bar-inner">
+        <a class="cv__back" href={`/${lang}/`}>← {dictionary.cv.backToPortfolio}</a>
+        {
+          cv && (
+            <div class="cv__download">
+              <Button href={`/media/${cv.kv_key}?download`}>
+                {dictionary.cv.download}
+                <span class="visually-hidden">, {sizeLabel(cv.size_bytes)}</span>
+              </Button>
+              <p class="cv__file-meta" aria-hidden="true">
+                PDF · {sizeLabel(cv.size_bytes)} · {dictionary.cv.updated} {updated}
+              </p>
+            </div>
+          )
+        }
+      </div>
+    </div>
+
+    <div class="container cv__content">
+      <h1 class="visually-hidden">{title}</h1>
+      {
+        cv && cv.pages.length > 0 ? (
+          <ol class="cv__pages" role="list">
+            {cv.pages.map((page, index) => (
+              <li>
+                <img
+                  src={`/media/${page.kv_key}`}
+                  alt={`${dictionary.cv.page} ${index + 1} ${dictionary.cv.of} ${cv.pages.length}`}
+                  width={page.width ?? undefined}
+                  height={page.height ?? undefined}
+                  loading={index === 0 ? 'eager' : 'lazy'}
+                  fetchpriority={index === 0 ? 'high' : undefined}
+                  decoding="async"
+                />
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <p class="cv__empty">{dictionary.cv.empty}</p>
+        )
+      }
+    </div>
+  </div>
+</Base>
+
+<style>
+  /* main punya padding atas dari layout; bar CV menempel tepat di bawah header situs */
+  .cv {
+    margin-block-start: calc(-1 * var(--space-16));
+  }
+
+  .cv__bar {
+    position: sticky;
+    top: 4rem;
+    z-index: var(--z-sticky);
+    background: var(--color-bg);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .cv__bar-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3) var(--space-6);
+    padding-block: var(--space-3);
+  }
+
+  .cv__back {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    color: var(--color-muted);
+    font-size: var(--text-sm);
+    text-decoration: none;
+  }
+
+  .cv__back:hover {
+    color: var(--color-text);
+  }
+
+  .cv__download {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-4);
+  }
+
+  .cv__file-meta {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+  }
+
+  .cv__content {
+    padding-block-start: var(--space-12);
+  }
+
+  .cv__pages {
+    display: grid;
+    gap: var(--space-8);
+    justify-items: center;
+    padding: 0;
+    list-style: none;
+  }
+
+  .cv__pages img {
+    width: min(100%, 52rem);
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    box-shadow: 0 1px 2px color-mix(in oklab, var(--color-text) 8%, transparent);
+  }
+
+  .cv__empty {
+    color: var(--color-muted);
+  }
+</style>

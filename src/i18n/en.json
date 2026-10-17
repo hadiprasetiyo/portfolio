@@ -1,0 +1,76 @@
+{
+  "skipToContent": "Skip to content",
+  "mainNavigation": "Main",
+  "languageSwitcher": "Language",
+  "themeSwitcher": "Color theme",
+  "nav": {
+    "about": "About",
+    "projects": "Projects",
+    "experience": "Experience",
+    "contact": "Contact",
+    "cv": "CV"
+  },
+  "hero": {
+    "viewCv": "View CV",
+    "getInTouch": "Get in touch"
+  },
+  "sections": {
+    "about": "About",
+    "skills": "Skills",
+    "experience": "Experience",
+    "education": "Education",
+    "projects": "Selected projects",
+    "certifications": "Certifications",
+    "contact": "Contact",
+    "work": "Work"
+  },
+  "skillCategories": {
+    "language": "Languages",
+    "framework": "Frameworks",
+    "database": "Databases",
+    "tool": "Tools"
+  },
+  "present": "Present",
+  "project": {
+    "readCaseStudy": "Read case study",
+    "liveSite": "Live site",
+    "sourceCode": "Source code",
+    "backToProjects": "Back to projects",
+    "stack": "Stack"
+  },
+  "certification": {
+    "viewCredential": "View credential"
+  },
+  "cv": {
+    "title": "Curriculum vitae",
+    "backToPortfolio": "Back to portfolio",
+    "download": "Download PDF",
+    "updated": "Updated",
+    "page": "Page",
+    "of": "of",
+    "empty": "The CV is being updated. Please check back soon, or get in touch for a copy."
+  },
+  "contact": {
+    "intro": "Have a role or a project in mind? Send a message and I will reply by email.",
+    "name": "Name",
+    "email": "Email",
+    "message": "Message",
+    "send": "Send message",
+    "sending": "Sending",
+    "sent": "Message sent. I usually reply within two days.",
+    "failed": "Message not sent. Check your connection and try again.",
+    "invalid": "Please check the highlighted fields.",
+    "errors": {
+      "name": "Enter your name (up to 100 characters).",
+      "email": "Enter a valid email address.",
+      "message": "Write a message (up to 2000 characters).",
+      "captcha": "Complete the verification and try again."
+    }
+  },
+  "footer": {
+    "builtWith": "Built with Astro and Cloudflare Workers."
+  },
+  "meta": {
+    "homeDescription": "Portfolio of a web developer focused on data-heavy applications."
+  }
+}

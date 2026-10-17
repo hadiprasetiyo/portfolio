@@ -1,11 +1,11 @@
 ---
 import type { Theme } from '../lib/db';
 
-type Props = { themes: Theme[] };
-const { themes } = Astro.props;
+type Props = { themes: Theme[]; label: string };
+const { themes, label } = Astro.props;
 ---
 
-<div class="theme-switcher" role="group" aria-label="Color theme">
+<div class="theme-switcher" role="group" aria-label={label}>
   {
     themes.map((theme) => (
       <button
