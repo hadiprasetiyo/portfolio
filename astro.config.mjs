@@ -1,5 +1,5 @@
 // @ts-check
-import { defineConfig } from 'astro/config';
+import { defineConfig, fontProviders } from 'astro/config';
 
 import cloudflare from '@astrojs/cloudflare';
 import vue from '@astrojs/vue';
@@ -12,5 +12,27 @@ export default defineConfig({
   }),
   // session admin pakai cookie bertanda tangan, bukan session KV bawaan Astro
   session: false,
-  integrations: [vue()],
+  integrations: [
+    vue(),
+    {
+      // styleguide cuma untuk review visual, tidak pernah ikut build production
+      name: 'dev-styleguide',
+      hooks: {
+        'astro:config:setup': ({ command, injectRoute }) => {
+          if (command === 'dev') injectRoute({ pattern: '/styleguide', entrypoint: './src/dev/styleguide.astro' });
+        },
+      },
+    },
+  ],
+  fonts: [
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Plus Jakarta Sans',
+      cssVariable: '--font-sans',
+      weights: ['200 800'],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['sans-serif'],
+    },
+  ],
 });

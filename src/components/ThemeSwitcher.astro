@@ -1,0 +1,84 @@
+---
+import type { Theme } from '../lib/db';
+
+type Props = { themes: Theme[] };
+const { themes } = Astro.props;
+---
+
+<div class="theme-switcher" role="group" aria-label="Color theme">
+  {
+    themes.map((theme) => (
+      <button
+        type="button"
+        data-theme-option={theme.id}
+        aria-label={theme.name}
+        title={theme.name}
+        style={`--swatch-bg:${theme.color_bg};--swatch-accent:${theme.color_accent};--swatch-highlight:${theme.color_highlight}`}
+      />
+    ))
+  }
+</div>
+
+<script is:inline>
+  {
+    const root = document.documentElement;
+    const buttons = document.querySelectorAll('[data-theme-option]');
+    const sync = () => buttons.forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.themeOption === root.dataset.theme)));
+    buttons.forEach((button) =>
+      button.addEventListener('click', () => {
+        root.dataset.theme = button.dataset.themeOption;
+        try {
+          localStorage.setItem('theme', button.dataset.themeOption);
+        } catch {}
+        sync();
+      }),
+    );
+    sync();
+  }
+</script>
+
+<style>
+  .theme-switcher {
+    display: flex;
+    gap: var(--space-1);
+  }
+
+  button {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    border-radius: 50%;
+  }
+
+  /* swatch dibagi dua: accent dan highlight, supaya beda preset terlihat sekilas */
+  button::before {
+    content: '';
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--swatch-accent) 50%, var(--swatch-highlight) 50%);
+    box-shadow:
+      0 0 0 1px var(--color-border),
+      0 0 0 3px var(--swatch-bg);
+    transition: transform var(--duration-fast) var(--ease-out);
+  }
+
+  button:hover::before {
+    transform: scale(1.08);
+  }
+
+  button:active::before {
+    transform: scale(0.94);
+  }
+
+  button[aria-pressed='true']::before {
+    box-shadow:
+      0 0 0 2px var(--color-bg),
+      0 0 0 3.5px var(--color-text);
+  }
+</style>

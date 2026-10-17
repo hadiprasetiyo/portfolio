@@ -1,0 +1,267 @@
+---
+import Button from '../components/Button.astro';
+import Base from '../layouts/Base.astro';
+
+const colorTokens = [
+  ['--color-bg', 'Background'],
+  ['--color-surface', 'Surface'],
+  ['--color-border', 'Border'],
+  ['--color-muted', 'Muted text'],
+  ['--color-text', 'Text'],
+  ['--color-accent', 'Accent (link, focus)'],
+  ['--color-highlight', 'Highlight (isian CTA)'],
+];
+const typeScale = ['--text-4xl', '--text-3xl', '--text-2xl', '--text-xl', '--text-lg', '--text-base', '--text-sm'];
+const sampleProjects = [
+  { title: 'Inventory system for a retail chain', summary: 'Cut stock reconciliation from two days to forty minutes by moving counts to a shared database.', stack: ['Laravel', 'MySQL', 'Alpine.js'], year: '2025' },
+  { title: 'Clinic queue display', summary: 'Real-time queue board that keeps working when the clinic network drops.', stack: ['Vue', 'SQLite', 'WebSocket'], year: '2024' },
+];
+---
+
+<Base title="Styleguide" lang="en" path="">
+  <span slot="brand" class="brand">Styleguide</span>
+
+  <div class="container stack">
+    <section>
+      <p class="note">Halaman ini hanya ada saat <code>npm run dev</code>. Ganti tema lewat bulatan di kanan atas, lalu tekan Tab untuk melihat fokus keyboard.</p>
+    </section>
+
+    <section aria-labelledby="colors">
+      <h2 id="colors">Warna</h2>
+      <ul class="swatches" role="list">
+        {
+          colorTokens.map(([token, label]) => (
+            <li>
+              <span class="swatch" style={`background: var(${token})`} />
+              <span class="swatch__label">{label}</span>
+              <code>{token}</code>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <section aria-labelledby="type">
+      <h2 id="type">Tipografi</h2>
+      <div class="type-scale">
+        {
+          typeScale.map((token) => (
+            <p style={`font-size: var(${token}); line-height: 1.2`}>
+              <code class="type-scale__token">{token}</code>
+              Building software that holds up
+            </p>
+          ))
+        }
+      </div>
+      <article class="prose">
+        <h1>Hadi Prasetiyo</h1>
+        <p class="lead">Web developer focused on data-heavy applications that stay fast on slow connections.</p>
+        <h3>Heading level three</h3>
+        <p>
+          Body text sits at a 68 character measure with 1.6 line height. Links look like <a href="#type">this inline link</a>, and
+          technical metadata such as <time datetime="2026-09">Sep 2026</time> uses the system monospace stack.
+        </p>
+      </article>
+    </section>
+
+    <section aria-labelledby="buttons">
+      <h2 id="buttons">Tombol</h2>
+      <div class="row">
+        <Button>View CV</Button>
+        <Button variant="secondary">Get in touch</Button>
+        <Button href="#buttons">Link as button</Button>
+      </div>
+      <div class="row">
+        <Button disabled>Disabled</Button>
+        <Button variant="secondary" disabled>Disabled</Button>
+        <Button loading>Sending</Button>
+      </div>
+      <div class="row">
+        <p class="status status--success" role="status">Message sent. I usually reply within two days.</p>
+        <p class="status status--error" role="alert">Message not sent. Check your connection and try again.</p>
+      </div>
+      <div class="row">
+        <span class="badge">Open to work</span>
+      </div>
+    </section>
+
+    <section aria-labelledby="projects">
+      <h2 id="projects">Baris proyek</h2>
+      <ol class="project-list" role="list">
+        {
+          sampleProjects.map((project, index) => (
+            <li class="project-row">
+              <span class="project-row__index">{String(index + 1).padStart(2, '0')}</span>
+              <div>
+                <h3 class="project-row__title">
+                  <a href="#projects">{project.title}</a>
+                </h3>
+                <p class="project-row__summary">{project.summary}</p>
+                <p class="project-row__stack">{project.stack.join(' · ')}</p>
+              </div>
+              <time class="project-row__year">{project.year}</time>
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .brand {
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .stack {
+    display: grid;
+    gap: var(--space-24);
+  }
+
+  section > h2 {
+    margin-block-end: var(--space-8);
+  }
+
+  .note {
+    color: var(--color-muted);
+  }
+
+  .swatches {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+    gap: var(--space-6);
+    padding: 0;
+    list-style: none;
+  }
+
+  .swatches li {
+    display: grid;
+    gap: var(--space-1);
+    font-size: var(--text-sm);
+  }
+
+  .swatch {
+    aspect-ratio: 3 / 2;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    margin-block-end: var(--space-2);
+  }
+
+  .swatches code {
+    color: var(--color-muted);
+  }
+
+  .type-scale {
+    display: grid;
+    gap: var(--space-4);
+    margin-block-end: var(--space-16);
+    max-width: none;
+  }
+
+  .type-scale p {
+    max-width: none;
+  }
+
+  .type-scale__token {
+    display: block;
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+  }
+
+  .prose {
+    display: grid;
+    gap: var(--space-4);
+    max-width: var(--reading);
+  }
+
+  .lead {
+    font-size: var(--text-lg);
+    color: var(--color-muted);
+  }
+
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-4);
+    margin-block-end: var(--space-6);
+  }
+
+  .status {
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+  }
+
+  .status--success {
+    border-color: color-mix(in oklab, var(--color-accent) 40%, var(--color-bg));
+  }
+
+  .status--error {
+    border-color: var(--color-danger);
+    color: var(--color-danger);
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-1) var(--space-3);
+    background: var(--color-highlight);
+    color: var(--color-text);
+    border: 1px solid color-mix(in oklab, var(--color-highlight) 70%, var(--color-text));
+    border-radius: 999px;
+    font-size: var(--text-sm);
+    font-weight: 600;
+  }
+
+  .project-list {
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .project-row {
+    display: grid;
+    grid-template-columns: 3rem 1fr auto;
+    gap: var(--space-6);
+    padding-block: var(--space-8);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .project-row__index,
+  .project-row__year,
+  .project-row__stack {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+  }
+
+  .project-row__title {
+    font-size: var(--text-xl);
+    margin-block-end: var(--space-2);
+  }
+
+  .project-row__title a {
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  .project-row__title a:hover {
+    color: var(--color-accent);
+  }
+
+  .project-row__summary {
+    color: var(--color-muted);
+    margin-block-end: var(--space-3);
+  }
+
+  @media (max-width: 40rem) {
+    .project-row {
+      grid-template-columns: 1fr;
+      gap: var(--space-2);
+    }
+  }
+</style>

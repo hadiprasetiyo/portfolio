@@ -1,0 +1,171 @@
+/* Empat warna dasar (--color-bg, --color-text, --color-accent, --color-highlight)
+   disuntikkan layout dari tabel themes. Semua warna lain diturunkan di sini. */
+:root {
+  --color-muted: color-mix(in oklab, var(--color-text) 72%, var(--color-bg));
+  --color-border: color-mix(in oklab, var(--color-text) 12%, var(--color-bg));
+  --color-surface: color-mix(in oklab, var(--color-text) 3%, var(--color-bg));
+  --color-accent-hover: color-mix(in oklab, var(--color-accent) 82%, var(--color-text));
+  --focus-ring: var(--color-accent);
+  --color-danger: #8a1c12;
+
+  --font-mono: ui-monospace, 'Cascadia Code', 'SF Mono', Menlo, Consolas, monospace;
+
+  /* skala 1.25, ukuran besar mengecil di layar sempit */
+  --text-sm: 0.875rem;
+  --text-base: clamp(1rem, 0.96rem + 0.2vw, 1.0625rem);
+  --text-lg: 1.25rem;
+  --text-xl: 1.5625rem;
+  --text-2xl: clamp(1.75rem, 1.5rem + 1.2vw, 1.953rem);
+  --text-3xl: clamp(2rem, 1.6rem + 2vw, 2.441rem);
+  --text-4xl: clamp(2.25rem, 1.5rem + 3.6vw, 3.5rem);
+
+  --leading-body: 1.6;
+  --leading-heading: 1.15;
+  --measure: 68ch;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-24: 6rem;
+  --space-32: 8rem;
+
+  --container: 70rem;
+  --reading: 45rem;
+  --gutter: clamp(1rem, 4vw, 2rem);
+
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 14px;
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --duration-fast: 120ms;
+  --duration: 180ms;
+  --duration-slow: 240ms;
+
+  --z-sticky: 10;
+  --z-dropdown: 20;
+  --z-modal: 30;
+  --z-toast: 40;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  color-scheme: light;
+}
+
+body {
+  min-height: 100dvh;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--leading-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+img,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  line-height: var(--leading-heading);
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+h1 { font-size: var(--text-4xl); font-weight: 700; }
+h2 { font-size: var(--text-3xl); font-weight: 650; }
+h3 { font-size: var(--text-xl); font-weight: 600; }
+
+p {
+  max-width: var(--measure);
+  text-wrap: pretty;
+}
+
+a {
+  color: var(--color-accent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+a:hover {
+  color: var(--color-accent-hover);
+}
+
+code,
+kbd,
+time {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--color-accent) 20%, var(--color-bg));
+}
+
+.container {
+  width: min(100% - 2 * var(--gutter), var(--container));
+  margin-inline: auto;
+}
+
+.visually-hidden:not(:focus-within, :active) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
