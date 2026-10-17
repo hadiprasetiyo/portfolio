@@ -1,0 +1,105 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+
+type Props = {
+  variant?: 'primary' | 'secondary';
+  href?: string;
+  loading?: boolean;
+} & HTMLAttributes<'button'>;
+
+const { variant = 'primary', href, loading = false, class: className, ...rest } = Astro.props;
+const classes = ['button', `button--${variant}`, className];
+---
+
+{
+  href ? (
+    <a href={href} class:list={classes}>
+      <slot />
+    </a>
+  ) : (
+    <button class:list={classes} aria-busy={loading ? 'true' : undefined} disabled={loading || rest.disabled} {...rest}>
+      <slot />
+    </button>
+  )
+}
+
+<style>
+  .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    min-height: 2.75rem;
+    padding-inline: var(--space-6);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      transform var(--duration-fast) var(--ease-out),
+      border-color var(--duration) var(--ease-out),
+      background-color var(--duration) var(--ease-out);
+  }
+
+  /* highlight cuma jadi isian, teksnya tetap warna text (lolos 4.5:1 di semua preset) */
+  .button--primary {
+    background: var(--color-highlight);
+    color: var(--color-text);
+    border-color: color-mix(in oklab, var(--color-highlight) 70%, var(--color-text));
+  }
+
+  .button--secondary {
+    background: transparent;
+    color: var(--color-text);
+    border-color: color-mix(in oklab, var(--color-text) 35%, var(--color-bg));
+  }
+
+  @media (hover: hover) {
+    .button:hover {
+      transform: translateY(-1px);
+      color: var(--color-text);
+    }
+
+    .button--primary:hover {
+      background: color-mix(in oklab, var(--color-highlight) 88%, var(--color-text));
+    }
+
+    .button--secondary:hover {
+      border-color: var(--color-text);
+    }
+  }
+
+  .button:active {
+    transform: scale(0.97);
+  }
+
+  .button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .button[aria-busy='true'] {
+    opacity: 1;
+    cursor: progress;
+  }
+
+  .button[aria-busy='true']::before {
+    content: '';
+    width: 0.875rem;
+    height: 0.875rem;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spin 700ms linear infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+</style>

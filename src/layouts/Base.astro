@@ -1,0 +1,171 @@
+---
+import { Font } from 'astro:assets';
+import ThemeSwitcher from '../components/ThemeSwitcher.astro';
+import { getSettings, getThemes, type Locale } from '../lib/db';
+import '../styles/global.css';
+
+type Props = {
+  title: string;
+  lang: Locale;
+  // path tanpa awalan bahasa, dipakai switcher EN · ID; kosongkan kalau halaman tidak bilingual
+  path?: string;
+};
+
+const { title, lang, path } = Astro.props;
+const [themes, settings] = await Promise.all([getThemes(), getSettings()]);
+
+// warna aman di-inline: kolomnya dijaga CHECK hex di database
+const themeCss = themes
+  .map(
+    (theme) =>
+      `[data-theme="${theme.id}"]{--color-bg:${theme.color_bg};--color-text:${theme.color_text};--color-accent:${theme.color_accent};--color-highlight:${theme.color_highlight}}`,
+  )
+  .join('');
+const languages: { code: Locale; label: string }[] = [
+  { code: 'en', label: 'English' },
+  { code: 'id', label: 'Bahasa Indonesia' },
+];
+---
+
+<html lang={lang} data-theme={settings.theme_id}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <Font cssVariable="--font-sans" preload />
+    <style set:html={themeCss}></style>
+    <script is:inline define:vars={{ themeIds: themes.map((theme) => String(theme.id)) }}>
+      // dijalankan sebelum paint supaya tema pilihan pengunjung tidak berkedip
+      try {
+        const saved = localStorage.getItem('theme');
+        if (themeIds.includes(saved)) document.documentElement.dataset.theme = saved;
+      } catch {}
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <div class="container site-header__inner">
+        <slot name="brand" />
+        <div class="site-header__controls">
+          {
+            path !== undefined && (
+              <nav class="language-switcher" aria-label="Language">
+                {languages.map((language, index) => (
+                  <>
+                    {index > 0 && <span aria-hidden="true">·</span>}
+                    <a
+                      href={`/${language.code}${path}`}
+                      hreflang={language.code}
+                      lang={language.code}
+                      aria-label={language.label}
+                      aria-current={language.code === lang ? 'page' : undefined}
+                    >
+                      {language.code.toUpperCase()}
+                    </a>
+                  </>
+                ))}
+              </nav>
+            )
+          }
+          <ThemeSwitcher themes={themes} />
+        </div>
+      </div>
+    </header>
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <div class="container">
+        <slot name="footer" />
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style>
+  .skip-link {
+    position: absolute;
+    top: var(--space-2);
+    left: var(--space-2);
+    z-index: var(--z-toast);
+    padding: var(--space-2) var(--space-4);
+    background: var(--color-text);
+    color: var(--color-bg);
+    border-radius: var(--radius-sm);
+    transform: translateY(-200%);
+  }
+
+  .skip-link:focus-visible {
+    transform: none;
+  }
+
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-sticky);
+    background: var(--color-bg);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .site-header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    min-height: 4rem;
+  }
+
+  .site-header__controls {
+    display: flex;
+    align-items: center;
+    gap: var(--space-6);
+    margin-inline-start: auto;
+  }
+
+  .language-switcher {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+  }
+
+  .language-switcher a {
+    display: inline-grid;
+    place-items: center;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    color: var(--color-muted);
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .language-switcher a:hover {
+    color: var(--color-text);
+  }
+
+  .language-switcher a[aria-current='page'] {
+    color: var(--color-text);
+    text-decoration: underline;
+    text-decoration-color: var(--color-accent);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.35em;
+  }
+
+  main {
+    padding-block: var(--space-16);
+  }
+
+  main:focus {
+    outline: none;
+  }
+
+  .site-footer {
+    border-top: 1px solid var(--color-border);
+    padding-block: var(--space-8);
+    color: var(--color-muted);
+    font-size: var(--text-sm);
+  }
+</style>
