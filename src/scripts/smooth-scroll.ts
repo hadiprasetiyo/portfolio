@@ -17,3 +17,4 @@ export const scrollToY = (top: number) => {
   if (lenis) lenis.scrollTo(top, { duration: 1.6 });
   else scrollTo({ top, behavior: 'auto' });
 };
+
