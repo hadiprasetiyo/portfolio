@@ -1,8 +1,7 @@
 ---
 import { Font } from 'astro:assets';
-import ThemeSwitcher from '../components/ThemeSwitcher.astro';
 import { getDictionary, LOCALES, type Locale } from '../i18n';
-import { getProfile, getSettings, getThemes } from '../lib/db';
+import { getProfile } from '../lib/db';
 import '../styles/global.css';
 
 type Props = {
@@ -11,51 +10,44 @@ type Props = {
   lang: Locale;
   // path tanpa awalan bahasa, dipakai switcher EN · ID dan nav
   path: string;
+  // halaman utama menaruh hero di bawah nav yang transparan, halaman lain diberi jarak dari nav
+  fullBleed?: boolean;
 };
 
-const { title, description, lang, path } = Astro.props;
-const [themes, settings, profile] = await Promise.all([getThemes(), getSettings(), getProfile()]);
+const { title, description, lang, path, fullBleed = false } = Astro.props;
+const profile = await getProfile();
 const dictionary = getDictionary(lang);
 
-// warna aman di-inline: kolomnya dijaga CHECK hex di database
-const themeCss = themes
-  .map(
-    (theme) =>
-      `[data-theme="${theme.id}"]{--color-bg:${theme.color_bg};--color-text:${theme.color_text};--color-accent:${theme.color_accent};--color-highlight:${theme.color_highlight}}`,
-  )
-  .join('');
 const languageNames: Record<Locale, string> = { en: 'English', id: 'Bahasa Indonesia' };
 const home = `/${lang}/`;
 const navigation = [
-  { href: `${home}#about`, label: dictionary.nav.about },
   { href: `${home}#projects`, label: dictionary.nav.projects },
+  { href: `${home}#skills`, label: dictionary.nav.skills },
   { href: `${home}#experience`, label: dictionary.nav.experience },
   { href: `${home}#contact`, label: dictionary.nav.contact },
 ];
 ---
 
-<html lang={lang} data-theme={settings.theme_id}>
+<html lang={lang}>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#07070A" />
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <Font cssVariable="--font-serif" preload />
     <Font cssVariable="--font-sans" preload />
-    <style set:html={themeCss}></style>
-    <script is:inline define:vars={{ themeIds: themes.map((theme) => String(theme.id)) }}>
-      // dijalankan sebelum paint supaya tema pilihan pengunjung tidak berkedip
-      try {
-        const saved = localStorage.getItem('theme');
-        if (themeIds.includes(saved)) document.documentElement.dataset.theme = saved;
-      } catch {}
-    </script>
+    <Font cssVariable="--font-mono" />
+    <Font cssVariable="--font-script" preload />
+    <Font cssVariable="--font-display" />
   </head>
   <body>
+    <canvas class="sky" aria-hidden="true"></canvas>
     <a class="skip-link" href="#main">{dictionary.skipToContent}</a>
     <header class="site-header">
-      <div class="container site-header__inner">
-        <a class="brand" href={home}>{profile?.full_name ?? 'Portfolio'}</a>
+      <div class="wrap site-header__inner">
+        <a class="logo" href={home} aria-label={`hadiiyok, ${dictionary.backToTop}`}>hadiiyok</a>
         <nav class="site-nav" aria-label={dictionary.mainNavigation}>
           <ul role="list">
             {
@@ -68,38 +60,47 @@ const navigation = [
             <li><a href={`/${lang}/cv`} aria-current={path === '/cv' ? 'page' : undefined}>{dictionary.nav.cv}</a></li>
           </ul>
         </nav>
-        <div class="site-header__controls">
-          <nav class="language-switcher" aria-label={dictionary.languageSwitcher}>
-            {
-              LOCALES.map((code, index) => (
-                <>
-                  {index > 0 && <span aria-hidden="true">·</span>}
-                  <a
-                    href={`/${code}${path}`}
-                    hreflang={code}
-                    lang={code}
-                    aria-label={languageNames[code]}
-                    aria-current={code === lang ? 'page' : undefined}
-                  >
-                    {code.toUpperCase()}
-                  </a>
-                </>
-              ))
-            }
-          </nav>
-          <ThemeSwitcher themes={themes} label={dictionary.themeSwitcher} />
-        </div>
+        <nav class="language-switcher" aria-label={dictionary.languageSwitcher}>
+          {
+            LOCALES.map((code, index) => (
+              <>
+                {index > 0 && <span aria-hidden="true">·</span>}
+                <a
+                  href={`/${code}${path}`}
+                  hreflang={code}
+                  lang={code}
+                  aria-label={languageNames[code]}
+                  aria-current={code === lang ? 'page' : undefined}
+                >
+                  {code.toUpperCase()}
+                </a>
+              </>
+            ))
+          }
+        </nav>
+        <button class="sound" type="button" aria-pressed="false" aria-label={dictionary.sound.play} data-play={dictionary.sound.play} data-pause={dictionary.sound.pause}
+          ><span class="sound__bars" aria-hidden="true"><i></i><i></i><i></i></span><span class="sound__label">{dictionary.sound.label}</span></button
+        >
       </div>
     </header>
-    <main id="main" tabindex="-1">
+    <main id="main" tabindex="-1" class:list={{ 'main--padded': !fullBleed }}>
       <slot />
     </main>
     <footer class="site-footer">
-      <div class="container site-footer__inner">
-        <p>© {new Date().getFullYear()} {profile?.full_name}</p>
-        <p>{dictionary.footer.builtWith}</p>
+      <div class="wrap site-footer__inner">
+        <p class="label">© {new Date().getFullYear()} {profile?.full_name} · {dictionary.footer.builtWith}</p>
       </div>
     </footer>
+    <script>
+      import { startCursor } from '../scripts/cursor';
+      import '../scripts/smooth-scroll';
+      import { startSky } from '../scripts/sky';
+      import { startSound } from '../scripts/sound.js';
+
+      startSky(document.querySelector<HTMLCanvasElement>('.sky')!);
+      startCursor();
+      startSound();
+    </script>
   </body>
 </html>
 
@@ -110,9 +111,8 @@ const navigation = [
     left: var(--space-2);
     z-index: var(--z-toast);
     padding: var(--space-2) var(--space-4);
-    background: var(--color-text);
-    color: var(--color-bg);
-    border-radius: var(--radius-sm);
+    background: var(--gold);
+    color: var(--bg);
     transform: translateY(-200%);
   }
 
@@ -121,83 +121,114 @@ const navigation = [
   }
 
   .site-header {
-    position: sticky;
-    top: 0;
+    position: fixed;
+    top: env(safe-area-inset-top, 0px);
+    right: 0;
+    left: 0;
     z-index: var(--z-sticky);
-    background: var(--color-bg);
-    border-bottom: 1px solid var(--color-border);
   }
 
   .site-header__inner {
     display: flex;
     align-items: center;
-    gap: var(--space-6);
-    min-height: 4rem;
+    gap: 28px;
+    min-height: 76px;
   }
 
-  .brand {
-    color: var(--color-text);
-    font-weight: 700;
-    letter-spacing: -0.01em;
+  /* font script hanya dipakai sebagai aksen: logo dan nama di hero */
+  .logo {
+    padding: 0.1em 0.2em 0.1em 0;
+    color: var(--fg);
+    font: 400 40px/0.8 var(--font-script);
     text-decoration: none;
-    white-space: nowrap;
+  }
+
+  .site-nav {
+    margin-left: auto;
   }
 
   .site-nav ul {
     display: flex;
-    gap: var(--space-1);
+    gap: 26px;
     padding: 0;
     list-style: none;
   }
 
-  .site-nav a,
-  .language-switcher a {
+  .site-nav a {
+    position: relative;
     display: inline-grid;
     place-items: center;
     min-height: 2.75rem;
-    padding-inline: var(--space-2);
-    color: var(--color-muted);
-    font-size: var(--text-sm);
-    font-weight: 500;
+    font-size: 13.5px;
+    font-weight: 400;
     text-decoration: none;
   }
 
-  .site-nav a:hover,
-  .language-switcher a:hover,
-  .site-nav a[aria-current='page'] {
-    color: var(--color-text);
+  /* garis bawah tumbuh dari kiri saat hover */
+  .site-nav a::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: 10px;
+    left: 0;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.6s var(--ease);
   }
 
-  .site-header__controls {
-    display: flex;
-    align-items: center;
-    gap: var(--space-4);
-    margin-inline-start: auto;
+  .site-nav a:hover,
+  .site-nav a[aria-current='page'] {
+    color: var(--fg);
+  }
+
+  .site-nav a:hover::after,
+  .site-nav a[aria-current='page']::after {
+    transform: scaleX(1);
+    transform-origin: left;
   }
 
   .language-switcher {
     display: flex;
     align-items: center;
-    color: var(--color-muted);
+    gap: 6px;
+    color: var(--muted);
+    font: 400 12px/1 var(--font-mono);
+    letter-spacing: 0.1em;
   }
 
+  .language-switcher a {
+    display: inline-grid;
+    place-items: center;
+    min-width: 2rem;
+    min-height: 2.75rem;
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .language-switcher a:hover,
   .language-switcher a[aria-current='page'] {
-    color: var(--color-text);
-    text-decoration: underline;
-    text-decoration-color: var(--color-accent);
-    text-decoration-thickness: 2px;
-    text-underline-offset: 0.35em;
+    color: var(--fg);
   }
 
-  /* di layar sempit nav anchor disembunyikan; halaman utama cukup di-scroll, CV tetap terjangkau dari hero */
+  /* di layar sempit nav anchor disembunyikan; halaman utama cukup di-scroll */
   @media (max-width: 56rem) {
     .site-nav {
       display: none;
     }
+
+    .language-switcher {
+      margin-left: auto;
+    }
   }
 
   main {
-    padding-block: var(--space-16) var(--space-24);
+    position: relative;
+  }
+
+  .main--padded {
+    padding-block: calc(76px + var(--space-16)) var(--space-24);
   }
 
   main:focus {
@@ -205,16 +236,12 @@ const navigation = [
   }
 
   .site-footer {
-    border-top: 1px solid var(--color-border);
+    position: relative;
     padding-block: var(--space-8);
-    color: var(--color-muted);
-    font-size: var(--text-sm);
   }
 
   .site-footer__inner {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: var(--space-2);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--line);
   }
 </style>
