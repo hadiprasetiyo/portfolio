@@ -26,3 +26,6 @@ pnpm-debug.log*
 # cloudflare
 .wrangler/
 .dev.vars*
+
+# tipe binding hasil generate, dibuat ulang oleh npm run check
+worker-configuration.d.ts

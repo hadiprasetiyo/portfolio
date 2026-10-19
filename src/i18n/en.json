@@ -1,0 +1,145 @@
+{
+  "skipToContent": "Skip to content",
+  "mainNavigation": "Main",
+  "languageSwitcher": "Language",
+  "backToTop": "back to top",
+  "nav": {
+    "about": "About",
+    "projects": "Work",
+    "skills": "Toolkit",
+    "experience": "Journey",
+    "contact": "Contact",
+    "cv": "CV"
+  },
+  "hero": {
+    "viewCv": "View CV",
+    "getInTouch": "Get in touch",
+    "role": "Web Developer",
+    "field": "Information Systems",
+    "observing": "Observing Sgr A* · 26,000 light-years",
+    "hint": "Move your cursor into the horizon",
+    "inclination": "Inclination",
+    "azimuth": "Azimuth",
+    "now": "Now",
+    "localTime": "Local time",
+    "coordinates": "6.21° S · 106.85° E",
+    "stories": [
+      [
+        "01 · Structure",
+        "Every system starts with a schema that <em>holds</em>."
+      ],
+      [
+        "02 · Speed",
+        "Queries that answer before you <em>blink</em>."
+      ],
+      [
+        "03 · Calm",
+        "Interfaces that simply get out of <em>the way</em>."
+      ]
+    ]
+  },
+  "sections": {
+    "about": "About",
+    "skills": "Skills",
+    "experience": "Experience",
+    "education": "Education",
+    "projects": "Selected projects",
+    "certifications": "Certifications",
+    "contact": "Contact",
+    "work": "Work"
+  },
+  "skillCategories": {
+    "language": "Languages",
+    "framework": "Frameworks",
+    "database": "Databases",
+    "tool": "Tools"
+  },
+  "present": "Present",
+  "project": {
+    "readCaseStudy": "Read case study",
+    "liveSite": "Live site",
+    "sourceCode": "Source code",
+    "backToProjects": "Back to projects",
+    "stack": "Stack"
+  },
+  "certification": {
+    "viewCredential": "View credential"
+  },
+  "cv": {
+    "title": "Curriculum vitae",
+    "backToPortfolio": "Back to portfolio",
+    "download": "Download PDF",
+    "updated": "Updated",
+    "page": "Page",
+    "of": "of",
+    "empty": "The CV is being updated. Please check back soon, or get in touch for a copy."
+  },
+  "contact": {
+    "intro": "Have a role or a project in mind? Send a message and I will reply by email.",
+    "name": "Name",
+    "email": "Email",
+    "message": "Message",
+    "send": "Send message",
+    "sending": "Sending",
+    "sent": "Message sent. I usually reply within two days.",
+    "failed": "Message not sent. Check your connection and try again.",
+    "invalid": "Please check the highlighted fields.",
+    "errors": {
+      "name": "Enter your name (up to 100 characters).",
+      "email": "Enter a valid email address.",
+      "message": "Write a message (up to 2000 characters).",
+      "captcha": "Complete the verification and try again."
+    }
+  },
+  "footer": {
+    "builtWith": "Built with Astro and Cloudflare Workers."
+  },
+  "meta": {
+    "homeDescription": "Portfolio of a web developer focused on data-heavy applications."
+  },
+  "about": {
+    "chapter": "About",
+    "plate": "Plate I · Transit",
+    "projects": "Projects shipped",
+    "years": "Years building",
+    "skills": "Tools in the kit"
+  },
+  "work": {
+    "chapter": "Selected work",
+    "hint": "Click a planet to bring it forward",
+    "show": "Show project"
+  },
+  "toolkit": {
+    "chapter": "Toolkit",
+    "title": "Instruments of <em>the trade</em>",
+    "intro": "Constellations of tools on a turning sky. Click one, on the chart or in the list, and the sky turns to bring it overhead.",
+    "charting": "Now charting"
+  },
+  "journey": {
+    "chapter": "Journey",
+    "title": "Phases, <em>waxing</em>",
+    "intro": "Each step lights a little more of the moon. Scroll and watch it fill.",
+    "nextYear": "Next",
+    "nextPeriod": "Next chapter",
+    "nextTitle": "Your team",
+    "nextOrg": "Backend or full-stack, where data matters",
+    "nextDescription": "The phase where the work is fully lit. If your team needs someone who reads query plans for fun, this is the one.",
+    "phases": {
+      "crescent": "Waxing crescent",
+      "quarter": "First quarter",
+      "gibbous": "Waxing gibbous",
+      "full": "Full moon"
+    }
+  },
+  "contactSection": {
+    "chapter": "Contact",
+    "title": "Let's <em>talk</em>",
+    "cta": "Write<br>to me",
+    "elsewhere": "Elsewhere"
+  },
+  "sound": {
+    "label": "Sound",
+    "play": "Play ambient sound",
+    "pause": "Pause ambient sound"
+  }
+}

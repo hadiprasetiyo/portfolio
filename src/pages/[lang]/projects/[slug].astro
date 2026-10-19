@@ -1,0 +1,187 @@
+---
+import Base from '../../../layouts/Base.astro';
+import { getDictionary, LOCALES, localized, type Locale } from '../../../i18n';
+import { getPublishedProjects, type Project } from '../../../lib/db';
+import { renderMarkdown } from '../../../lib/markdown';
+
+export async function getStaticPaths() {
+  const projects = await getPublishedProjects();
+  return LOCALES.flatMap((lang) => projects.map((project) => ({ params: { lang, slug: project.slug }, props: { project } })));
+}
+
+type Props = { project: Project };
+const { project } = Astro.props;
+const lang = Astro.params.lang as Locale;
+const dictionary = getDictionary(lang);
+const title = localized(project, 'title', lang);
+const summary = localized(project, 'summary', lang);
+const body = renderMarkdown(localized(project, 'body', lang));
+---
+
+<Base title={title} description={summary} lang={lang} path={`/projects/${project.slug}`}>
+  <article class="container project">
+    <a class="project__back" href={`/${lang}/#projects`}>← {dictionary.project.backToProjects}</a>
+    <header class="project__header">
+      <h1>{title}</h1>
+      {summary && <p class="project__summary">{summary}</p>}
+      <dl class="project__facts">
+        {
+          project.skills.length > 0 && (
+            <div>
+              <dt>{dictionary.project.stack}</dt>
+              <dd>{project.skills.join(' · ')}</dd>
+            </div>
+          )
+        }
+        <div>
+          <dt class="visually-hidden">Year</dt>
+          <dd><time datetime={project.published_at.slice(0, 7)}>{project.published_at.slice(0, 4)}</time></dd>
+        </div>
+      </dl>
+      {
+        (project.live_url || project.repo_url) && (
+          <p class="project__links">
+            {project.live_url && (
+              <a href={project.live_url} rel="noopener noreferrer">
+                {dictionary.project.liveSite} ↗
+              </a>
+            )}
+            {project.repo_url && (
+              <a href={project.repo_url} rel="noopener noreferrer">
+                {dictionary.project.sourceCode} ↗
+              </a>
+            )}
+          </p>
+        )
+      }
+    </header>
+    {
+      project.cover_key && project.cover_width && project.cover_height && (
+        <img
+          class="project__cover"
+          src={`/media/${project.cover_key}`}
+          alt={localized(project, 'cover_alt', lang)}
+          width={project.cover_width}
+          height={project.cover_height}
+          fetchpriority="high"
+          decoding="async"
+        />
+      )
+    }
+    <div class="prose" set:html={body} />
+  </article>
+</Base>
+
+<style>
+  .project {
+    display: grid;
+    gap: var(--space-12);
+    max-width: calc(var(--reading) + 2 * var(--gutter));
+  }
+
+  .project__back {
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    color: var(--color-muted);
+    font-size: var(--text-sm);
+    text-decoration: none;
+  }
+
+  .project__back:hover {
+    color: var(--color-text);
+  }
+
+  .project__header {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .project__summary {
+    font-size: var(--text-xl);
+    line-height: 1.4;
+    color: var(--color-muted);
+  }
+
+  .project__facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-8);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+  }
+
+  .project__facts div {
+    display: flex;
+    gap: var(--space-2);
+  }
+
+  .project__facts dd {
+    margin: 0;
+    color: var(--color-text);
+  }
+
+  .project__links {
+    display: flex;
+    gap: var(--space-6);
+  }
+
+  .project__cover {
+    width: 100%;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+  }
+
+  .prose {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .prose :global(h2) {
+    font-size: var(--text-2xl);
+    margin-block-start: var(--space-8);
+  }
+
+  .prose :global(h3) {
+    margin-block-start: var(--space-4);
+  }
+
+  .prose :global(ul),
+  .prose :global(ol) {
+    display: grid;
+    gap: var(--space-2);
+    padding-inline-start: 1.25em;
+  }
+
+  .prose :global(img) {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+  }
+
+  .prose :global(code) {
+    padding: 0.1em 0.35em;
+    background: var(--color-surface);
+    border-radius: 4px;
+  }
+
+  .prose :global(pre) {
+    padding: var(--space-4);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    overflow-x: auto;
+  }
+
+  .prose :global(pre code) {
+    padding: 0;
+    background: none;
+  }
+
+  .prose :global(blockquote) {
+    padding-inline-start: var(--space-4);
+    border-inline-start: 2px solid var(--color-border);
+    color: var(--color-muted);
+  }
+</style>

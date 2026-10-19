@@ -13,6 +13,10 @@
 	"observability": {
 		"enabled": true
 	},
+	// kunci uji resmi Turnstile (selalu lolos); production wajib diganti kunci asli sebelum launch
+	"vars": {
+		"TURNSTILE_SITE_KEY": "1x00000000000000000000AA"
+	},
 	"d1_databases": [
 		{
 			"binding": "DB",
@@ -31,6 +35,9 @@
 	"env": {
 		"production": {
 			"name": "portfolio",
+			"vars": {
+				"TURNSTILE_SITE_KEY": "1x00000000000000000000AA"
+			},
 			"d1_databases": [
 				{
 					"binding": "DB",

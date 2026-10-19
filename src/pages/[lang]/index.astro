@@ -1,0 +1,432 @@
+---
+import { Image } from 'astro:assets';
+import portrait from '../../assets/portrait.webp';
+import constellation from '../../components/horizon/constellation.svg?raw';
+import signature from '../../components/horizon/signature.svg?raw';
+import ContactForm from '../../components/ContactForm.astro';
+import Base from '../../layouts/Base.astro';
+import { formatMonth, getDictionary, LOCALES, localized, type Locale } from '../../i18n';
+import { getCertifications, getExperiences, getProfile, getPublishedProjects, getSkills, type Skill } from '../../lib/db';
+import {
+  astroTicks,
+  bodyFor,
+  moonPath,
+  planetMarkup,
+  planetStyle,
+  SOLAR_PLANET_COUNT,
+  toRoman,
+  wordSpans,
+  zodiacSigns,
+  type Sign,
+} from '../../lib/horizon';
+import '../../styles/hero.css';
+import '../../styles/home.css';
+
+export function getStaticPaths() {
+  return LOCALES.map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as Locale;
+const dictionary = getDictionary(lang);
+const [profile, skills, experiences, certifications, projects] = await Promise.all([
+  getProfile(),
+  getSkills(),
+  getExperiences(),
+  getCertifications(),
+  getPublishedProjects(),
+]);
+
+const fullName = profile?.full_name ?? 'Portfolio';
+// kata pertama ditulis script seperti tanda tangan, sisanya kapital tipis di bawahnya
+const [firstName, ...restOfName] = fullName.split(' ');
+const surname = restOfName.join(' ');
+const headline = profile ? localized(profile, 'headline', lang) : '';
+const bio = profile ? localized(profile, 'bio', lang) : '';
+const work = experiences.filter((experience) => experience.kind === 'work');
+const currentRole = work.find((experience) => experience.ended_on === null) ?? work[0];
+const city = profile?.location.split(',')[0] ?? '';
+
+/* About: angka statistik dihitung dari data, bukan diketik */
+const firstYear = Math.min(...experiences.map((experience) => Number(experience.started_on.slice(0, 4))), new Date().getFullYear());
+const stats = [
+  { label: dictionary.about.projects, value: projects.length },
+  { label: dictionary.about.years, value: Math.max(1, new Date().getFullYear() - firstYear) },
+  { label: dictionary.about.skills, value: skills.length },
+];
+
+/* Selected work */
+const planetCount = Math.max(SOLAR_PLANET_COUNT, projects.length);
+const numerals = projects.map((_, index) => toRoman(index + 1));
+
+/* Toolkit: tiap kategori skill jadi satu rasi bernama Latin */
+const latinNames: Record<Skill['category'], string> = { language: 'Lingua', framework: 'Fabrica', database: 'Thesaurus', tool: 'Instrumenta' };
+const categories = [...new Set(skills.map((skill) => skill.category))];
+const signs: Sign[] = categories.map((category) => ({
+  group: dictionary.skillCategories[category],
+  latin: latinNames[category],
+  skills: skills.filter((skill) => skill.category === category).map((skill) => ({ id: `s${skill.id}`, name: skill.name })),
+}));
+
+/* Journey: dari yang terlama, bulan makin terang, ditutup purnama "bab berikutnya" */
+const timeline = [...experiences].sort((a, b) => a.started_on.localeCompare(b.started_on));
+const phaseName = (phase: number) => {
+  const names = dictionary.journey.phases;
+  if (phase >= 0.99) return names.full;
+  if (phase >= 0.55) return names.gibbous;
+  if (phase >= 0.45) return names.quarter;
+  return names.crescent;
+};
+const phases = [
+  ...timeline.map((experience, index) => {
+    const phase = 0.22 + (timeline.length > 1 ? (index / (timeline.length - 1)) * 0.6 : 0);
+    return {
+      phase,
+      year: experience.started_on.slice(0, 4),
+      title: localized(experience, 'title', lang),
+      org: [experience.organization, experience.location].filter(Boolean).join(', '),
+      period: `${formatMonth(experience.started_on, lang)} – ${experience.ended_on ? formatMonth(experience.ended_on, lang) : dictionary.present}`,
+      description: localized(experience, 'description', lang),
+    };
+  }),
+  {
+    phase: 1,
+    year: dictionary.journey.nextYear,
+    title: dictionary.journey.nextTitle,
+    org: dictionary.journey.nextOrg,
+    period: dictionary.journey.nextPeriod,
+    description: dictionary.journey.nextDescription,
+  },
+];
+
+const homeData = { projects: numerals.map((numeral) => ({ numeral })), signs: signs.map((sign) => ({ latin: sign.latin })) };
+const title = profile ? `${fullName} · ${headline}` : 'Portfolio';
+---
+
+<Base title={title} description={headline || dictionary.meta.homeDescription} lang={lang} path="/" fullBleed>
+  <section class="hero">
+    <div class="hero__stage">
+      <canvas class="hero__gl" aria-hidden="true"></canvas>
+      <canvas class="hero__fx" aria-hidden="true"></canvas>
+      <div class="frame" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <div class="hero__story" aria-hidden="true">
+        {
+          dictionary.hero.stories.map(([label, text]) => (
+            <p class="story">
+              <span class="label">{label}</span>
+              <span class="story__text" set:html={text} />
+            </p>
+          ))
+        }
+      </div>
+      <p class="wrap hero__telemetry label" aria-hidden="true">
+        {dictionary.hero.inclination} <b data-inclination>08.0°</b><br />{dictionary.hero.azimuth} <b data-azimuth>000.0°</b>
+      </p>
+      <p class="wrap hero__obs label">
+        {dictionary.hero.observing} · <b data-totality>00:00:00</b><span class="hero__hint"><br />{dictionary.hero.hint}</span>
+      </p>
+      <div class="eclipse" aria-hidden="true">
+        <div class="corona"></div>
+        <div class="sun"></div>
+        <div class="moon"></div>
+        <span class="diamond"></span>
+      </div>
+      <h1 class="wrap hero__name is-h">
+        <span class="line" style="--ld:0.1s"><span class="word"><span class="ch" style="--i:0">{firstName}</span></span></span>
+        {
+          surname && (
+            <span class="line" style="--ld:0.35s">
+              <em>
+                <span class="word"><span class="ch" style="--i:1">{surname}</span></span>
+                <span class="hero__shine" aria-hidden="true">{surname}</span>
+              </em>
+            </span>
+          )
+        }
+        <span class="hero__tag" aria-hidden="true"><i class="hero__star"></i><span class="hero__role">{dictionary.hero.role}</span><i class="hero__rule"></i><span class="hero__field">{dictionary.hero.field}</span></span>
+      </h1>
+      <div class="wrap hero__foot">
+        <p class="label">
+          <span class="dot" aria-hidden="true"></span>{dictionary.hero.now} · {currentRole ? localized(currentRole, 'title', lang) : dictionary.hero.role}<br />{dictionary.hero.coordinates} · {city}
+        </p>
+        <p class="hero__lead">{headline}</p>
+        <p class="hero__scroll label"><span>{dictionary.hero.localTime}<br /><b data-clock>--:--:--</b> WIB</span><i aria-hidden="true"></i></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap statement" id="about" aria-labelledby="about-heading">
+    <figure class="portrait">
+      <div class="portrait__mount">
+        <div class="portrait__plate">
+          <Image src={portrait} alt={fullName} width={960} height={1200} loading="lazy" decoding="async" />
+          <Fragment set:html={signature} />
+        </div>
+        <span class="portrait__side" aria-hidden="true"><span class="portrait__tick"></span><span class="portrait__label">{dictionary.about.plate}</span></span>
+        <span class="portrait__track" aria-hidden="true"
+          ><span class="portrait__lane"
+            ><span class="portrait__planet"
+              ><i class="portrait__ring portrait__ring--back"></i><i class="portrait__ring portrait__ring--cross portrait__ring--back"></i><i class="portrait__globe"></i><i class="portrait__ring portrait__ring--front"></i><i class="portrait__ring portrait__ring--cross portrait__ring--front"></i><i class="portrait__moon portrait__moon--glint" style="--period:3.2s;--size:1.4px;--orbit:path('M7.5 0A7.5 2 0 1 1 -7.5 0A7.5 2 0 1 1 7.5 0')"><b></b></i><i class="portrait__moon" style="--period:10s;--size:1.6px;--orbit:path('M17 0A17 5 0 1 1 -17 0A17 5 0 1 1 17 0')"><b></b></i></span
+            ></span
+          ></span
+        >
+      </div>
+      <figcaption class="portrait__caption label">
+        <span class="portrait__lines"><span>{fullName}</span><span>{currentRole ? localized(currentRole, 'title', lang) : dictionary.hero.role}</span></span>
+      </figcaption>
+    </figure>
+    <div class="statement__body">
+      <h2 class="label chapter" id="about-heading" data-reveal><span>No. 01</span><i aria-hidden="true"></i>{dictionary.about.chapter}</h2>
+      <div class:list={['statement__copy', { 'statement__copy--long': bio.length > 160 }]} style="margin-top:28px">
+        <p class="statement__text" set:html={wordSpans(bio)} />
+        <p class="statement__text statement__sheen" aria-hidden="true" set:html={wordSpans(bio)} />
+      </div>
+      <div class="statement__meta drawn" data-reveal>
+        {stats.map((stat) => <p class="label">{stat.label}<b data-count={stat.value} data-pad="2">{String(stat.value).padStart(2, '0')}</b></p>)}
+      </div>
+    </div>
+  </section>
+
+  {
+    projects.length > 0 && (
+      <section class="works" id="projects" style={`--count:${projects.length}`} aria-labelledby="work-heading">
+        <div class="wrap works__stage">
+          <div class="panel">
+            <h2 class="label chapter" id="work-heading">
+              <span>No. 02</span>
+              <i aria-hidden="true" />
+              {dictionary.work.chapter}
+            </h2>
+            <div class="panel__details" aria-live="polite">
+              {projects.map((project, index) => (
+                <article class:list={['detail', { 'is-active': index === 0 }]}>
+                  <div class="detail__body" aria-hidden="true" set:html={planetMarkup(index)} />
+                  <p class="label">
+                    {numerals[index]} · {project.published_at.slice(0, 4)} · {bodyFor(index).name}
+                  </p>
+                  <h3>{localized(project, 'title', lang)}</h3>
+                  <p>{localized(project, 'summary', lang)}</p>
+                  {project.skills.length > 0 && <p class="stack">{project.skills.join(' · ')}</p>}
+                  <a class="link" href={`/${lang}/projects/${project.slug}`}>
+                    {dictionary.project.readCaseStudy} →
+                  </a>
+                </article>
+              ))}
+            </div>
+            <p class="panel__progress label">
+              <span class="panel__index">I</span>
+              <i aria-hidden="true" />
+              <span>{numerals[numerals.length - 1]}</span>
+            </p>
+          </div>
+          <div class="orrery">
+            <canvas class="orrery__sky" aria-hidden="true" />
+            <span class="orrery__sun" aria-hidden="true" />
+            {Array.from({ length: planetCount }, (_, index) => {
+              const project = projects[index];
+              if (!project) return <span class="orrery__planet orrery__planet--minor" aria-hidden="true" style={planetStyle(index)} set:html={planetMarkup(index)} />;
+              const projectTitle = localized(project, 'title', lang);
+              return (
+                <button class="orrery__planet" type="button" data-work={index} style={planetStyle(index)} aria-label={`${dictionary.work.show} ${projectTitle}`}>
+                  <Fragment set:html={planetMarkup(index)} />
+                  <span class="orrery__label">
+                    <span class="label">
+                      {numerals[index]} · {bodyFor(index).name}
+                    </span>
+                    <span class="orrery__title">{projectTitle}</span>
+                  </span>
+                </button>
+              );
+            })}
+            <p class="orrery__hint label">{dictionary.work.hint}</p>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    signs.length > 0 && (
+      <section class="wrap tools" id="skills" aria-labelledby="skills-heading">
+        <div class="astro-wrap">
+          <p class="zodiac__caption label" aria-live="polite">
+            {dictionary.toolkit.charting} · <b>{signs[0].latin}</b>
+          </p>
+          <svg class="astro zodiac" viewBox="0 0 600 600" aria-hidden="true">
+            <g class="astro__outer" set:html={`${astroTicks()}<circle class="astro__ring" cx="300" cy="300" r="290"></circle>`} />
+            <circle class="astro__ring" cx="300" cy="300" r="250" />
+            <circle class="astro__ring astro__ring--dash" cx="300" cy="300" r="56" />
+            <g class="zodiac__wheel" set:html={zodiacSigns(signs)} />
+            <path class="zodiac__pointer" d="M300 22L293 10H307Z" />
+            <circle class="astro__core" cx="300" cy="300" r="5" />
+          </svg>
+        </div>
+        <div class="tools__head">
+          <p class="label chapter" data-reveal>
+            <span>No. 03</span>
+            <i aria-hidden="true" />
+            {dictionary.toolkit.chapter}
+          </p>
+          <h2 id="skills-heading" data-split style="margin-top:18px" set:html={dictionary.toolkit.title} />
+          <p class="tools__intro" data-reveal>
+            {dictionary.toolkit.intro}
+          </p>
+          <dl class="kit">
+            {signs.map((sign, index) => (
+              <div class="drawn" data-reveal data-sign={index}>
+                <dt>
+                  <button class="kit__group label" type="button">
+                    {sign.latin} · {sign.group}
+                  </button>
+                </dt>
+                <dd>
+                  {sign.skills.map((skill) => (
+                    <button type="button" data-skill={skill.id}>
+                      {skill.name}
+                    </button>
+                  ))}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </section>
+    )
+  }
+
+  <section class="wrap journey" id="experience" aria-labelledby="journey-heading">
+    <div class="journey__head">
+      <div>
+        <p class="label chapter" data-reveal><span>No. 04</span><i aria-hidden="true"></i>{dictionary.journey.chapter}</p>
+        <h2 class="section-title" id="journey-heading" data-split style="margin-top:18px" set:html={dictionary.journey.title} />
+      </div>
+      <p data-reveal>{dictionary.journey.intro}</p>
+    </div>
+    <ol class="phases">
+      {
+        phases.map((item) => (
+          <li class:list={['phase', 'drawn', { 'phase--full': item.phase === 1 }]} data-reveal data-phase={item.phase}>
+            <svg viewBox="0 0 72 72" role="img" aria-label={phaseName(item.phase)}>
+              <circle class="phase__shadow" cx="36" cy="36" r="30" />
+              <path class="phase__lit" d={moonPath(item.phase)} />
+            </svg>
+            <p class="phase__year">
+              {item.year}
+              <small class="label">{phaseName(item.phase)}</small>
+            </p>
+            <div>
+              <h3>{item.title}</h3>
+              <p class="phase__org">
+                {item.org} · {item.period}
+              </p>
+              {item.description && <p>{item.description}</p>}
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+    {
+      certifications.length > 0 && (
+        <ul class="certifications" role="list">
+          {certifications.map((certification) => (
+            <li class="certification drawn" data-reveal>
+              <span class="label">{formatMonth(certification.issued_on, lang)}</span>
+              <span class="certification__name">{certification.name}</span>
+              <span class="label">{certification.issuer}</span>
+              {certification.credential_url && (
+                <a class="link" href={certification.credential_url} rel="noopener noreferrer">
+                  {dictionary.certification.viewCredential}
+                  <span class="visually-hidden">: {certification.name}</span>
+                </a>
+              )}
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </section>
+
+  <section class="wrap contact" id="contact" aria-labelledby="contact-heading">
+    <Fragment set:html={constellation} />
+    <svg class="contact__orbit" viewBox="0 0 1000 320" aria-hidden="true">
+      <ellipse cx="500" cy="160" rx="480" ry="120"></ellipse>
+      <circle r="4"><animateMotion dur="18s" repeatCount="indefinite" path="M20 160a480 120 0 1 0 960 0a480 120 0 1 0-960 0"></animateMotion></circle>
+    </svg>
+    <p class="label chapter" data-reveal><span>No. 05</span><i aria-hidden="true"></i>{dictionary.contactSection.chapter}</p>
+    <h2 id="contact-heading" data-split style="margin-top:26px" set:html={dictionary.contactSection.title} />
+    {profile?.public_email && <a class="contact__email" href={`mailto:${profile.public_email}`} data-reveal>{profile.public_email}</a>}
+    <a class="cta" href="#contact-form"><span set:html={dictionary.contactSection.cta} /></a>
+    <div class="contact__form" id="contact-form">
+      <p class="contact__intro">{dictionary.contact.intro}</p>
+      <ContactForm lang={lang} />
+    </div>
+    <nav class="contact__links" aria-label={dictionary.contactSection.elsewhere}>
+      {profile?.github_url && <a class="link" href={profile.github_url} rel="noopener noreferrer">GitHub</a>}
+      {profile?.linkedin_url && <a class="link" href={profile.linkedin_url} rel="noopener noreferrer">LinkedIn</a>}
+      <a class="link" href={`/${lang}/cv`}>{dictionary.nav.cv}</a>
+    </nav>
+  </section>
+
+  <script type="application/json" id="home-data" set:html={JSON.stringify(homeData).replace(/</g, '\u003c')} />
+</Base>
+
+<script>
+  import { startHero } from '../../scripts/hero.js';
+  import { startHome } from '../../scripts/home.js';
+
+  startHero();
+  startHome();
+</script>
+
+<style is:global>
+  .certifications {
+    display: grid;
+    margin-top: 80px;
+    padding: 0;
+    list-style: none;
+  }
+
+  .certification {
+    display: grid;
+    grid-template-columns: 110px minmax(0, 1fr) auto auto;
+    align-items: baseline;
+    gap: 24px;
+    padding-block: 18px;
+  }
+
+  .certification__name {
+    font: 400 22px/1.2 var(--font-serif);
+  }
+
+  /* bio dari CMS bisa panjang; huruf diperkecil supaya tetap terbaca sebagai pernyataan, bukan dinding teks */
+  .statement__copy--long .statement__text {
+    max-width: 30ch;
+    font-size: clamp(26px, 2.6vw, 44px);
+    line-height: 1.12;
+  }
+
+  .contact__form {
+    position: relative;
+    width: min(100%, 36rem);
+    margin-top: 60px;
+    text-align: left;
+  }
+
+  .contact__intro {
+    margin-bottom: var(--space-6);
+    color: var(--muted);
+  }
+
+  .contact__links {
+    position: relative;
+    display: flex;
+    gap: 26px;
+    margin-top: 60px;
+  }
+
+  @media (max-width: 900px) {
+    .certification {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 4px;
+    }
+  }
+</style>

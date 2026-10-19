@@ -1,0 +1,145 @@
+{
+  "skipToContent": "Langsung ke konten",
+  "mainNavigation": "Utama",
+  "languageSwitcher": "Bahasa",
+  "backToTop": "kembali ke atas",
+  "nav": {
+    "about": "Tentang",
+    "projects": "Karya",
+    "skills": "Keahlian",
+    "experience": "Perjalanan",
+    "contact": "Kontak",
+    "cv": "CV"
+  },
+  "hero": {
+    "viewCv": "Lihat CV",
+    "getInTouch": "Hubungi saya",
+    "role": "Web Developer",
+    "field": "Sistem Informasi",
+    "observing": "Mengamati Sgr A* · 26.000 tahun cahaya",
+    "hint": "Arahkan kursor ke cakrawala",
+    "inclination": "Inklinasi",
+    "azimuth": "Azimut",
+    "now": "Kini",
+    "localTime": "Waktu lokal",
+    "coordinates": "6,21° LS · 106,85° BT",
+    "stories": [
+      [
+        "01 · Struktur",
+        "Setiap sistem dimulai dari skema yang <em>kokoh</em>."
+      ],
+      [
+        "02 · Kecepatan",
+        "Query yang menjawab sebelum kamu <em>berkedip</em>."
+      ],
+      [
+        "03 · Tenang",
+        "Antarmuka yang tahu kapan harus <em>menepi</em>."
+      ]
+    ]
+  },
+  "sections": {
+    "about": "Tentang",
+    "skills": "Keahlian",
+    "experience": "Pengalaman",
+    "education": "Pendidikan",
+    "projects": "Proyek pilihan",
+    "certifications": "Sertifikasi",
+    "contact": "Kontak",
+    "work": "Pekerjaan"
+  },
+  "skillCategories": {
+    "language": "Bahasa pemrograman",
+    "framework": "Framework",
+    "database": "Database",
+    "tool": "Tools"
+  },
+  "present": "Sekarang",
+  "project": {
+    "readCaseStudy": "Baca studi kasus",
+    "liveSite": "Situs live",
+    "sourceCode": "Kode sumber",
+    "backToProjects": "Kembali ke proyek",
+    "stack": "Stack"
+  },
+  "certification": {
+    "viewCredential": "Lihat kredensial"
+  },
+  "cv": {
+    "title": "Curriculum vitae",
+    "backToPortfolio": "Kembali ke portofolio",
+    "download": "Unduh PDF",
+    "updated": "Diperbarui",
+    "page": "Halaman",
+    "of": "dari",
+    "empty": "CV sedang diperbarui. Silakan cek lagi nanti, atau hubungi saya untuk salinannya."
+  },
+  "contact": {
+    "intro": "Punya lowongan atau proyek? Kirim pesan, saya akan membalas lewat email.",
+    "name": "Nama",
+    "email": "Email",
+    "message": "Pesan",
+    "send": "Kirim pesan",
+    "sending": "Mengirim",
+    "sent": "Pesan terkirim. Biasanya saya membalas dalam dua hari.",
+    "failed": "Pesan belum terkirim. Periksa koneksi lalu coba lagi.",
+    "invalid": "Periksa kembali kolom yang ditandai.",
+    "errors": {
+      "name": "Isi nama kamu (maksimal 100 karakter).",
+      "email": "Isi alamat email yang valid.",
+      "message": "Tulis pesan (maksimal 2000 karakter).",
+      "captcha": "Selesaikan verifikasi lalu coba lagi."
+    }
+  },
+  "footer": {
+    "builtWith": "Dibangun dengan Astro dan Cloudflare Workers."
+  },
+  "meta": {
+    "homeDescription": "Portofolio web developer yang fokus pada aplikasi sarat data."
+  },
+  "about": {
+    "chapter": "Tentang",
+    "plate": "Pelat I · Transit",
+    "projects": "Proyek selesai",
+    "years": "Tahun berkarya",
+    "skills": "Alat dalam kit"
+  },
+  "work": {
+    "chapter": "Karya pilihan",
+    "hint": "Klik planet untuk membawanya ke depan",
+    "show": "Tampilkan proyek"
+  },
+  "toolkit": {
+    "chapter": "Keahlian",
+    "title": "Instrumen <em>kerja</em>",
+    "intro": "Rasi-rasi alat kerja di langit yang berputar. Klik salah satu, di peta atau di daftar, dan langit berputar membawanya ke atas.",
+    "charting": "Sedang dipetakan"
+  },
+  "journey": {
+    "chapter": "Perjalanan",
+    "title": "Fase, <em>membesar</em>",
+    "intro": "Setiap langkah menerangi bulan sedikit lagi. Scroll dan lihat ia penuh.",
+    "nextYear": "Berikut",
+    "nextPeriod": "Bab berikutnya",
+    "nextTitle": "Timmu",
+    "nextOrg": "Backend atau full-stack, tempat data jadi penting",
+    "nextDescription": "Fase ketika pekerjaan sepenuhnya terang. Kalau timmu butuh orang yang senang membaca query plan, inilah orangnya.",
+    "phases": {
+      "crescent": "Sabit awal",
+      "quarter": "Kuartal pertama",
+      "gibbous": "Cembung awal",
+      "full": "Purnama"
+    }
+  },
+  "contactSection": {
+    "chapter": "Kontak",
+    "title": "Mari <em>bicara</em>",
+    "cta": "Kirim<br>pesan",
+    "elsewhere": "Tautan lain"
+  },
+  "sound": {
+    "label": "Suara",
+    "play": "Putar suara latar",
+    "pause": "Jeda suara latar"
+  }
+}
