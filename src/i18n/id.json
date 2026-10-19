@@ -2,10 +2,12 @@
   "skipToContent": "Langsung ke konten",
   "mainNavigation": "Utama",
   "languageSwitcher": "Bahasa",
+  "backToTop": "kembali ke atas",
   "nav": {
     "about": "Tentang",
-    "projects": "Proyek",
-    "experience": "Pengalaman",
+    "projects": "Karya",
+    "skills": "Keahlian",
+    "experience": "Perjalanan",
     "contact": "Kontak",
     "cv": "CV"
   },

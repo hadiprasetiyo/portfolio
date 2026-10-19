@@ -2,10 +2,12 @@
   "skipToContent": "Skip to content",
   "mainNavigation": "Main",
   "languageSwitcher": "Language",
+  "backToTop": "back to top",
   "nav": {
     "about": "About",
-    "projects": "Projects",
-    "experience": "Experience",
+    "projects": "Work",
+    "skills": "Toolkit",
+    "experience": "Journey",
     "contact": "Contact",
     "cv": "CV"
   },

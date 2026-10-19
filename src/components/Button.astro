@@ -31,44 +31,43 @@ const classes = ['button', `button--${variant}`, className];
     gap: var(--space-2);
     min-height: 2.75rem;
     padding-inline: var(--space-6);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    font-size: var(--text-sm);
-    font-weight: 600;
-    letter-spacing: 0.01em;
+    border: 1px solid var(--line);
+    border-radius: 0;
+    font: 400 11px/1 var(--font-mono);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
     text-decoration: none;
     cursor: pointer;
     transition:
-      transform var(--duration-fast) var(--ease-out),
-      border-color var(--duration) var(--ease-out),
-      background-color var(--duration) var(--ease-out);
+      transform var(--duration-fast) var(--ease),
+      border-color var(--duration) var(--ease),
+      background-color var(--duration) var(--ease),
+      color var(--duration) var(--ease);
   }
 
-  /* highlight cuma jadi isian, teksnya tetap warna text (lolos 4.5:1 di semua preset) */
+  /* emas berisi teks gelap; teks krem di atas emas kontrasnya terlalu rendah */
   .button--primary {
-    background: var(--color-highlight);
-    color: var(--color-text);
-    border-color: color-mix(in oklab, var(--color-highlight) 70%, var(--color-text));
+    background: var(--gold);
+    color: var(--bg);
+    border-color: var(--gold);
   }
 
   .button--secondary {
     background: transparent;
-    color: var(--color-text);
-    border-color: color-mix(in oklab, var(--color-text) 35%, var(--color-bg));
+    color: var(--fg);
+    border-color: rgba(217, 194, 154, 0.45);
   }
 
   @media (hover: hover) {
-    .button:hover {
-      transform: translateY(-1px);
-      color: var(--color-text);
-    }
-
     .button--primary:hover {
-      background: color-mix(in oklab, var(--color-highlight) 88%, var(--color-text));
+      background: var(--sun);
+      border-color: var(--sun);
+      color: var(--bg);
     }
 
     .button--secondary:hover {
-      border-color: var(--color-text);
+      border-color: var(--gold);
+      color: var(--gold);
     }
   }
 
@@ -91,15 +90,9 @@ const classes = ['button', `button--${variant}`, className];
     content: '';
     width: 0.875rem;
     height: 0.875rem;
-    border: 2px solid currentColor;
+    border: 1px solid currentColor;
     border-right-color: transparent;
     border-radius: 50%;
     animation: spin 700ms linear infinite;
-  }
-
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
   }
 </style>

@@ -1,17 +1,27 @@
-/* Satu tema gelap Horizon: hitam pekat dan emas sampanye. Warna lain diturunkan dari empat warna dasar ini. */
+/* Satu tema gelap Horizon: hitam pekat dan emas sampanye. Warna lain diturunkan dari warna dasar ini.
+   Variabel font (--font-serif, --font-sans, --font-mono, --font-script, --font-display) diisi komponen Font di layout. */
 :root {
-  --color-bg: #07070a;
-  --color-text: #f2eee6;
-  --color-accent: #d9c29a;
-  --color-highlight: #d9c29a;
-  --color-muted: color-mix(in oklab, var(--color-text) 72%, var(--color-bg));
-  --color-border: color-mix(in oklab, var(--color-text) 12%, var(--color-bg));
-  --color-surface: color-mix(in oklab, var(--color-text) 3%, var(--color-bg));
-  --color-accent-hover: color-mix(in oklab, var(--color-accent) 82%, var(--color-text));
-  --focus-ring: var(--color-accent);
-  --color-danger: #8a1c12;
+  --bg: #07070a;
+  --fg: #f2eee6;
+  --muted: #8e8a82;
+  --faint: #5a574f;
+  --line: rgba(242, 238, 230, 0.12);
+  --gold: #d9c29a;
+  --sun: #fff4de;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  /* ayunan bandul: melambat lembut di kedua ujung */
+  --ease-swing: cubic-bezier(0.37, 0, 0.63, 1);
 
-  --font-mono: ui-monospace, 'Cascadia Code', 'SF Mono', Menlo, Consolas, monospace;
+  --color-bg: var(--bg);
+  --color-text: var(--fg);
+  --color-accent: var(--gold);
+  --color-highlight: var(--gold);
+  --color-muted: var(--muted);
+  --color-border: var(--line);
+  --color-surface: color-mix(in oklab, var(--fg) 4%, var(--bg));
+  --color-accent-hover: var(--sun);
+  --focus-ring: var(--gold);
+  --color-danger: #e08a7a;
 
   /* skala 1.25, ukuran besar mengecil di layar sempit */
   --text-sm: 0.875rem;
@@ -22,8 +32,8 @@
   --text-3xl: clamp(2rem, 1.6rem + 2vw, 2.441rem);
   --text-4xl: clamp(2.25rem, 1.5rem + 3.6vw, 3.5rem);
 
-  --leading-body: 1.6;
-  --leading-heading: 1.15;
+  --leading-body: 1.65;
+  --leading-heading: 1.05;
   --measure: 68ch;
 
   --space-1: 0.25rem;
@@ -37,23 +47,25 @@
   --space-24: 6rem;
   --space-32: 8rem;
 
-  --container: 70rem;
+  --container: 82.5rem;
   --reading: 45rem;
-  --gutter: clamp(1rem, 4vw, 2rem);
+  --gutter: max(1.5rem, env(safe-area-inset-left, 0px));
 
   --radius-sm: 6px;
   --radius: 10px;
   --radius-lg: 14px;
 
-  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
-  --duration-fast: 120ms;
-  --duration: 180ms;
-  --duration-slow: 240ms;
+  --ease-out: var(--ease);
+  --duration-fast: 160ms;
+  --duration: 400ms;
+  --duration-slow: 900ms;
 
-  --z-sticky: 10;
-  --z-dropdown: 20;
-  --z-modal: 30;
-  --z-toast: 40;
+  --z-sticky: 40;
+  --z-dropdown: 50;
+  --z-modal: 60;
+  --z-toast: 90;
+
+  color-scheme: dark;
 }
 
 *,
@@ -68,17 +80,30 @@
 
 html {
   -webkit-text-size-adjust: 100%;
-  color-scheme: dark;
 }
 
 body {
   min-height: 100dvh;
-  background: var(--color-bg);
-  color: var(--color-text);
+  overflow-x: clip;
+  background: var(--bg);
+  color: var(--fg);
   font-family: var(--font-sans);
   font-size: var(--text-base);
+  font-weight: 300;
   line-height: var(--leading-body);
   -webkit-font-smoothing: antialiased;
+}
+
+/* butiran film tipis, yang membuat hitam pekat terasa seperti cetakan, bukan layar */
+body::after {
+  content: '';
+  position: fixed;
+  inset: -50%;
+  z-index: 80;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  opacity: 0.04;
+  pointer-events: none;
+  animation: grain 1.2s steps(4) infinite;
 }
 
 img,
@@ -101,14 +126,22 @@ h1,
 h2,
 h3,
 h4 {
+  font-family: var(--font-serif);
+  font-weight: 400;
   line-height: var(--leading-heading);
   letter-spacing: -0.02em;
   text-wrap: balance;
 }
 
-h1 { font-size: var(--text-4xl); font-weight: 700; }
-h2 { font-size: var(--text-3xl); font-weight: 650; }
-h3 { font-size: var(--text-xl); font-weight: 600; }
+h1 { font-size: var(--text-4xl); }
+h2 { font-size: var(--text-3xl); }
+h3 { font-size: var(--text-xl); }
+
+h1 em,
+h2 em,
+h3 em {
+  color: var(--gold);
+}
 
 p {
   max-width: var(--measure);
@@ -116,14 +149,14 @@ p {
 }
 
 a {
-  color: var(--color-accent);
+  color: inherit;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.2em;
-  transition: color var(--duration-fast) var(--ease-out);
+  transition: color var(--duration-fast) var(--ease);
 }
 
 a:hover {
-  color: var(--color-accent-hover);
+  color: var(--gold);
 }
 
 code,
@@ -134,17 +167,44 @@ time {
 }
 
 :focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
+  outline: 1px solid var(--focus-ring);
+  outline-offset: 4px;
 }
 
 ::selection {
-  background: color-mix(in oklab, var(--color-accent) 20%, var(--color-bg));
+  background: var(--gold);
+  color: var(--bg);
 }
 
-.container {
+.container,
+.wrap {
   width: min(100% - 2 * var(--gutter), var(--container));
   margin-inline: auto;
+}
+
+/* label kecil berhuruf kapital, dipakai untuk metadata dan kepala bab */
+.label {
+  color: var(--muted);
+  font: 400 11px/1.5 var(--font-mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+/* kepala bab gaya majalah: nomor emas, garis rambut, nama bagian */
+.chapter {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.chapter span {
+  color: var(--gold);
+}
+
+.chapter i {
+  width: 40px;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(217, 194, 154, 0.65), rgba(217, 194, 154, 0.12));
 }
 
 .visually-hidden:not(:focus-within, :active) {
@@ -155,6 +215,88 @@ time {
   clip-path: inset(50%);
   white-space: nowrap;
 }
+
+/* ---------- langit global dan kursor ---------- */
+.sky {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  background: var(--nebula, none) center / cover no-repeat, var(--bg);
+  pointer-events: none;
+}
+
+.has-cursor,
+.has-cursor * {
+  cursor: none;
+}
+
+.cursor,
+.cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 85;
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* titik cahaya di tengah, cincin bidik dengan empat tanda arah */
+.cursor {
+  width: 5px;
+  height: 5px;
+  margin: -2.5px 0 0 -2.5px;
+  background: #fff6e2;
+  box-shadow: 0 0 8px 2px rgba(255, 236, 200, 0.75), 0 0 22px 6px rgba(217, 194, 154, 0.25);
+}
+
+.cursor-ring {
+  width: 40px;
+  height: 40px;
+  margin: -20px 0 0 -20px;
+  transition: opacity 0.4s;
+}
+
+.cursor-ring svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: none;
+  stroke: rgba(217, 194, 154, 0.8);
+  stroke-width: 1;
+  transition: scale 0.6s var(--ease);
+  animation: spin 14s linear infinite;
+}
+
+.cursor-ring .ticks {
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+  transition: transform 0.6s var(--ease);
+}
+
+.cursor-ring.is-big svg {
+  scale: 1.55;
+}
+
+.cursor-ring.is-big .ticks {
+  transform: rotate(45deg);
+}
+
+.cursor-trail {
+  position: fixed;
+  inset: 0;
+  z-index: 84;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+@keyframes grain { 25% { transform: translate(-3%, 2%); } 50% { transform: translate(2%, -3%); } 75% { transform: translate(-1%, -2%); } }
+@keyframes spin { to { rotate: 360deg; } }
+@keyframes pulse { 50% { opacity: 0.35; } }
 
 @media (prefers-reduced-motion: no-preference) {
   @view-transition {
