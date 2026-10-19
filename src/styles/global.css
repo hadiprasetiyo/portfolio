@@ -1,6 +1,9 @@
-/* Empat warna dasar (--color-bg, --color-text, --color-accent, --color-highlight)
-   disuntikkan layout dari tabel themes. Semua warna lain diturunkan di sini. */
+/* Satu tema gelap Horizon: hitam pekat dan emas sampanye. Warna lain diturunkan dari empat warna dasar ini. */
 :root {
+  --color-bg: #07070a;
+  --color-text: #f2eee6;
+  --color-accent: #d9c29a;
+  --color-highlight: #d9c29a;
   --color-muted: color-mix(in oklab, var(--color-text) 72%, var(--color-bg));
   --color-border: color-mix(in oklab, var(--color-text) 12%, var(--color-bg));
   --color-surface: color-mix(in oklab, var(--color-text) 3%, var(--color-bg));
@@ -65,7 +68,7 @@
 
 html {
   -webkit-text-size-adjust: 100%;
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 body {

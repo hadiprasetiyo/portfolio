@@ -1,19 +1,8 @@
 -- Skema awal. Sebelum rilis, file ini diubah langsung, jangan tambah migration baru.
 
-CREATE TABLE themes (
-  id              INTEGER PRIMARY KEY,
-  name            TEXT    NOT NULL UNIQUE,
-  color_bg        TEXT    NOT NULL CHECK (length(color_bg) = 7 AND color_bg GLOB '#*' AND substr(color_bg, 2) NOT GLOB '*[^0-9A-Fa-f]*'),
-  color_text      TEXT    NOT NULL CHECK (length(color_text) = 7 AND color_text GLOB '#*' AND substr(color_text, 2) NOT GLOB '*[^0-9A-Fa-f]*'),
-  color_accent    TEXT    NOT NULL CHECK (length(color_accent) = 7 AND color_accent GLOB '#*' AND substr(color_accent, 2) NOT GLOB '*[^0-9A-Fa-f]*'),
-  color_highlight TEXT    NOT NULL CHECK (length(color_highlight) = 7 AND color_highlight GLOB '#*' AND substr(color_highlight, 2) NOT GLOB '*[^0-9A-Fa-f]*'),
-  sort_order      INTEGER NOT NULL DEFAULT 0
-) STRICT;
-
 CREATE TABLE settings (
   id             INTEGER PRIMARY KEY CHECK (id = 1),
   default_locale TEXT    NOT NULL DEFAULT 'en' CHECK (default_locale IN ('en', 'id')),
-  theme_id       INTEGER NOT NULL REFERENCES themes (id),
   updated_at     TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
 ) STRICT;
 
@@ -118,11 +107,5 @@ CREATE TABLE messages (
   created_at TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
 ) STRICT;
 
--- Data wajib, bukan data dummy: situs tidak bisa render tanpa tema aktif dan settings.
--- Kontras sudah dicek: text/bg, accent/bg, dan text/highlight semuanya >= 4.5:1.
-INSERT INTO themes (id, name, color_bg, color_text, color_accent, color_highlight, sort_order) VALUES
-  (1, 'Clean Slate',         '#FCFCFD', '#0F1B2D', '#1E3A5F', '#DCE6F2', 1),
-  (2, 'Executive Precision', '#F7F5F0', '#1C1A17', '#7A5C1E', '#D4BE8A', 2),
-  (3, 'Hybrid',              '#FCFCFD', '#0F172A', '#3B5B85', '#D4B46A', 3);
-
-INSERT INTO settings (id, default_locale, theme_id) VALUES (1, 'en', 3);
+-- Data wajib, bukan data dummy: situs tidak bisa render tanpa baris settings.
+INSERT INTO settings (id, default_locale) VALUES (1, 'en');

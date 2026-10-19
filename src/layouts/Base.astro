@@ -1,8 +1,7 @@
 ---
 import { Font } from 'astro:assets';
-import ThemeSwitcher from '../components/ThemeSwitcher.astro';
 import { getDictionary, LOCALES, type Locale } from '../i18n';
-import { getProfile, getSettings, getThemes } from '../lib/db';
+import { getProfile } from '../lib/db';
 import '../styles/global.css';
 
 type Props = {
@@ -14,16 +13,8 @@ type Props = {
 };
 
 const { title, description, lang, path } = Astro.props;
-const [themes, settings, profile] = await Promise.all([getThemes(), getSettings(), getProfile()]);
+const profile = await getProfile();
 const dictionary = getDictionary(lang);
-
-// warna aman di-inline: kolomnya dijaga CHECK hex di database
-const themeCss = themes
-  .map(
-    (theme) =>
-      `[data-theme="${theme.id}"]{--color-bg:${theme.color_bg};--color-text:${theme.color_text};--color-accent:${theme.color_accent};--color-highlight:${theme.color_highlight}}`,
-  )
-  .join('');
 const languageNames: Record<Locale, string> = { en: 'English', id: 'Bahasa Indonesia' };
 const home = `/${lang}/`;
 const navigation = [
@@ -34,7 +25,7 @@ const navigation = [
 ];
 ---
 
-<html lang={lang} data-theme={settings.theme_id}>
+<html lang={lang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -42,14 +33,6 @@ const navigation = [
     {description && <meta name="description" content={description} />}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <Font cssVariable="--font-sans" preload />
-    <style set:html={themeCss}></style>
-    <script is:inline define:vars={{ themeIds: themes.map((theme) => String(theme.id)) }}>
-      // dijalankan sebelum paint supaya tema pilihan pengunjung tidak berkedip
-      try {
-        const saved = localStorage.getItem('theme');
-        if (themeIds.includes(saved)) document.documentElement.dataset.theme = saved;
-      } catch {}
-    </script>
   </head>
   <body>
     <a class="skip-link" href="#main">{dictionary.skipToContent}</a>
@@ -87,7 +70,6 @@ const navigation = [
               ))
             }
           </nav>
-          <ThemeSwitcher themes={themes} label={dictionary.themeSwitcher} />
         </div>
       </div>
     </header>
