@@ -83,7 +83,7 @@ export function startSky(canvas: HTMLCanvasElement) {
         size: 0.3 + depth * 1.1,
         phase: Math.random() * Math.PI * 2,
         speed: 0.4 + Math.random() * 1.4,
-        color: warm ? '242, 230, 210' : '210, 222, 255',
+        color: warm ? '#F2E6D2' : '#D2DEFF',
       };
     });
     paintNebula();
@@ -240,16 +240,17 @@ export function startSky(canvas: HTMLCanvasElement) {
     context.clearRect(0, 0, width, height);
     pointer.sx += (pointer.x - pointer.sx) * 0.03;
     pointer.sy += (pointer.y - pointer.sy) * 0.03;
+    // bintang sekecil ini tidak bisa dibedakan bulat atau kotak; fillRect dan globalAlpha jauh lebih murah dari arc dan string warna baru
     for (const star of stars) {
       const shift = 0.04 + star.depth * 0.22;
       const x = (((star.x - pointer.sx * shift * 30) % width) + width) % width;
       const y = (((star.y - scrollY * shift) % height) + height) % height;
       const glow = 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(now * 0.001 * star.speed + star.phase));
-      context.fillStyle = `rgba(${star.color}, ${(glow * (0.25 + star.depth * 0.6)).toFixed(3)})`;
-      context.beginPath();
-      context.arc(x, y, star.size, 0, Math.PI * 2);
-      context.fill();
+      context.globalAlpha = glow * (0.25 + star.depth * 0.6);
+      context.fillStyle = star.color;
+      context.fillRect(x - star.size, y - star.size, star.size * 2, star.size * 2);
     }
+    context.globalAlpha = 1;
     if (reduce) return;
     drawComet(dt);
     drifters.forEach((rock) => drawDrifter(rock, dt, scrolled));
