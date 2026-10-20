@@ -236,7 +236,8 @@ export function startHero() {
       for (int i = 0; i < 160; i++) {
         float r = length(pos);
         closest = min(closest, r);
-        if (r < 1.0) {
+        // di dalam photon sphere (r = 1.5) sinar yang bergerak ke dalam pasti jatuh, tidak perlu diikuti sampai horizon
+        if (r < 1.0 || (r < 1.5 && dot(pos, vel) < 0.0)) {
           captured = true;
           break;
         }
@@ -323,9 +324,12 @@ export function startHero() {
     };
     const draw = () => gl.drawArrays(gl.TRIANGLES, 0, 3);
     return {
-      resize(width, height) {
-        canvas.width = width;
-        canvas.height = height;
+      // scene di-ray trace di resolusi lebih kecil dari kanvas lalu diperbesar saat combine; ganti skala cukup alokasi ulang tekstur, kanvas tetap
+      resize(width, height, sceneScale) {
+        if (canvas.width !== width || canvas.height !== height) {
+          canvas.width = width;
+          canvas.height = height;
+        }
         if (targets) {
           for (const item of Object.values(targets)) {
             gl.deleteTexture(item.texture);
@@ -334,15 +338,16 @@ export function startHero() {
         }
         const smallWidth = Math.max(1, Math.round(width / 4));
         const smallHeight = Math.max(1, Math.round(height / 4));
-        targets = { scene: makeTarget(width, height), first: makeTarget(smallWidth, smallHeight), second: makeTarget(smallWidth, smallHeight) };
+        targets = { scene: makeTarget(Math.max(1, Math.round(width * sceneScale)), Math.max(1, Math.round(height * sceneScale))), first: makeTarget(smallWidth, smallHeight), second: makeTarget(smallWidth, smallHeight) };
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
       },
       render(values) {
         if (!targets) return;
         use(targets.scene, scene);
         const uniform = scene.uniform;
-        gl.uniform2f(uniform.u_center, values.center[0], values.center[1]);
-        gl.uniform1f(uniform.u_focal, values.focal);
+        const scale = targets.scene.width / canvas.width;
+        gl.uniform2f(uniform.u_center, values.center[0] * scale, values.center[1] * scale);
+        gl.uniform1f(uniform.u_focal, values.focal * scale);
         gl.uniform1f(uniform.u_time, values.time);
         gl.uniform1f(uniform.u_dist, values.dist);
         gl.uniform1f(uniform.u_elev, values.elev);
@@ -386,10 +391,11 @@ export function startHero() {
   const glCanvas = app.querySelector('.hero__gl');
   const corona = createCorona(glCanvas);
   if (corona) root.classList.add('has-gl');
-  // ray tracing per piksel: di layar 2x biayanya empat kali lipat, padahal bloom membuat bedanya nyaris tak terlihat
-  const maxRatio = Math.min(devicePixelRatio || 1, 1.5);
-  let quality = 1;
-  let glRatio = maxRatio * quality;
+  // kanvas akhir dibatasi 1.5x: di layar 2x biayanya hampir dua kali lipat, padahal bloom membuat bedanya nyaris tak terlihat
+  const glRatio = Math.min(devicePixelRatio || 1, 1.5);
+  // resolusi ray tracing per piksel CSS, terpisah dari kanvas; diatur adaptQuality mengikuti kemampuan GPU
+  let quality = Math.min(glRatio, 0.8);
+  let qualityCeiling = glRatio;
   const sky = { width: 0, height: 0, cx: 0, cy: 0, radius: 1 };
   const measureHero = () => {
     const stageBox = stage.getBoundingClientRect();
@@ -401,7 +407,7 @@ export function startHero() {
     sky.cx = sky.baseX;
     sky.cy = sky.baseY;
     sky.radius = box.width / 2;
-    if (corona) corona.resize(Math.round(sky.width * glRatio), Math.round(sky.height * glRatio));
+    if (corona) corona.resize(Math.round(sky.width * glRatio), Math.round(sky.height * glRatio), quality / glRatio);
   };
   measureHero();
 
@@ -1059,15 +1065,18 @@ export function startHero() {
   const frameTimes = [];
   const adaptQuality = (delta) => {
     frameTimes.push(delta);
-    if (frameTimes.length < 40) return;
+    if (frameTimes.length < 30) return;
     const average = frameTimes.reduce((sum, value) => sum + value, 0) / frameTimes.length;
     frameTimes.length = 0;
-    // turun begitu di bawah sekitar 50 fps, naik lagi kalau longgar; tajam sedikit dikorbankan demi gerak yang mulus
-    const next = average > 20 ? Math.max(0.5, quality - 0.1) : average < 14 ? Math.min(1, quality + 0.1) : quality;
-    if (next !== quality) {
+    // biaya scene sebanding jumlah piksel, jadi turun langsung sebesar kelebihannya; naik pelan dan tidak melewati titik yang pernah terlalu berat
+    let next = quality;
+    if (average > 19) {
+      qualityCeiling = quality * 0.95;
+      next = Math.max(0.4, quality * Math.sqrt(15 / average));
+    } else if (average < 17.5) next = Math.min(qualityCeiling, quality + 0.05);
+    if (Math.abs(next - quality) > 0.01) {
       quality = next;
-      glRatio = maxRatio * quality;
-      measureHero();
+      corona.resize(Math.round(sky.width * glRatio), Math.round(sky.height * glRatio), quality / glRatio);
     }
   };
 
