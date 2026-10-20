@@ -3,6 +3,7 @@
    (scroll, resize, kursor, langit global). Ditulis sebagai JS biasa karena sebagian besar isinya shader dan matematika kanvas. */
 import { setCursorAttractor } from './cursor';
 import { clamp, smooth } from './math';
+import { makeRockBody, shadeBody } from './rock';
 
 export function startHero() {
   const root = document.documentElement;
@@ -385,7 +386,8 @@ export function startHero() {
   const glCanvas = app.querySelector('.hero__gl');
   const corona = createCorona(glCanvas);
   if (corona) root.classList.add('has-gl');
-  const maxRatio = Math.min(devicePixelRatio || 1, 2);
+  // ray tracing per piksel: di layar 2x biayanya empat kali lipat, padahal bloom membuat bedanya nyaris tak terlihat
+  const maxRatio = Math.min(devicePixelRatio || 1, 1.5);
   let quality = 1;
   let glRatio = maxRatio * quality;
   const sky = { width: 0, height: 0, cx: 0, cy: 0, radius: 1 };
@@ -561,103 +563,6 @@ export function startHero() {
   const spinRate = (radius) => 2.2 / Math.pow(radius, 1.5);
   const orbitPoint = (radius, angle, height) => [Math.cos(angle) * radius, height, Math.sin(angle) * radius];
 
-  const seeded = (seed) => () => {
-    seed = (seed + 0x6D2B79F5) | 0;
-    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-  const valueNoise = (random) => {
-    const grid = Array.from({ length: 64 }, () => random());
-    const at = (x, y) => grid[(x & 7) + (y & 7) * 8];
-    return (x, y) => {
-      const left = Math.floor(x);
-      const top = Math.floor(y);
-      const fx = x - left;
-      const fy = y - top;
-      const sx = fx * fx * (3 - 2 * fx);
-      const sy = fy * fy * (3 - 2 * fy);
-      const upper = at(left, top) + (at(left + 1, top) - at(left, top)) * sx;
-      const lower = at(left, top + 1) + (at(left + 1, top + 1) - at(left, top + 1)) * sx;
-      return upper + (lower - upper) * sy;
-    };
-  };
-  // tiap batu menyimpan peta normal dan warna permukaan; cahayanya dihitung ulang tiap frame dari arah lubang hitam
-  const makeRockBody = (size) => {
-    const random = seeded(Math.floor(Math.random() * 1e9));
-    const noise = valueNoise(random);
-    const lobes = [[2, random() * 6.28, 0.12], [3, random() * 6.28, 0.07], [5, random() * 6.28, 0.035]];
-    const craters = Array.from({ length: 7 }, () => ({ x: random() * 1.2 - 0.6, y: random() * 1.2 - 0.6, r: 0.08 + random() * 0.2 }));
-    const count = size * size;
-    const normal = new Float32Array(count * 3);
-    const albedo = new Float32Array(count);
-    const coverage = new Float32Array(count);
-    for (let y = 0; y < size; y++) {
-      for (let x = 0; x < size; x++) {
-        const u = ((x + 0.5) / size) * 2 - 1;
-        const v = ((y + 0.5) / size) * 2 - 1;
-        const angle = Math.atan2(v, u);
-        let edge = 0.86;
-        for (const [lobe, phase, amount] of lobes) edge *= 1 + amount * Math.sin(lobe * angle + phase);
-        const reach = Math.hypot(u, v) / edge;
-        const index = y * size + x;
-        coverage[index] = clamp((1 - reach) * size * edge * 0.5, 0, 1);
-        if (coverage[index] <= 0) continue;
-        const inside = Math.min(reach, 0.999);
-        let nx = u / edge + (noise(u * 4 + 0.15, v * 4) - noise(u * 4 - 0.15, v * 4)) * 0.6;
-        let ny = v / edge + (noise(u * 4, v * 4 + 0.15) - noise(u * 4, v * 4 - 0.15)) * 0.6;
-        const nz = Math.sqrt(1 - inside * inside);
-        let tone = 0.55 + (noise(u * 6 + 3, v * 6) - 0.5) * 0.35;
-        for (const crater of craters) {
-          const dx = u - crater.x;
-          const dy = v - crater.y;
-          const depth = Math.hypot(dx, dy) / crater.r;
-          if (depth < 1) {
-            // dinding kawah miring ke arah pusatnya
-            nx -= (dx / crater.r) * 0.9 * (1 - depth);
-            ny -= (dy / crater.r) * 0.9 * (1 - depth);
-            tone *= 0.88;
-          } else if (depth < 1.25) {
-            tone *= 1.08;
-          }
-        }
-        const length = Math.hypot(nx, ny, nz) || 1;
-        normal[index * 3] = nx / length;
-        normal[index * 3 + 1] = ny / length;
-        normal[index * 3 + 2] = nz / length;
-        albedo[index] = tone;
-      }
-    }
-    const canvas = document.createElement('canvas');
-    canvas.width = size;
-    canvas.height = size;
-    const context = canvas.getContext('2d');
-    return { size, normal, albedo, coverage, canvas, context, image: context.createImageData(size, size) };
-  };
-  // cahaya hangat dari piringan, cahaya redup kebiruan dari bintang dan nebula, ditambah pijar kalau batu sudah panas
-  const shadeBody = (body, light, heat) => {
-    const { size, normal, albedo, coverage, image } = body;
-    const data = image.data;
-    for (let index = 0; index < size * size; index++) {
-      const offset = index * 4;
-      const cover = coverage[index];
-      if (cover <= 0) {
-        data[offset + 3] = 0;
-        continue;
-      }
-      const facing = normal[index * 3] * light[0] + normal[index * 3 + 1] * light[1] + normal[index * 3 + 2] * light[2];
-      // piringan itu sumber cahaya yang lebar, jadi cahayanya sedikit "membungkus"; batu yang membelakangi cahaya dapat sinar tepi
-      const wrap = Math.max(0, (facing + 0.3) / 1.3);
-      const rim = Math.pow(1 - normal[index * 3 + 2], 3) * Math.max(0, -light[2]) * 0.9;
-      const lit = wrap + rim;
-      const tone = albedo[index];
-      data[offset] = Math.min(255, tone * (lit * 255 + 26) + heat * 130);
-      data[offset + 1] = Math.min(255, tone * (lit * 214 + 28) + heat * 50);
-      data[offset + 2] = Math.min(255, tone * (lit * 160 + 40) + heat * 12);
-      data[offset + 3] = cover * 255;
-    }
-    body.context.putImageData(image, 0, 0);
-  };
   // arah dari batu ke lubang hitam, dipindah ke koordinat layar lalu ke koordinat sprite yang sedang terguling
   const lightFor = (point, spin) => {
     const toward = unit([-point[0], -point[1], -point[2]]);
@@ -1157,8 +1062,8 @@ export function startHero() {
     if (frameTimes.length < 40) return;
     const average = frameTimes.reduce((sum, value) => sum + value, 0) / frameTimes.length;
     frameTimes.length = 0;
-    // turun hanya kalau di bawah sekitar 35 fps, naik lagi begitu lancar, supaya tetap setajam mungkin
-    const next = average > 28 ? Math.max(0.6, quality - 0.1) : average < 18 ? Math.min(1, quality + 0.1) : quality;
+    // turun begitu di bawah sekitar 50 fps, naik lagi kalau longgar; tajam sedikit dikorbankan demi gerak yang mulus
+    const next = average > 20 ? Math.max(0.5, quality - 0.1) : average < 14 ? Math.min(1, quality + 0.1) : quality;
     if (next !== quality) {
       quality = next;
       glRatio = maxRatio * quality;
@@ -1168,9 +1073,16 @@ export function startHero() {
 
 
   /* ---------- penyambung: scroll, resize, kursor, dan putaran frame ---------- */
+  // posisi hero di dokumen disimpan sekali per resize; membaca getBoundingClientRect tiap frame memaksa layout dihitung ulang
+  const heroPlace = { top: 0, height: 0 };
+  const measurePlace = () => {
+    heroPlace.top = hero.getBoundingClientRect().top + scrollY;
+    heroPlace.height = hero.offsetHeight;
+  };
+  measurePlace();
+  const heroBottom = () => heroPlace.top + heroPlace.height - scrollY;
   const onScroll = () => {
-    const heroBox = hero.getBoundingClientRect();
-    heroProgress = clamp(-heroBox.top / (heroBox.height - innerHeight), 0, 1);
+    heroProgress = clamp((scrollY - heroPlace.top) / (heroPlace.height - innerHeight), 0, 1);
     if (reduce) {
       scrollEase = heroProgress;
       hero.style.setProperty('--p', heroProgress.toFixed(4));
@@ -1181,6 +1093,7 @@ export function startHero() {
   onScroll();
   addEventListener('scroll', onScroll, { passive: true });
   addEventListener('resize', () => {
+    measurePlace();
     measureHero();
     resizeFx();
     onScroll();
@@ -1214,12 +1127,14 @@ export function startHero() {
   // kursor terhisap ke inti lubang hitam selama hero masih di layar
   setCursorAttractor(() => {
     if (!corona) return null;
-    const stageBox = stage.getBoundingClientRect();
+    // panggung sticky menempel di atas layar sampai ujung hero, lalu ikut naik
+    const bottom = heroBottom();
+    const stageTop = Math.min(Math.max(heroPlace.top - scrollY, 0), bottom - innerHeight);
     return {
-      x: stageBox.left + sky.cx,
-      y: stageBox.top + sky.cy,
+      x: sky.cx,
+      y: stageTop + sky.cy,
       horizon: sky.radius * (restDistance / view.dist),
-      active: stageBox.bottom > 0 && heroProgress < 0.6,
+      active: bottom > 0 && heroProgress < 0.6,
     };
   });
 
@@ -1229,19 +1144,21 @@ export function startHero() {
   requestAnimationFrame(function frame(now) {
     if (introStart.at === null) introStart.at = now;
     const frameDelta = previousFrame === null ? 0 : now - previousFrame;
-    const heroBox = hero.getBoundingClientRect();
-    if (previousFrame !== null && heroBox.bottom > 0) adaptQuality(frameDelta);
+    const bottom = heroBottom();
+    const visible = bottom > 0;
     previousFrame = now;
-    tickClocks();
-    pointer.sx += (pointer.x - pointer.sx) * 0.03;
-    pointer.sy += (pointer.y - pointer.sy) * 0.03;
-    stage.style.setProperty('--mx', (pointer.sx * 2).toFixed(3));
-    stage.style.setProperty('--my', (pointer.sy * 2).toFixed(3));
-    scrollEase += (heroProgress - scrollEase) * 0.1;
-    hero.style.setProperty('--p', scrollEase.toFixed(4));
     // selama lubang hitam menutup layar penuh, langit global di belakangnya tidak perlu digambar
-    root.dataset.skyCovered = String(Boolean(corona) && heroBox.bottom >= innerHeight && scrollEase < 0.2);
-    if (heroBox.bottom > 0) {
+    const covered = String(Boolean(corona) && bottom >= innerHeight && scrollEase < 0.2);
+    if (root.dataset.skyCovered !== covered) root.dataset.skyCovered = covered;
+    if (visible) {
+      if (frameDelta) adaptQuality(frameDelta);
+      tickClocks();
+      pointer.sx += (pointer.x - pointer.sx) * 0.03;
+      pointer.sy += (pointer.y - pointer.sy) * 0.03;
+      stage.style.setProperty('--mx', (pointer.sx * 2).toFixed(3));
+      stage.style.setProperty('--my', (pointer.sy * 2).toFixed(3));
+      scrollEase += (heroProgress - scrollEase) * 0.1;
+      hero.style.setProperty('--p', scrollEase.toFixed(4));
       renderHero(now);
       fxDelta += (Math.min(0.05, frameDelta / 1000 || 1 / 60) - fxDelta) * 0.2;
       if (corona) drawFx(fxDelta, now);

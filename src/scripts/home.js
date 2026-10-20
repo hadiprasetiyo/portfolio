@@ -2,6 +2,15 @@
    planisfer zodiak, suara, rasi bintang kontak, dan fase bulan. Inti kodenya diangkat apa adanya dari
    prototipe Horizon v61; datanya dibaca dari JSON yang dirender server. */
 import { moonPath } from '../lib/horizon';
+import dwarfTexture from '../assets/planets/dwarf.webp?url';
+import earthTexture from '../assets/planets/earth.webp?url';
+import jupiterTexture from '../assets/planets/jupiter.webp?url';
+import marsTexture from '../assets/planets/mars.webp?url';
+import mercuryTexture from '../assets/planets/mercury.webp?url';
+import neptuneTexture from '../assets/planets/neptune.webp?url';
+import saturnTexture from '../assets/planets/saturn.webp?url';
+import uranusTexture from '../assets/planets/uranus.webp?url';
+import venusTexture from '../assets/planets/venus.webp?url';
 import { clamp, seeded, smooth } from './math';
 import { scrollToY } from './smooth-scroll';
 
@@ -98,126 +107,28 @@ export function startHome() {
     return index < solarShares.length ? solarShares[index] : 0.96 + (index - solarShares.length + 1) * 0.05;
   });
 
-  /* tekstur permukaan prosedural: peta ekuirektangular yang dibungkus ke bola dan diputar */
+  /* tekstur permukaan: peta ekuirektangular 256x128 yang sudah dipanggang jadi gambar, dibungkus ke bola lalu diputar.
+     Dulu dibangkitkan dari noise di browser dan memakan sekitar 2 detik per planet, membuat scroll macet. */
   const textureWidth = 256;
   const textureHeight = 128;
-  const hash3 = (x, y, z, seed) => {
-    let h = Math.imul(x, 374761393) ^ Math.imul(y, 668265263) ^ Math.imul(z, 1274126177) ^ Math.imul(seed, 2246822519);
-    h = Math.imul(h ^ (h >>> 13), 1274126177);
-    return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
-  };
-  const noise3 = (x, y, z, seed) => {
-    const ix = Math.floor(x);
-    const iy = Math.floor(y);
-    const iz = Math.floor(z);
-    const fx = x - ix;
-    const fy = y - iy;
-    const fz = z - iz;
-    const ux = fx * fx * (3 - 2 * fx);
-    const uy = fy * fy * (3 - 2 * fy);
-    const uz = fz * fz * (3 - 2 * fz);
-    const corner = (dx, dy, dz) => hash3(ix + dx, iy + dy, iz + dz, seed);
-    const x00 = corner(0, 0, 0) + (corner(1, 0, 0) - corner(0, 0, 0)) * ux;
-    const x10 = corner(0, 1, 0) + (corner(1, 1, 0) - corner(0, 1, 0)) * ux;
-    const x01 = corner(0, 0, 1) + (corner(1, 0, 1) - corner(0, 0, 1)) * ux;
-    const x11 = corner(0, 1, 1) + (corner(1, 1, 1) - corner(0, 1, 1)) * ux;
-    const y0 = x00 + (x10 - x00) * uy;
-    const y1 = x01 + (x11 - x01) * uy;
-    return y0 + (y1 - y0) * uz;
-  };
-  // noise di permukaan bola, jadi peta menyambung mulus di garis bujur 0 dan 360
-  const fbm = (point, scale, seed, octaves = 5) => {
-    let total = 0;
-    let amount = 0.5;
-    let frequency = scale;
-    for (let octave = 0; octave < octaves; octave++) {
-      total += noise3(point[0] * frequency + 17, point[1] * frequency + 31, point[2] * frequency + 47, seed + octave) * amount;
-      frequency *= 2.03;
-      amount *= 0.5;
+  const textureUrls = { mercury: mercuryTexture, venus: venusTexture, earth: earthTexture, mars: marsTexture, jupiter: jupiterTexture, saturn: saturnTexture, uranus: uranusTexture, neptune: neptuneTexture, dwarf: dwarfTexture };
+  const loadTexture = async (kind) => {
+    const image = new Image();
+    image.src = textureUrls[kind];
+    await image.decode();
+    const canvas = document.createElement('canvas');
+    canvas.width = textureWidth;
+    canvas.height = textureHeight;
+    const context = canvas.getContext('2d', { willReadFrequently: true });
+    context.drawImage(image, 0, 0, textureWidth, textureHeight);
+    const pixels = context.getImageData(0, 0, textureWidth, textureHeight).data;
+    // tutupan awan Bumi disimpan di kanal alpha gambar
+    let clouds = null;
+    if (kind === 'earth') {
+      clouds = new Float32Array(textureWidth * textureHeight);
+      for (let index = 0; index < clouds.length; index++) clouds[index] = pixels[index * 4 + 3] / 255;
     }
-    return total / (1 - Math.pow(0.5, octaves));
-  };
-  const blend = (from, to, t) => [from[0] + (to[0] - from[0]) * t, from[1] + (to[1] - from[1]) * t, from[2] + (to[2] - from[2]) * t];
-  const ramp = (stops, t) => {
-    const position = clamp(t, 0, 0.9999) * (stops.length - 1);
-    const index = Math.floor(position);
-    return blend(stops[index], stops[index + 1], position - index);
-  };
-  const wrapAngle = (value) => ((((value + Math.PI) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2)) - Math.PI;
-  // kawah: dasar gelap dan bibir terang, lebarnya dikoreksi menurut lintang
-  const stampCraters = (pixels, count, seed, strength) => {
-    const random = seeded(seed);
-    for (let crater = 0; crater < count; crater++) {
-      const centerLat = (random() - 0.5) * 2.6;
-      const centerLon = random() * Math.PI * 2;
-      const radius = (0.03 + Math.pow(random(), 3) * 0.12) * Math.PI;
-      for (let row = 0; row < textureHeight; row++) {
-        const lat = (0.5 - (row + 0.5) / textureHeight) * Math.PI;
-        if (Math.abs(lat - centerLat) > radius * 1.4) continue;
-        for (let column = 0; column < textureWidth; column++) {
-          const lon = ((column + 0.5) / textureWidth) * Math.PI * 2;
-          const distance = Math.hypot(wrapAngle(lon - centerLon) * Math.cos(lat), lat - centerLat) / radius;
-          if (distance > 1.35) continue;
-          const offset = (row * textureWidth + column) * 4;
-          const shade = distance < 1 ? 1 - strength * (1 - distance * distance) * 0.6 : 1 + strength * 0.5 * (1 - (distance - 1) / 0.35);
-          for (let channel = 0; channel < 3; channel++) pixels[offset + channel] = clamp(pixels[offset + channel] * shade, 0, 255);
-        }
-      }
-    }
-  };
-  const painters = {
-    mercury: (point) => {
-      const tone = 0.35 + fbm(point, 2.2, 11) * 0.55;
-      return ramp([[78, 72, 66], [128, 120, 110], [176, 168, 156]], tone);
-    },
-    venus: (point) => {
-      const warp = fbm(point, 1.4, 21, 3);
-      const swirl = fbm([point[0] + warp, point[1] * 2.4, point[2] - warp], 1.8, 22, 5);
-      return ramp([[196, 150, 92], [226, 196, 140], [246, 228, 190]], swirl);
-    },
-    earth: (point, lat) => {
-      const height = fbm(point, 1.5, 31, 6);
-      const ocean = ramp([[14, 36, 74], [28, 66, 118], [44, 92, 146]], fbm(point, 3, 32, 3));
-      const land = ramp([[86, 82, 54], [118, 106, 70], [160, 136, 96], [138, 120, 88]], fbm(point, 4, 33, 4));
-      let color = blend(ocean, land, smooth(0.52, 0.555, height));
-      color = blend(color, [236, 240, 246], smooth(1.12, 1.24, Math.abs(lat)));
-      return color;
-    },
-    mars: (point, lat) => {
-      let color = ramp([[132, 58, 34], [182, 94, 58], [214, 136, 92]], fbm(point, 2.2, 41, 5));
-      color = blend(color, [92, 44, 28], smooth(0.42, 0.3, fbm(point, 1.2, 42, 4)) * 0.75);
-      return blend(color, [240, 232, 226], smooth(1.28, 1.38, Math.abs(lat)));
-    },
-    jupiter: (point, lat, lon) => {
-      const warp = fbm(point, 3.2, 51, 4);
-      const band = Math.sin(lat * 7.2 + (warp - 0.5) * 1.6) * 0.5 + 0.5;
-      const fine = Math.sin(lat * 26 + (warp - 0.5) * 4) * 0.5 + 0.5;
-      let color = blend([166, 116, 80], [236, 220, 194], band);
-      color = blend(color, [196, 152, 110], fine * 0.25);
-      // Bintik Merah Besar di belahan selatan
-      const spot = Math.hypot(wrapAngle(lon - 1.2) * 1.05, (lat + 0.38) * 2.5);
-      color = blend(color, [188, 92, 62], smooth(0.34, 0.2, spot));
-      return blend(color, [232, 210, 180], smooth(0.44, 0.36, spot) * smooth(0.28, 0.36, spot) * 0.6);
-    },
-    saturn: (point, lat) => {
-      const warp = fbm(point, 2.4, 61, 3);
-      const band = Math.sin(lat * 6 + (warp - 0.5) * 0.9) * 0.5 + 0.5;
-      const color = blend([196, 166, 116], [236, 218, 176], band);
-      return blend(color, [178, 150, 104], smooth(1.0, 1.4, Math.abs(lat)) * 0.6);
-    },
-    uranus: (point, lat) => {
-      const band = Math.sin(lat * 5) * 0.5 + 0.5;
-      return blend(blend([156, 190, 204], [182, 210, 220], band * 0.6 + fbm(point, 2, 71, 3) * 0.2), [208, 228, 234], smooth(0.9, 1.4, -lat) * 0.5);
-    },
-    neptune: (point, lat, lon) => {
-      const warp = fbm(point, 2.6, 81, 4);
-      let color = blend([34, 60, 146], [70, 112, 200], Math.sin(lat * 5.5 + (warp - 0.5) * 1.4) * 0.5 + 0.5);
-      const spot = Math.hypot(wrapAngle(lon - 2.2) * 1.2, (lat + 0.35) * 2.6);
-      color = blend(color, [18, 30, 84], smooth(0.3, 0.16, spot));
-      const streak = Math.hypot(wrapAngle(lon - 2.5) * 0.7, (lat + 0.12) * 6);
-      return blend(color, [222, 232, 255], smooth(0.3, 0.1, streak) * 0.8);
-    },
-    dwarf: (point) => ramp([[92, 84, 76], [146, 136, 124]], fbm(point, 2.6, 91, 4)),
+    return { pixels, clouds };
   };
   const atmospheres = {
     mercury: [0, 0, 0, 0], venus: [255, 232, 190, 0.55], earth: [110, 168, 255, 0.95], mars: [232, 156, 116, 0.3],
@@ -225,31 +136,6 @@ export function startHome() {
   };
   // kemiringan poros dalam derajat searah jarum jam di layar, disamakan dengan arah cincin di CSS; putaran dalam piksel tekstur per detik
   const axes = { mercury: [2, 0.8], venus: [-3, -0.4], earth: [23, 5], mars: [25, 4.8], jupiter: [3, 9], saturn: [-14, 8], uranus: [78, -4.5], neptune: [28, 5.5], dwarf: [10, 1] };
-  const paintTexture = (kind) => {
-    const pixels = new Uint8ClampedArray(textureWidth * textureHeight * 4);
-    const clouds = kind === 'earth' ? new Float32Array(textureWidth * textureHeight) : null;
-    for (let row = 0; row < textureHeight; row++) {
-      const lat = (0.5 - (row + 0.5) / textureHeight) * Math.PI;
-      for (let column = 0; column < textureWidth; column++) {
-        const lon = ((column + 0.5) / textureWidth) * Math.PI * 2;
-        const point = [Math.cos(lat) * Math.cos(lon), Math.sin(lat), Math.cos(lat) * Math.sin(lon)];
-        const color = painters[kind](point, lat, lon);
-        const offset = (row * textureWidth + column) * 4;
-        pixels[offset] = color[0];
-        pixels[offset + 1] = color[1];
-        pixels[offset + 2] = color[2];
-        pixels[offset + 3] = 255;
-        if (clouds) {
-          const warp = fbm(point, 1.6, 35, 3);
-          clouds[row * textureWidth + column] = smooth(0.5, 0.74, fbm([point[0] + warp, point[1] * 1.6, point[2] - warp], 2.4, 36, 5)) * 0.85;
-        }
-      }
-    }
-    if (kind === 'mercury') stampCraters(pixels, 70, 101, 0.7);
-    if (kind === 'mars') stampCraters(pixels, 14, 102, 0.35);
-    if (kind === 'dwarf') stampCraters(pixels, 30, 103, 0.6);
-    return { pixels, clouds };
-  };
   // geometri bola per ukuran kanvas dan kemiringan poros: normal tiap piksel dan koordinat teksturnya
   const geometryCache = new Map();
   const sphereGeometry = (size, axisDegrees) => {
@@ -348,13 +234,17 @@ export function startHome() {
       speed: 0.16 / Math.pow(orbitShares[index] / orbitShares[0], 1.5),
     };
   });
-  // tekstur dibuat satu planet per frame setelah bagian karya mendekat, supaya pembuka halaman tidak tersendat
-  const pendingTextures = [...planetsState];
-  const bakeNextTexture = () => {
-    const planet = pendingTextures.shift();
-    if (!planet) return;
-    planet.texture = paintTexture(planet.kind);
-    planet.sphere.classList.add('is-textured');
+  // tekstur dimuat saat bagian karya mendekat; dekode gambar terjadi di luar thread utama
+  let texturesRequested = false;
+  const requestTextures = () => {
+    if (texturesRequested) return;
+    texturesRequested = true;
+    planetsState.forEach((planet) =>
+      loadTexture(planet.kind).then((texture) => {
+        planet.texture = texture;
+        planet.sphere.classList.add('is-textured');
+      }),
+    );
   };
 
   // sabuk asteroid utama di antara Mars dan Jupiter, Sabuk Kuiper di luar Neptunus
@@ -440,7 +330,7 @@ export function startHome() {
   const showcaseAngle = 0.42;
   const placeOrrery = (seconds) => {
     if (stacked.matches || !orreryBox.width) return;
-    if (pendingTextures.length) bakeNextTexture();
+    requestTextures();
     planetsState.forEach((planet, index) => {
       const active = index === activeWork;
       if (active) {
@@ -474,12 +364,20 @@ export function startHome() {
       if (!planet.texture) return;
       // resolusi kanvas mengikuti ukuran tampil, dibulatkan supaya tidak dibuat ulang tiap frame
       const wanted = clamp(Math.round((124 * scale * Math.min(orreryBox.ratio, 1.5)) / 8) * 8, 16, 192);
+      let resized = false;
       if (wanted !== planet.size) {
         planet.size = wanted;
         planet.canvas.width = wanted;
         planet.canvas.height = wanted;
         planet.image = planet.context.createImageData(wanted, wanted);
+        resized = true;
       }
+      // render per piksel mahal: ulangi hanya kalau putaran atau arah cahaya sudah bergeser cukup untuk terlihat
+      const turned = Math.abs(planet.spin - (planet.drawnSpin ?? Infinity)) > 0.6;
+      const relit = !planet.drawnLight || light[0] * planet.drawnLight[0] + light[1] * planet.drawnLight[1] + light[2] * planet.drawnLight[2] < 0.9995;
+      if (!resized && !turned && !relit) return;
+      planet.drawnSpin = planet.spin;
+      planet.drawnLight = light;
       renderPlanet(planet, light);
     });
     drawSky(seconds);
@@ -684,15 +582,17 @@ export function startHome() {
     mouse.y = event.clientY;
     mouse.seen = true;
   });
+  // animasi tiap section hanya jalan saat section itu terlihat; dicek lewat observer, bukan mengukur layout tiap frame
+  const visible = new Set();
+  const watcher = new IntersectionObserver((entries) => entries.forEach((entry) => (entry.isIntersecting ? visible.add(entry.target) : visible.delete(entry.target))));
+  [works, zodiac, cta].forEach((element) => element && watcher.observe(element));
   let previousFrame = null;
   requestAnimationFrame(function frame(now) {
     const stepSeconds = previousFrame === null ? 1 / 60 : Math.min(0.05, (now - previousFrame) / 1000);
     previousFrame = now;
-    const worksBox = works.getBoundingClientRect();
-    if (worksBox.bottom > 0 && worksBox.top < innerHeight) placeOrrery(stepSeconds);
-    const zodiacBox = zodiac.getBoundingClientRect();
-    if (zodiacBox.bottom > 0 && zodiacBox.top < innerHeight) turnZodiac(now, stepSeconds);
-    if (cta) {
+    if (visible.has(works)) placeOrrery(stepSeconds);
+    if (visible.has(zodiac)) turnZodiac(now, stepSeconds);
+    if (cta && visible.has(cta)) {
       let goalX = 0;
       let goalY = 0;
       if (mouse.seen) {

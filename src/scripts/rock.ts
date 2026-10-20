@@ -8,6 +8,8 @@ export type RockBody = {
   canvas: HTMLCanvasElement;
   context: CanvasRenderingContext2D;
   image: ImageData;
+  shadedLight?: Vector3;
+  shadedHeat?: number;
 };
 
 // tiap batu menyimpan peta normal dan warna permukaan; cahayanya dihitung ulang tiap frame dari arah sumber cahaya
@@ -65,6 +67,11 @@ export const makeRockBody = (size: number): RockBody => {
 
 // cahaya hangat yang sedikit membungkus, sinar tepi untuk sisi yang membelakangi cahaya, ditambah pijar kalau batu panas
 export const shadeBody = (body: RockBody, light: Vector3, heat: number) => {
+  // arah cahaya relatif batu berubah pelan; bayangan yang nyaris sama tidak perlu dihitung ulang per piksel
+  const last = body.shadedLight;
+  if (last && last[0] * light[0] + last[1] * light[1] + last[2] * light[2] > 0.9995 && Math.abs((body.shadedHeat ?? 0) - heat) < 0.02) return;
+  body.shadedLight = light;
+  body.shadedHeat = heat;
   const { size, normal, albedo, coverage, image } = body;
   const data = image.data;
   for (let index = 0; index < size * size; index++) {
