@@ -286,6 +286,11 @@ time {
   pointer-events: none;
 }
 
+/* tertutup lubang hitam yang buram: disembunyikan supaya tidak ikut dikomposisi tiap frame */
+:root[data-sky-covered='true'] .sky {
+  visibility: hidden;
+}
+
 .has-cursor,
 .has-cursor * {
   cursor: none;

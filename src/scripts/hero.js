@@ -62,11 +62,26 @@ export function startHero() {
       color += (texture2D(u_source, v_uv + u_step * 4.0).rgb + texture2D(u_source, v_uv - u_step * 4.0).rgb) * 0.016;
       gl_FragColor = vec4(color, 1.0);
     }`;
+  // kilatan lensa horizontal (anamorphic): bagian terang ditarik memanjang ke kiri dan kanan; dihitung di resolusi bloom, bukan per piksel layar
+  const streakSource = `
+    precision mediump float;
+    varying vec2 v_uv;
+    uniform sampler2D u_source;
+    void main() {
+      vec3 streak = vec3(0.0);
+      for (int i = 1; i <= 8; i++) {
+        float offset = float(i) * 0.03;
+        float weight = exp(-float(i) * 0.38);
+        streak += (texture2D(u_source, v_uv + vec2(offset, 0.0)).rgb + texture2D(u_source, v_uv - vec2(offset, 0.0)).rgb) * weight;
+      }
+      gl_FragColor = vec4(streak * vec3(0.95, 0.88, 1.0) * 0.22, 1.0);
+    }`;
   const combineSource = `
     precision mediump float;
     varying vec2 v_uv;
     uniform sampler2D u_scene;
     uniform sampler2D u_bloom;
+    uniform sampler2D u_streakMap;
     uniform float u_strength;
     uniform float u_streak;
     uniform float u_ripple;
@@ -76,6 +91,7 @@ export function startHero() {
       // gelombang gravitasi: cincin yang melebar dari lubang hitam dan membengkokkan gambar yang dilewatinya
       vec2 uv = v_uv;
       vec2 shift = vec2(0.0);
+      vec3 color = texture2D(u_scene, uv).rgb;
       if (u_ripple >= 0.0) {
         vec2 d = uv - u_rippleCenter;
         d.x *= u_aspect;
@@ -84,18 +100,11 @@ export function startHero() {
         float band = exp(-pow((dist - front) / 0.07, 2.0)) * exp(-u_ripple * 1.1);
         shift = (d / max(dist, 0.0001)) * sin((dist - front) * 70.0) * band * 0.014;
         shift.x /= u_aspect;
+        // warna sedikit terpisah di puncak gelombang, seperti lensa yang tertekuk
+        color = vec3(texture2D(u_scene, uv + shift * 1.15).r, texture2D(u_scene, uv + shift).g, texture2D(u_scene, uv + shift * 0.85).b);
       }
-      // warna sedikit terpisah di puncak gelombang, seperti lensa yang tertekuk
-      vec3 color = vec3(texture2D(u_scene, uv + shift * 1.15).r, texture2D(u_scene, uv + shift).g, texture2D(u_scene, uv + shift * 0.85).b);
       color += texture2D(u_bloom, uv + shift).rgb * u_strength;
-      // kilatan lensa horizontal (anamorphic): bagian terang ditarik memanjang ke kiri dan kanan
-      vec3 streak = vec3(0.0);
-      for (int i = 1; i <= 8; i++) {
-        float offset = float(i) * 0.03;
-        float weight = exp(-float(i) * 0.38);
-        streak += (texture2D(u_bloom, uv + vec2(offset, 0.0)).rgb + texture2D(u_bloom, uv - vec2(offset, 0.0)).rgb) * weight;
-      }
-      color += streak * vec3(0.95, 0.88, 1.0) * u_streak * 0.22;
+      color += texture2D(u_streakMap, uv).rgb * u_streak;
       gl_FragColor = vec4(color, 1.0);
     }`;
   // ray tracing lubang hitam Schwarzschild (satuan: jari-jari horizon = 1); sinar dibelokkan tiap langkah
@@ -291,8 +300,9 @@ export function startHero() {
     const scene = link(fragmentSource, ['u_center', 'u_focal', 'u_time', 'u_dist', 'u_elev', 'u_azim', 'u_roll', 'u_glow']);
     const bright = link(brightSource, ['u_source', 'u_texel']);
     const blur = link(blurSource, ['u_source', 'u_step']);
-    const combine = link(combineSource, ['u_scene', 'u_bloom', 'u_strength', 'u_streak', 'u_ripple', 'u_rippleCenter', 'u_aspect']);
-    if (!scene || !bright || !blur || !combine) return null;
+    const streak = link(streakSource, ['u_source']);
+    const combine = link(combineSource, ['u_scene', 'u_bloom', 'u_streakMap', 'u_strength', 'u_streak', 'u_ripple', 'u_rippleCenter', 'u_aspect']);
+    if (!scene || !bright || !blur || !streak || !combine) return null;
     gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
     gl.enableVertexAttribArray(0);
@@ -372,9 +382,14 @@ export function startHero() {
           draw();
         }
 
+        use(targets.second, streak);
+        sample(0, targets.first.texture, streak.uniform.u_source);
+        draw();
+
         use(null, combine);
         sample(0, targets.scene.texture, combine.uniform.u_scene);
         sample(1, targets.first.texture, combine.uniform.u_bloom);
+        sample(2, targets.second.texture, combine.uniform.u_streakMap);
         gl.uniform1f(combine.uniform.u_strength, 0.75);
         gl.uniform1f(combine.uniform.u_streak, values.streak ?? 0);
         gl.uniform1f(combine.uniform.u_ripple, values.ripple ?? -1);
@@ -391,11 +406,13 @@ export function startHero() {
   const glCanvas = app.querySelector('.hero__gl');
   const corona = createCorona(glCanvas);
   if (corona) root.classList.add('has-gl');
-  // kanvas akhir dibatasi 1.5x: di layar 2x biayanya hampir dua kali lipat, padahal bloom membuat bedanya nyaris tak terlihat
-  const glRatio = Math.min(devicePixelRatio || 1, 1.5);
+  // kanvas akhir maksimal 1x piksel CSS: terukur di GPU laptop, biaya per frame lebih ikut luas kanvas daripada kerumitan shader
+  let glRatio = Math.min(devicePixelRatio || 1, 1);
   // resolusi ray tracing per piksel CSS, terpisah dari kanvas; diatur adaptQuality mengikuti kemampuan GPU
   let quality = Math.min(glRatio, 0.8);
   let qualityCeiling = glRatio;
+  let halfRate = false;
+  let renderCount = 0;
   const sky = { width: 0, height: 0, cx: 0, cy: 0, radius: 1 };
   const measureHero = () => {
     const stageBox = stage.getBoundingClientRect();
@@ -501,7 +518,7 @@ export function startHero() {
     const edgeOn = Math.exp(-Math.pow(inclination / 4, 2));
     view.intro = intro;
     view.phase = diskPhase;
-    corona.render({
+    if (!halfRate || renderCount++ % 2 === 0) corona.render({
       center: [sky.cx * glRatio, (sky.height - sky.cy) * glRatio],
       focal: (sky.radius * glRatio * restDistance) / 2.6,
       time: diskPhase,
@@ -1070,11 +1087,16 @@ export function startHero() {
     frameTimes.length = 0;
     // biaya scene sebanding jumlah piksel, jadi turun langsung sebesar kelebihannya; naik pelan dan tidak melewati titik yang pernah terlalu berat
     let next = quality;
-    if (average > 19) {
+    const previousRatio = glRatio;
+    // patokannya 60 fps, juga di layar 120 Hz ke atas: di bawah itu hero terasa tersendat dibanding section lain
+    if (average > 17) {
+      // urutan mundur: resolusi scene, lalu luas kanvas sekali, terakhir lubang hitam digambar tiap dua frame
+      if (quality <= 0.41 && glRatio <= 0.75) halfRate = true;
+      if (quality <= 0.41) glRatio = Math.min(glRatio, 0.75);
       qualityCeiling = quality * 0.95;
-      next = Math.max(0.4, quality * Math.sqrt(15 / average));
-    } else if (average < 17.5) next = Math.min(qualityCeiling, quality + 0.05);
-    if (Math.abs(next - quality) > 0.01) {
+      next = Math.max(0.4, quality * Math.sqrt(14 / average));
+    } else if (average < 14) next = Math.min(qualityCeiling, quality + 0.05);
+    if (Math.abs(next - quality) > 0.01 || glRatio !== previousRatio) {
       quality = next;
       corona.resize(Math.round(sky.width * glRatio), Math.round(sky.height * glRatio), quality / glRatio);
     }
@@ -1090,11 +1112,17 @@ export function startHero() {
   };
   measurePlace();
   const heroBottom = () => heroPlace.top + heroPlace.height - scrollY;
+  // mask pudar di kanvas hero baru dipasang saat hero mulai ditinggalkan; selama mask aktif tiap frame kanvas dikomposisi ulang lewat surface tambahan
+  const setProgress = (progress) => {
+    hero.style.setProperty('--p', progress.toFixed(4));
+    const exiting = progress * 1.5 - 0.35 > 0;
+    if (exiting !== stage.classList.contains('is-exiting')) stage.classList.toggle('is-exiting', exiting);
+  };
   const onScroll = () => {
     heroProgress = clamp((scrollY - heroPlace.top) / (heroPlace.height - innerHeight), 0, 1);
     if (reduce) {
       scrollEase = heroProgress;
-      hero.style.setProperty('--p', heroProgress.toFixed(4));
+      setProgress(heroProgress);
       hero.style.setProperty('--q', smooth(0, 0.14, heroProgress).toFixed(4));
       updateStory(heroProgress);
     }
@@ -1167,7 +1195,7 @@ export function startHero() {
       stage.style.setProperty('--mx', (pointer.sx * 2).toFixed(3));
       stage.style.setProperty('--my', (pointer.sy * 2).toFixed(3));
       scrollEase += (heroProgress - scrollEase) * 0.1;
-      hero.style.setProperty('--p', scrollEase.toFixed(4));
+      setProgress(scrollEase);
       renderHero(now);
       fxDelta += (Math.min(0.05, frameDelta / 1000 || 1 / 60) - fxDelta) * 0.2;
       if (corona) drawFx(fxDelta, now);
