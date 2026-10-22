@@ -385,8 +385,8 @@
   --exit: clamp(0, calc(var(--p, 0) * 1.5 - 0.35), 1);
 }
 
-.hero__gl,
-.hero__fx {
+.is-exiting .hero__gl,
+.is-exiting .hero__fx {
   -webkit-mask-image: linear-gradient(180deg, #000 35%, rgba(0, 0, 0, calc(1 - var(--exit))) 100%);
   mask-image: linear-gradient(180deg, #000 35%, rgba(0, 0, 0, calc(1 - var(--exit))) 100%);
 }
