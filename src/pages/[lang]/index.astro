@@ -1,5 +1,4 @@
 ---
-import { Image } from 'astro:assets';
 import portrait from '../../assets/portrait.webp';
 import constellation from '../../components/horizon/constellation.svg?raw';
 import signature from '../../components/horizon/signature.svg?raw';
@@ -158,7 +157,8 @@ const title = profile ? `${fullName} · ${headline}` : 'Portfolio';
     <figure class="portrait">
       <div class="portrait__mount">
         <div class="portrait__plate">
-          <Image src={portrait} alt={fullName} width={960} height={1200} loading="lazy" decoding="async" />
+          {/* passthrough tidak mengolah gambar, jadi <Image> cuma menambah satu panggilan Worker; foto sudah WebP 960x1200 */}
+          <img src={portrait.src} alt={fullName} width={portrait.width} height={portrait.height} loading="lazy" decoding="async" />
           <Fragment set:html={signature} />
         </div>
         <span class="portrait__side" aria-hidden="true"><span class="portrait__tick"></span><span class="portrait__label">{dictionary.about.plate}</span></span>
