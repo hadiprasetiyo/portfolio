@@ -12,12 +12,20 @@ export const moonPath = (f: number, r = 30, cx = 36, cy = 36) => {
 };
 
 // tiap kata dibungkus span supaya bisa menyala satu per satu saat dibaca
-export const wordSpans = (text: string) =>
-  text
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((word) => `<span>${escapeHtml(word)}</span>`)
-    .join(' ');
+// kata atau frasa di antara *bintang* jadi <em>: emas mengkilap dan tidak ikut menyala saat dibaca
+export const wordSpans = (text: string) => {
+  const parts = text.split('*');
+  // bintang tanpa pasangan dianggap huruf biasa
+  if (parts.length % 2 === 0) parts.splice(-2, 2, `${parts.at(-2)}*${parts.at(-1)}`);
+  let html = '';
+  parts.forEach((part, index) => {
+    const tag = index % 2 ? 'em' : 'span';
+    for (const piece of part.split(/(\s+)/)) {
+      if (piece) html += /^\s/.test(piece) ? ' ' : `<${tag}>${escapeHtml(piece)}</${tag}>`;
+    }
+  });
+  return html.trim();
+};
 
 /* ---------- tata surya: proyek ke-n menempati planet ke-n dari matahari ---------- */
 export type SolarBody = { name: string; size: number; ring?: boolean; dwarf?: boolean };
