@@ -406,10 +406,10 @@ export function startHero() {
   const glCanvas = app.querySelector('.hero__gl');
   const corona = createCorona(glCanvas);
   if (corona) root.classList.add('has-gl');
-  // kanvas akhir maksimal 1x piksel CSS: terukur di GPU laptop, biaya per frame lebih ikut luas kanvas daripada kerumitan shader
-  let glRatio = Math.min(devicePixelRatio || 1, 1);
+  // kanvas mulai tajam sampai 1.5x; di GPU lemah biayanya lebih ikut luas kanvas daripada shader, jadi adaptQuality yang mengecilkannya
+  let glRatio = Math.min(devicePixelRatio || 1, 1.5);
   // resolusi ray tracing per piksel CSS, terpisah dari kanvas; diatur adaptQuality mengikuti kemampuan GPU
-  let quality = Math.min(glRatio, 0.8);
+  let quality = Math.min(glRatio, 1);
   let qualityCeiling = glRatio;
   let halfRate = false;
   let renderCount = 0;
@@ -1080,22 +1080,30 @@ export function startHero() {
 
   // resolusi render menyesuaikan kecepatan frame GPU
   const frameTimes = [];
+  // detik-detik awal masih memuat font dan tekstur; tersendat di sini bukan tanda GPU lemah
+  let warmup = 90;
   const adaptQuality = (delta) => {
+    if (warmup > 0) {
+      warmup -= 1;
+      return;
+    }
     frameTimes.push(delta);
     if (frameTimes.length < 30) return;
     const average = frameTimes.reduce((sum, value) => sum + value, 0) / frameTimes.length;
+    // frame tercepat kira-kira satu jeda refresh layar; rata-rata yang dekat dengannya berarti tidak ada frame yang terlewat
+    const keepingUp = average < Math.min(...frameTimes) * 1.2;
     frameTimes.length = 0;
     // biaya scene sebanding jumlah piksel, jadi turun langsung sebesar kelebihannya; naik pelan dan tidak melewati titik yang pernah terlalu berat
     let next = quality;
     const previousRatio = glRatio;
     // patokannya 60 fps, juga di layar 120 Hz ke atas: di bawah itu hero terasa tersendat dibanding section lain
     if (average > 17) {
-      // urutan mundur: resolusi scene, lalu luas kanvas sekali, terakhir lubang hitam digambar tiap dua frame
+      // urutan mundur: resolusi scene, lalu luas kanvas (1.5x, 1x, 0.75x), terakhir lubang hitam digambar tiap dua frame
       if (quality <= 0.41 && glRatio <= 0.75) halfRate = true;
-      if (quality <= 0.41) glRatio = Math.min(glRatio, 0.75);
+      if (quality <= 0.41) glRatio = glRatio > 1 ? 1 : Math.min(glRatio, 0.75);
       qualityCeiling = quality * 0.95;
       next = Math.max(0.4, quality * Math.sqrt(14 / average));
-    } else if (average < 14) next = Math.min(qualityCeiling, quality + 0.05);
+    } else if (keepingUp || average < 14) next = Math.min(qualityCeiling, glRatio, quality + 0.1);
     if (Math.abs(next - quality) > 0.01 || glRatio !== previousRatio) {
       quality = next;
       corona.resize(Math.round(sky.width * glRatio), Math.round(sky.height * glRatio), quality / glRatio);
