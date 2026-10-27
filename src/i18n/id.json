@@ -9,7 +9,16 @@
     "skills": "Keahlian",
     "experience": "Perjalanan",
     "contact": "Kontak",
-    "cv": "CV"
+    "cv": "CV",
+    "index": "Indeks",
+    "close": "Tutup",
+    "details": {
+      "about": "Siapa saya",
+      "projects": "Proyek di orbitnya",
+      "skills": "Keahlian sebagai rasi bintang",
+      "experience": "Pengalaman menurut fase bulan",
+      "contact": "Kirim pesan"
+    }
   },
   "hero": {
     "viewCv": "Lihat CV",

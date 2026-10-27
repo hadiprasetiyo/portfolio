@@ -9,7 +9,16 @@
     "skills": "Toolkit",
     "experience": "Journey",
     "contact": "Contact",
-    "cv": "CV"
+    "cv": "CV",
+    "index": "Index",
+    "close": "Close",
+    "details": {
+      "about": "Who I am",
+      "projects": "Projects in orbit",
+      "skills": "Skills as constellations",
+      "experience": "Experience by moon phase",
+      "contact": "Write to me"
+    }
   },
   "hero": {
     "viewCv": "View CV",
