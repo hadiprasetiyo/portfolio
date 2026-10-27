@@ -1002,10 +1002,14 @@
   stroke: rgba(242, 238, 230, 0.22);
 }
 
+/* cincin luar berputar pelan; tiap angka diputar balik sama cepat supaya tetap tegak terbaca */
 .astro__deg {
   fill: var(--faint);
   font: 400 10px var(--font-mono);
   letter-spacing: 0.08em;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: spin 260s linear infinite reverse;
 }
 
 .astro__outer {
