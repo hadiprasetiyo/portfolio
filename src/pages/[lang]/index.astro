@@ -145,7 +145,7 @@ const title = profile ? `${fullName} · ${headline}` : 'Portfolio';
       </h1>
       <div class="wrap hero__foot">
         <p class="label">
-          <span class="dot" aria-hidden="true"></span>{dictionary.hero.now} · {currentRole ? localized(currentRole, 'title', lang) : dictionary.hero.role}<br />{dictionary.hero.coordinates} · {city}
+          {currentRole ? localized(currentRole, 'title', lang) : dictionary.hero.role}<br />{dictionary.hero.coordinates} · {city}
         </p>
         <p class="hero__lead">{headline}</p>
         <p class="hero__scroll label"><span>{dictionary.hero.localTime}<br /><b data-clock>--:--:--</b> WIB</span><i aria-hidden="true"></i></p>
