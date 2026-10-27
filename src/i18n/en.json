@@ -9,7 +9,9 @@
     "skills": "Toolkit",
     "experience": "Journey",
     "contact": "Contact",
-    "cv": "CV"
+    "cv": "CV",
+    "index": "Index",
+    "close": "Close"
   },
   "hero": {
     "viewCv": "View CV",

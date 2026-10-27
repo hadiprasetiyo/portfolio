@@ -9,7 +9,9 @@
     "skills": "Keahlian",
     "experience": "Perjalanan",
     "contact": "Kontak",
-    "cv": "CV"
+    "cv": "CV",
+    "index": "Indeks",
+    "close": "Tutup"
   },
   "hero": {
     "viewCv": "Lihat CV",
