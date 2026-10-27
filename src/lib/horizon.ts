@@ -72,15 +72,16 @@ export const toRoman = (value: number) => {
 export const astroTicks = () =>
   Array.from({ length: 72 }, (_, index) => {
     const degree = index * 5;
+    // 0° di puncak dan bertambah searah jarum jam, seperti dial astronomi dan navbar
     const angle = (degree * Math.PI) / 180;
     const length = degree % 30 === 0 ? 14 : 6;
-    const x1 = 300 + Math.cos(angle) * 288;
-    const y1 = 300 + Math.sin(angle) * 288;
-    const x2 = 300 + Math.cos(angle) * (288 - length);
-    const y2 = 300 + Math.sin(angle) * (288 - length);
+    const x1 = 300 + Math.sin(angle) * 288;
+    const y1 = 300 - Math.cos(angle) * 288;
+    const x2 = 300 + Math.sin(angle) * (288 - length);
+    const y2 = 300 - Math.cos(angle) * (288 - length);
     const label =
       degree % 30 === 0
-        ? `<text class="astro__deg" x="${(300 + Math.cos(angle) * 258).toFixed(1)}" y="${(300 + Math.sin(angle) * 258 + 3).toFixed(1)}" text-anchor="middle">${String(degree).padStart(3, '0')}°</text>`
+        ? `<text class="astro__deg" x="${(300 + Math.sin(angle) * 258).toFixed(1)}" y="${(300 - Math.cos(angle) * 258 + 3).toFixed(1)}" text-anchor="middle">${String(degree).padStart(3, '0')}°</text>`
         : '';
     return `<line class="astro__tick" x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}"></line>${label}`;
   }).join('');
