@@ -3,6 +3,7 @@ import { lenis } from './smooth-scroll';
 /* Navigasi astrolabe: jarum dial di navbar maju mengikuti posisi baca, dan indeks bab layar penuh
    dengan jarum alidade yang membidik bab yang disorot. */
 export function startNavigation() {
+  const header = document.querySelector<HTMLElement>('.site-header')!;
   const button = document.querySelector<HTMLButtonElement>('.dial-button')!;
   const dialNumber = button.querySelector<HTMLElement>('.dial-button__text small')!;
   const dialName = button.querySelector<HTMLElement>('.dial-button__text span')!;
@@ -59,6 +60,7 @@ export function startNavigation() {
   };
   const update = () => {
     queued = false;
+    header.classList.toggle('is-scrolled', scrollY > 24);
     let position = -1;
     if (tops.length) {
       const line = scrollY + innerHeight / 2;

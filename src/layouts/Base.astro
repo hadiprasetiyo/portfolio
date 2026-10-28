@@ -46,9 +46,13 @@ const platePoints = chapters.map((_, i) => {
   const [left, top] = polar(50, 49.2, i * step);
   return { angle: i * step, x, y, left, top };
 });
+const degreeLabels = Array.from({ length: 12 }, (_, k) => {
+  const [x, y] = polar(240, 170, k * 30);
+  return { x, y: y + 2.5, text: `${String(k * 30).padStart(3, '0')}°` };
+});
 const dialTicks = chapters.map((_, i) => {
-  const [x1, y1] = polar(19, 13.5, i * step);
-  const [x2, y2] = polar(19, 17.5, i * step);
+  const [x1, y1] = polar(21, 15.5, i * step);
+  const [x2, y2] = polar(21, 20, i * step);
   return { x1, y1, x2, y2 };
 });
 const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
@@ -97,11 +101,17 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
         >
         <button class="dial-button" type="button" aria-expanded="false" aria-controls="site-index" aria-label={dictionary.nav.index} data-open={dictionary.nav.index} data-close={dictionary.nav.close}>
           <span class="dial-button__text" aria-hidden="true"><small></small><span>{dictionary.nav.index}</span></span>
-          <svg class="dial" viewBox="0 0 38 38" aria-hidden="true">
-            <circle cx="19" cy="19" r="17.5"></circle>
+          {/* dial kecil meniru pelat indeks: dua cincin, lima tanda bab, jarum bersirip dan berpemberat */}
+          <svg class="dial" viewBox="0 0 42 42" aria-hidden="true">
+            <circle class="dial__ring" cx="21" cy="21" r="20"></circle>
+            <circle class="dial__inner" cx="21" cy="21" r="15.5"></circle>
             {dialTicks.map((tick) => <line class="dial__tick" {...tick}></line>)}
-            <g class="dial__needle"><line x1="19" y1="22" x2="19" y2="5"></line></g>
-            <circle class="dial__pin" cx="19" cy="19" r="1.4"></circle>
+            <g class="dial__needle">
+              <line x1="21" y1="25" x2="21" y2="8"></line>
+              <path d="M21 4.5 L23 8.5 L19 8.5 Z"></path>
+              <circle class="dial__counter" cx="21" cy="26.6" r="1.6"></circle>
+            </g>
+            <circle class="dial__pin" cx="21" cy="21" r="1.7"></circle>
           </svg>
         </button>
       </div>
@@ -109,16 +119,17 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
     <nav class="site-index" id="site-index" aria-label={dictionary.mainNavigation} inert>
       <div class="wrap site-index__inner">
         <div class="plate">
-          {/* pelat astrolabe: skala derajat, lingkaran horizon dan tropika, jarum alidade yang membidik bab */}
+          {/* pelat astrolabe: skala derajat, lingkaran tropika, jarum alidade yang membidik bab */}
           <svg viewBox="0 0 480 480" aria-hidden="true">
             <circle class="plate__ring plate__ring--strong plate__draw" cx="240" cy="240" r="200" style={`--length:${circleLength(200)}`}></circle>
             <circle class="plate__ring plate__draw" cx="240" cy="240" r="184" style={`--length:${circleLength(184)}`}></circle>
-            <g class="plate__scale">{scaleTicks.map(({ major, ...tick }) => <line class:list={{ major }} {...tick}></line>)}</g>
+            {/* skala derajat berputar masuk ke tempatnya saat indeks dibuka, seperti rete astrolabe */}
+            <g class="plate__rete plate__scale">{scaleTicks.map(({ major, ...tick }) => <line class:list={{ major }} {...tick}></line>)}</g>
             <circle class="plate__ring plate__draw" cx="240" cy="240" r="150" style={`--length:${circleLength(150)}`}></circle>
-            <circle class="plate__ring plate__draw" cx="240" cy="262" r="112" style={`--length:${circleLength(112)}`}></circle>
-            <circle class="plate__ring plate__draw" cx="240" cy="284" r="72" style={`--length:${circleLength(72)}`}></circle>
-            <line class="plate__ring plate__draw" x1="40" y1="240" x2="440" y2="240" style="--length:400"></line>
-            <line class="plate__ring plate__draw" x1="240" y1="40" x2="240" y2="440" style="--length:400"></line>
+            <line class="plate__ring plate__draw" x1="90" y1="240" x2="390" y2="240" style="--length:300"></line>
+            <line class="plate__ring plate__draw" x1="240" y1="90" x2="240" y2="390" style="--length:300"></line>
+            {/* jendela bacaan menutup garis di tengah supaya nama bab tidak tercoret jarum */}
+            <circle class="plate__window plate__draw" cx="240" cy="240" r="96" style={`--length:${circleLength(96)}`}></circle>
             {
               platePoints.map((point, i) => (
                 <path
@@ -130,11 +141,13 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
               ))
             }
             <g class="plate__alidade">
-              <line x1="240" y1="410" x2="240" y2="70"></line>
+              <line x1="240" y1="410" x2="240" y2="336"></line>
+              <line x1="240" y1="144" x2="240" y2="70"></line>
               <path class="plate__vane" d="M240 52 L245 70 L235 70 Z"></path>
               <circle class="plate__counter" cx="240" cy="404" r="6"></circle>
             </g>
-            <circle class="plate__pin" cx="240" cy="240" r="5"></circle>
+            {/* angka di atas jarum: tepi sewarna latar memotong jarum yang lewat di belakangnya */}
+            <g class="plate__rete">{degreeLabels.map((label) => <text class="plate__degree" x={label.x} y={label.y} text-anchor="middle">{label.text}</text>)}</g>
           </svg>
           {/* nama di tepi hanya untuk mouse; pembaca layar dan keyboard memakai daftar di sebelahnya */}
           {
@@ -148,20 +161,24 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
           <div class="plate__readout" aria-hidden="true"><span></span><strong></strong><small></small></div>
         </div>
         <div class="ledger">
+          <p class="chapter label" aria-hidden="true"><span>{dictionary.nav.index}</span><i></i>I – V</p>
           <ol role="list">
             {
               chapters.map((chapter, i) => (
-                <li>
+                <li style={`--i:${i + 1}`}>
                   <a href={`${home}#${chapter.id}`} data-chapter={i} data-number={chapter.number} data-roman={chapter.roman} data-label={chapter.label} data-detail={chapter.detail}>
                     <span>{chapter.roman}</span>
-                    <strong>{chapter.label}</strong>
+                    <strong>{chapter.label}<em>{chapter.detail}</em></strong>
                     <small>No. {chapter.number}</small>
                   </a>
                 </li>
               ))
             }
           </ol>
-          <a class="ledger__cv" href={`/${lang}/cv`} aria-current={path === '/cv' ? 'page' : undefined}>{dictionary.nav.cv} ↗</a>
+          <div class="ledger__foot">
+            <a class="ledger__cv" href={`/${lang}/cv`} aria-current={path === '/cv' ? 'page' : undefined}>{dictionary.nav.cv} ↗</a>
+            <span>{dictionary.hero.coordinates}</span>
+          </div>
         </div>
       </div>
     </nav>
@@ -212,11 +229,46 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
     z-index: var(--z-sticky);
   }
 
+  /* selubung gelap muncul setelah halaman digulir, supaya teks konten tidak bertumpuk dengan navbar */
+  .site-header::before {
+    content: '';
+    position: absolute;
+    inset: calc(-1 * env(safe-area-inset-top, 0px)) 0 -36px;
+    z-index: -1;
+    background: linear-gradient(var(--bg) 45%, transparent);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.6s var(--ease);
+  }
+
+  .site-header.is-scrolled::before {
+    opacity: 0.92;
+  }
+
   .site-header__inner {
+    --gap: 28px;
     display: flex;
     align-items: center;
-    gap: 28px;
+    gap: var(--gap);
     min-height: 76px;
+  }
+
+  /* garis rambut tegak memisahkan bahasa, suara, dan dial menjadi satu kelompok instrumen */
+  .site-header__inner > .sound,
+  .dial-button {
+    position: relative;
+  }
+
+  .site-header__inner > .sound::before,
+  .dial-button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: calc(var(--gap) / -2);
+    width: 1px;
+    height: 14px;
+    background: var(--line);
+    transform: translateY(-50%);
   }
 
   /* font script hanya dipakai sebagai aksen: logo dan nama di hero */
@@ -267,10 +319,12 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
   .dial-button__text {
     display: grid;
     justify-items: end;
-    gap: 3px;
+    gap: 5px;
+    color: var(--muted);
     font: 400 10px/1 var(--font-mono);
     letter-spacing: 0.18em;
     text-transform: uppercase;
+    transition: color 0.5s var(--ease);
   }
 
   .dial-button__text small {
@@ -282,16 +336,35 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
     display: none;
   }
 
+  .dial-button:hover .dial-button__text,
+  .dial-button[aria-expanded='true'] .dial-button__text {
+    color: var(--fg);
+  }
+
   .dial {
-    width: 38px;
-    height: 38px;
+    width: 42px;
+    height: 42px;
     overflow: visible;
   }
 
   .dial circle {
     fill: none;
-    stroke: rgba(217, 194, 154, 0.38);
+  }
+
+  .dial__ring {
+    stroke: rgba(217, 194, 154, 0.42);
     stroke-width: 0.8;
+    transition: stroke 0.5s var(--ease);
+  }
+
+  .dial__inner {
+    stroke: rgba(217, 194, 154, 0.14);
+    stroke-width: 0.6;
+  }
+
+  .dial-button:hover .dial__ring,
+  .dial-button[aria-expanded='true'] .dial__ring {
+    stroke: var(--gold);
   }
 
   .dial__tick {
@@ -306,7 +379,7 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
   }
 
   .dial__needle {
-    transform-origin: 19px 19px;
+    transform-origin: 21px 21px;
     transition: transform 0.8s var(--ease);
   }
 
@@ -315,9 +388,19 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
     stroke-width: 0.9;
   }
 
-  .dial .dial__pin {
+  .dial__needle path {
     fill: var(--sun);
-    stroke: none;
+  }
+
+  .dial .dial__counter {
+    stroke: rgba(217, 194, 154, 0.6);
+    stroke-width: 0.7;
+  }
+
+  .dial .dial__pin {
+    fill: var(--bg);
+    stroke: var(--gold);
+    stroke-width: 0.8;
   }
 
   /* indeks layar penuh, terbuka melingkar dari dial; di bawah header supaya dial tetap jadi tombol tutup */
@@ -355,12 +438,46 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
     aspect-ratio: 1;
   }
 
+  /* cahaya hangat samar di belakang pelat, seperti logam yang memantulkan lampu */
+  .plate::before {
+    content: '';
+    position: absolute;
+    inset: 4%;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(217, 194, 154, 0.045), transparent);
+  }
+
   .plate svg {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     overflow: visible;
+  }
+
+  .plate__rete {
+    transform: rotate(-30deg);
+    transform-origin: 240px 240px;
+    transition: transform 1.8s var(--ease) 0.1s;
+  }
+
+  .site-index.is-open .plate__rete {
+    transform: none;
+  }
+
+  .plate__degree {
+    fill: var(--faint);
+    stroke: var(--bg);
+    stroke-width: 4px;
+    paint-order: stroke;
+    font: 400 7px var(--font-mono);
+    letter-spacing: 0.08em;
+  }
+
+  .plate__window {
+    fill: var(--bg);
+    stroke: rgba(217, 194, 154, 0.26);
+    stroke-width: 0.7;
   }
 
   .plate__ring {
@@ -423,12 +540,6 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
   .plate__counter {
     fill: none;
     stroke: rgba(217, 194, 154, 0.38);
-    stroke-width: 0.8;
-  }
-
-  .plate__pin {
-    fill: var(--bg);
-    stroke: var(--gold);
     stroke-width: 0.8;
   }
 
@@ -521,16 +632,51 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
     list-style: none;
   }
 
+  /* baris masuk satu per satu setelah lingkaran pembuka lewat */
+  .ledger li,
+  .ledger > .chapter,
+  .ledger__foot {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
+  }
+
+  .site-index.is-open :is(.ledger li, .ledger > .chapter, .ledger__foot) {
+    opacity: 1;
+    transform: none;
+    transition-duration: 0.9s;
+    transition-delay: calc(0.3s + var(--i, 0) * 0.07s);
+  }
+
+  .site-index.is-open .ledger__foot {
+    --i: 6;
+  }
+
   .ledger ol a {
+    position: relative;
     display: grid;
     grid-template-columns: 48px minmax(0, 1fr) auto;
     align-items: baseline;
     gap: 12px;
-    padding-block: 14px;
+    padding-block: 16px;
     border-bottom: 1px solid var(--line);
     color: var(--muted);
     text-decoration: none;
     transition: color 0.5s var(--ease);
+  }
+
+  /* garis emas tumbuh dari kiri di atas garis baris yang disorot */
+  .ledger ol a::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: -1px;
+    left: 0;
+    height: 1px;
+    background: linear-gradient(90deg, var(--gold), rgba(217, 194, 154, 0.08));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.9s var(--ease);
   }
 
   .ledger span,
@@ -543,8 +689,21 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
   }
 
   .ledger strong {
+    display: grid;
+    gap: 8px;
     color: inherit;
     font: 400 clamp(24px, 2.4vw, 32px)/1.1 var(--font-serif);
+    transition: transform 0.7s var(--ease);
+  }
+
+  /* keterangan bab sudah tampil di tengah pelat; di sini hanya dipakai layar sempit */
+  .ledger strong em {
+    display: none;
+    color: var(--faint);
+    font: 400 10px/1.4 var(--font-mono);
+    font-style: normal;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
   }
 
   .ledger ol a:hover,
@@ -552,17 +711,49 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
     color: var(--fg);
   }
 
-  .ledger ol a.is-current span {
+  .ledger ol a:hover::after,
+  .ledger ol a.is-aim::after {
+    transform: scaleX(1);
+  }
+
+  .ledger ol a:hover strong,
+  .ledger ol a.is-aim strong {
+    transform: translateX(8px);
+  }
+
+  .ledger ol a.is-current span,
+  .ledger ol a.is-aim small {
     color: var(--gold);
   }
 
+  .ledger__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--faint);
+    font: 400 10px/1 var(--font-mono);
+    letter-spacing: 0.16em;
+  }
+
   .ledger__cv {
-    justify-self: start;
+    display: inline-grid;
+    place-items: center;
+    min-height: 2.75rem;
+    padding-inline: 18px;
+    border: 1px solid rgba(217, 194, 154, 0.32);
+    border-radius: 999px;
     color: var(--fg);
     font: 400 11px/1 var(--font-mono);
     letter-spacing: 0.16em;
     text-transform: uppercase;
     text-decoration: none;
+    transition: border-color 0.5s var(--ease), color 0.5s var(--ease);
+  }
+
+  .ledger__cv:hover {
+    border-color: var(--gold);
   }
 
   /* layar sempit: pelat mengecil di atas tanpa nama di tepi, daftar bab di bawahnya */
@@ -584,11 +775,15 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
     .plate__readout small {
       display: none;
     }
+
+    .ledger strong em {
+      display: block;
+    }
   }
 
   @media (max-width: 30rem) {
     .site-header__inner {
-      gap: 16px;
+      --gap: 16px;
     }
 
     .dial-button__text,
@@ -606,7 +801,11 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
     .site-index.is-open,
     .plate__draw,
     .plate__alidade,
-    .dial__needle {
+    .plate__rete,
+    .dial__needle,
+    .ledger li,
+    .ledger > .chapter,
+    .ledger__foot {
       transition: none;
     }
   }
