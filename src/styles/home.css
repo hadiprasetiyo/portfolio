@@ -1177,13 +1177,58 @@
   stroke-width: 0.7;
 }
 
-.zodiac__caption {
+/* kartus di atas penunjuk: nama Latin diapit garis emas, bacaan urutan dan sudut di bawahnya */
+.zodiac__cartouche {
   position: absolute;
-  top: -6px;
+  bottom: 100%;
   left: 50%;
-  color: var(--gold);
+  display: grid;
+  grid-template-columns: 44px auto 44px;
+  align-items: center;
+  justify-items: center;
+  gap: 4px 14px;
+  margin: 0;
+  padding-bottom: 10px;
   white-space: nowrap;
-  transform: translate(-50%, -100%);
+  translate: -50% 0;
+}
+
+.zodiac__cartouche i {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(217, 194, 154, 0.7));
+  transition: scale 0.9s var(--ease) 0.1s;
+}
+
+.zodiac__cartouche i:last-of-type {
+  rotate: 180deg;
+}
+
+.zodiac__cartouche b {
+  color: var(--gold);
+  font: italic 400 26px/1 var(--font-serif);
+}
+
+.zodiac__cartouche small {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font: 400 9px/1 var(--font-mono);
+  letter-spacing: 0.24em;
+}
+
+.zodiac__cartouche :is(b, small) {
+  transition: opacity 0.45s var(--ease), translate 0.45s var(--ease);
+}
+
+.zodiac__cartouche.is-swapping :is(b, small) {
+  opacity: 0;
+  translate: 0 5px;
+}
+
+.zodiac__cartouche.is-swapping i {
+  scale: 0.2 1;
+  transition-duration: 0.45s;
+  transition-delay: 0s;
 }
 
 .kit .kit__group {

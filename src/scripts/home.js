@@ -406,7 +406,9 @@ export function startHome() {
   const zodiac = app.querySelector('.zodiac');
   const zodiacWheel = zodiac.querySelector('.zodiac__wheel');
   const zodiacSignEls = [...zodiac.querySelectorAll('.zodiac__sign')];
-  const zodiacCaption = app.querySelector('.zodiac__caption b');
+  const cartouche = app.querySelector('.zodiac__cartouche');
+  const [cartoucheName, cartoucheMark] = [cartouche.querySelector('b'), cartouche.querySelector('small')];
+  let cartoucheSwap = 0;
   const kitRows = [...app.querySelectorAll('.kit [data-sign]')];
   let signActive = -1;
   let wheelTurn = 0;
@@ -421,7 +423,14 @@ export function startHome() {
     zodiacWheel.style.setProperty('--turn', `${wheelTurn}deg`);
     zodiacSignEls.forEach((sign, signIndex) => sign.classList.toggle('is-active', signIndex === index));
     kitRows.forEach((row) => row.classList.toggle('is-active', Number(row.dataset.sign) === index));
-    zodiacCaption.textContent = signs[index].latin;
+    // teks memudar dulu, berganti, lalu muncul lagi bersama garis emasnya yang tergambar ulang
+    cartouche.classList.add('is-swapping');
+    clearTimeout(cartoucheSwap);
+    cartoucheSwap = setTimeout(() => {
+      cartoucheName.textContent = signs[index].latin;
+      cartoucheMark.textContent = signs[index].mark;
+      cartouche.classList.remove('is-swapping');
+    }, reduce ? 0 : 450);
   };
   // berpindah sendiri ke rasi berikutnya, berhenti sementara setelah pengunjung memilih
   const autoZodiac = (now) => {

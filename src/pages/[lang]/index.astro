@@ -66,6 +66,8 @@ const signs: Sign[] = categories.map((category) => ({
   latin: latinNames[category],
   skills: skills.filter((skill) => skill.category === category).map((skill) => ({ id: `s${skill.id}`, name: skill.name })),
 }));
+// bacaan di kartus: urutan rasi dan sudut tempatnya di roda, mis. "II / IV · 090°"
+const signMarks = signs.map((_, index) => `${toRoman(index + 1)} / ${toRoman(signs.length)} · ${String(Math.round((index * 360) / signs.length)).padStart(3, '0')}°`);
 
 /* Journey: dari yang terlama, bulan makin terang, ditutup purnama "bab berikutnya" */
 const timeline = [...experiences].sort((a, b) => a.started_on.localeCompare(b.started_on));
@@ -98,7 +100,7 @@ const phases = [
   },
 ];
 
-const homeData = { projects: numerals.map((numeral) => ({ numeral })), signs: signs.map((sign) => ({ latin: sign.latin })) };
+const homeData = { projects: numerals.map((numeral) => ({ numeral })), signs: signs.map((sign, index) => ({ latin: sign.latin, mark: signMarks[index] })) };
 const title = profile ? `${fullName} · ${headline}` : 'Portfolio';
 ---
 
@@ -249,8 +251,10 @@ const title = profile ? `${fullName} · ${headline}` : 'Portfolio';
     signs.length > 0 && (
       <section class="wrap tools" id="skills" aria-labelledby="skills-heading">
         <div class="astro-wrap">
-          <p class="zodiac__caption label" aria-live="polite">
-            {dictionary.toolkit.charting} · <b>{signs[0].latin}</b>
+          {/* kartus seperti label rasi di planisfer antik; tidak diumumkan pembaca layar karena berganti sendiri tiap beberapa detik */}
+          <p class="zodiac__cartouche" aria-hidden="true">
+            <i></i><b>{signs[0].latin}</b><i></i>
+            <small>{signMarks[0]}</small>
           </p>
           {/* lapisan HTML terpisah supaya pita dan roda berputar di GPU tanpa menggambar ulang SVG tiap frame */}
           <div class="astro zodiac" aria-hidden="true">
