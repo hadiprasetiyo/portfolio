@@ -1,6 +1,6 @@
 import { smooth } from './math';
 
-/* Kursor pelacak bintang (desktop): titik cahaya, cincin bidik emas, dan jejak debu bintang.
+/* Kursor pelacak bintang (desktop): titik berlian, bidikan empat siku yang mengunci tombol dan tautan, dan jejak debu bintang.
    Bagian lain (lubang hitam di hero) bisa memasang penarik supaya kursor terhisap ke intinya. */
 
 export type Attractor = () => { x: number; y: number; horizon: number; active: boolean } | null;
@@ -18,7 +18,8 @@ export function startCursor() {
   dotElement.className = 'cursor';
   const ring = document.createElement('span');
   ring.className = 'cursor-ring';
-  ring.innerHTML = '<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="12"></circle><path class="ticks" d="M20 2v6M20 32v6M2 20h6M32 20h6"></path></svg>';
+  // siku dibungkus bingkai sendiri: putaran dan hentakan klik di bingkai, posisi di cincin, supaya tidak saling mengganggu
+  ring.innerHTML = '<span class="cursor-ring__frame"><i></i><i></i><i></i><i></i></span>';
   const trail = document.createElement('canvas');
   trail.className = 'cursor-trail';
   for (const element of [dotElement, ring, trail]) element.setAttribute('aria-hidden', 'true');
@@ -46,7 +47,23 @@ export function startCursor() {
       ring.style.opacity = '1';
     }
   });
-  document.addEventListener('pointerover', (event) => ring.classList.toggle('is-big', Boolean((event.target as Element).closest?.('a, button'))));
+  // bidikan mengunci tombol dan tautan yang cukup kecil untuk dipeluk siku; elemen selebar layar cukup ditandai tanpa dikunci
+  let locked: Element | null = null;
+  let lockedSize = '';
+  document.addEventListener('pointerover', (event) => {
+    const target = (event.target as Element).closest?.('a, button, input, textarea, select, label') ?? null;
+    const box = target?.getBoundingClientRect();
+    locked = box && box.width <= 560 && box.height <= 240 ? target : null;
+    ring.classList.toggle('is-locked', Boolean(locked));
+    ring.classList.toggle('is-near', Boolean(target) && !locked);
+    if (!locked) {
+      lockedSize = '';
+      ring.style.removeProperty('--w');
+      ring.style.removeProperty('--h');
+    }
+  });
+  addEventListener('pointerdown', () => ring.classList.add('is-pressed'));
+  addEventListener('pointerup', () => ring.classList.remove('is-pressed'));
 
   // butir dilepas dari posisi titik kursor yang tampil, jadi ikut berpilin saat kursor terhisap
   const dust: Grain[] = [];
@@ -70,7 +87,11 @@ export function startCursor() {
     if (count > 0) lastDust = { x, y };
     if (dust.length > 90) dust.splice(0, dust.length - 90);
   };
+  let dustShown = false;
   const drawDust = (dt: number) => {
+    // kanvas selebar layar tidak perlu dibersihkan ulang kalau memang sudah kosong
+    if (!dust.length && !dustShown) return;
+    dustShown = dust.length > 0;
     trailContext.clearRect(0, 0, innerWidth, innerHeight);
     trailContext.globalCompositeOperation = 'lighter';
     for (let index = dust.length - 1; index >= 0; index--) {
@@ -118,8 +139,23 @@ export function startCursor() {
       const shape = fall > 0.001 ? ` rotate(${angle.toFixed(3)}rad) scale(${(1 + fall * 1.8).toFixed(3)}, ${(1 - fall * 0.85).toFixed(3)})` : '';
       dotElement.style.opacity = fade.toFixed(3);
       ring.style.opacity = fade.toFixed(3);
-      mouse.rx += (shownX - mouse.rx) * 0.14;
-      mouse.ry += (shownY - mouse.ry) * 0.14;
+      // saat mengunci, bidikan melesat ke tengah elemen dan mengikuti ukurannya, termasuk elemen yang bergerak seperti planet
+      let aimX = shownX;
+      let aimY = shownY;
+      if (locked && capture < 0.05) {
+        const box = locked.getBoundingClientRect();
+        aimX = box.left + box.width / 2;
+        aimY = box.top + box.height / 2;
+        const size = `${Math.round(box.width + 14)}/${Math.round(box.height + 14)}`;
+        if (size !== lockedSize) {
+          lockedSize = size;
+          ring.style.setProperty('--w', `${Math.max(28, Math.round(box.width + 14))}px`);
+          ring.style.setProperty('--h', `${Math.max(28, Math.round(box.height + 14))}px`);
+        }
+      }
+      const follow = locked ? 0.3 : 0.22;
+      mouse.rx += (aimX - mouse.rx) * follow;
+      mouse.ry += (aimY - mouse.ry) * follow;
       dotElement.style.transform = `translate(${shownX.toFixed(1)}px, ${shownY.toFixed(1)}px)${shape}`;
       ring.style.transform = `translate(${mouse.rx.toFixed(1)}px, ${mouse.ry.toFixed(1)}px)${shape}`;
       emitDust(shownX, shownY, fade);

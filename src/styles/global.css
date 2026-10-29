@@ -302,51 +302,85 @@ time {
   top: 0;
   left: 0;
   z-index: 85;
-  border-radius: 50%;
   opacity: 0;
   pointer-events: none;
 }
 
-/* titik cahaya di tengah, cincin bidik dengan empat tanda arah */
+/* titik berlian di tengah, dipotong tajam lalu diberi cahaya */
 .cursor {
-  width: 5px;
-  height: 5px;
-  margin: -2.5px 0 0 -2.5px;
+  width: 7px;
+  height: 7px;
+  margin: -3.5px 0 0 -3.5px;
   background: #fff6e2;
-  box-shadow: 0 0 8px 2px rgba(255, 236, 200, 0.75), 0 0 22px 6px rgba(217, 194, 154, 0.25);
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  filter: drop-shadow(0 0 4px rgba(255, 236, 200, 0.9));
 }
 
+/* bidikan empat siku; saat bebas berdiri sebagai belah ketupat, saat mengunci tegak dan memeluk tepi elemen */
 .cursor-ring {
-  width: 40px;
-  height: 40px;
-  margin: -20px 0 0 -20px;
+  --w: 32px;
+  --h: 32px;
+  --arm: 9px;
+  width: 0;
+  height: 0;
   transition: opacity 0.4s;
 }
 
-.cursor-ring svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-  fill: none;
-  stroke: rgba(217, 194, 154, 0.8);
-  stroke-width: 1;
-  transition: scale 0.6s var(--ease);
-  animation: spin 14s linear infinite;
+.cursor-ring__frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  rotate: 45deg;
+  transition: rotate 0.32s cubic-bezier(0.2, 0.9, 0.1, 1), scale 0.12s ease-out;
 }
 
-.cursor-ring .ticks {
-  transform-box: view-box;
-  transform-origin: 50% 50%;
-  transition: transform 0.6s var(--ease);
+.cursor-ring i {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--arm);
+  height: var(--arm);
+  border: 0 solid #e6d2ad;
+  transition: translate 0.32s cubic-bezier(0.2, 0.9, 0.1, 1), border-color 0.25s;
 }
 
-.cursor-ring.is-big svg {
-  scale: 1.55;
+.cursor-ring i:nth-child(1) {
+  border-width: 1.7px 0 0 1.7px;
+  translate: calc(var(--w) / -2) calc(var(--h) / -2);
 }
 
-.cursor-ring.is-big .ticks {
-  transform: rotate(45deg);
+.cursor-ring i:nth-child(2) {
+  border-width: 1.7px 1.7px 0 0;
+  translate: calc(var(--w) / 2 - var(--arm)) calc(var(--h) / -2);
+}
+
+.cursor-ring i:nth-child(3) {
+  border-width: 0 0 1.7px 1.7px;
+  translate: calc(var(--w) / -2) calc(var(--h) / 2 - var(--arm));
+}
+
+.cursor-ring i:nth-child(4) {
+  border-width: 0 1.7px 1.7px 0;
+  translate: calc(var(--w) / 2 - var(--arm)) calc(var(--h) / 2 - var(--arm));
+}
+
+/* dekat elemen yang terlalu besar untuk dikunci: siku sedikit melebar dan tegak */
+.cursor-ring.is-near {
+  --w: 38px;
+  --h: 38px;
+}
+
+.cursor-ring:is(.is-locked, .is-near) .cursor-ring__frame {
+  rotate: 0deg;
+}
+
+.cursor-ring.is-locked i {
+  border-color: var(--sun);
+}
+
+/* hentakan saat diklik: siku menyempit sekejap */
+.cursor-ring.is-pressed .cursor-ring__frame {
+  scale: 0.72;
 }
 
 .cursor-trail {
