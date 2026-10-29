@@ -1359,12 +1359,15 @@
   stroke-width: 0.6;
 }
 
-.diploma__rose {
+.diploma__glyph {
   fill: url(#seal-metal);
 }
 
-.diploma__core {
-  fill: var(--bg);
+.diploma__glyph--line {
+  fill: none;
+  stroke: url(#seal-metal);
+  stroke-width: 1.1;
+  stroke-linecap: round;
 }
 
 .diploma h4 {

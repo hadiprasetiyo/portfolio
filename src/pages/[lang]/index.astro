@@ -45,13 +45,40 @@ const work = experiences.filter((experience) => experience.kind === 'work');
 const currentRole = work.find((experience) => experience.ended_on === null) ?? work[0];
 const city = profile?.location.split(',')[0] ?? '';
 
-// segel medali di piagam sertifikat: tepi bergerigi seperti koin dan mawar kompas delapan arah
+// segel medali di piagam sertifikat: tiap sertifikat punya lambang langit dan jumlah gerigi tepi sendiri
 const sealPoint = (radius: number, degrees: number) => {
   const angle = (degrees * Math.PI) / 180;
   return `${(32 + Math.sin(angle) * radius).toFixed(2)} ${(32 - Math.cos(angle) * radius).toFixed(2)}`;
 };
-const sealTicks = Array.from({ length: 48 }, (_, k) => `M${sealPoint(27.5, k * 7.5)}L${sealPoint(30, k * 7.5)}`).join('');
-const sealRose = `M${Array.from({ length: 16 }, (_, k) => sealPoint(k % 2 ? 3.4 : k % 4 === 0 ? 17 : 10, k * 22.5)).join('L')}Z`;
+const starPath = (points: number, outer: number, inner: number) =>
+  `M${Array.from({ length: points * 2 }, (_, k) => sealPoint(k % 2 ? inner : outer, (k * 180) / points)).join('L')}Z`;
+type SealPart = { d: string; line?: boolean };
+const sealGlyphs: SealPart[][] = [
+  // mawar kompas delapan arah
+  [{ d: `M${Array.from({ length: 16 }, (_, k) => sealPoint(k % 2 ? 3.4 : k % 4 === 0 ? 17 : 10, k * 22.5)).join('L')}Z` }],
+  // bintang empat ujung yang ramping
+  [{ d: starPath(4, 18, 2.6) }],
+  // bintang enam ujung
+  [{ d: starPath(6, 16, 6) }],
+  // matahari bersinar dua belas
+  [{ d: 'M32 26a6 6 0 1 0 0.01 0Z' }, { d: Array.from({ length: 12 }, (_, k) => `M${sealPoint(9, k * 30)}L${sealPoint(16, k * 30)}`).join(''), line: true }],
+  // bulan sabit
+  [{ d: 'M32 19A13 13 0 1 0 32 45A15 15 0 0 1 32 19Z' }],
+  // planet bercincin
+  [{ d: 'M32 25a7 7 0 1 0 0.01 0Z' }, { d: 'M17 36.5C21 40 43 31 47 27.5C43 24 21 33 17 36.5Z', line: true }],
+  // komet dengan ekor
+  [{ d: 'M40 24a3.6 3.6 0 1 0 0.01 0Z' }, { d: 'M37.4 25.6L18 43L39.6 30.2Z' }],
+  // rasi kecil empat bintang
+  [{ d: 'M20 40L28 30L37 34L45 21', line: true }, { d: 'M20 38a2 2 0 1 0 0.01 0ZM28 28a2.4 2.4 0 1 0 0.01 0ZM37 32a2 2 0 1 0 0.01 0ZM45 18.6a2.4 2.4 0 1 0 0.01 0Z' }],
+];
+const sealTickCounts = [48, 60, 36, 72, 40, 54, 30, 64];
+const sealFor = (index: number) => {
+  const ticks = sealTickCounts[index % sealTickCounts.length];
+  return {
+    ticks: Array.from({ length: ticks }, (_, k) => `M${sealPoint(27.5, (k * 360) / ticks)}L${sealPoint(30, (k * 360) / ticks)}`).join(''),
+    parts: sealGlyphs[index % sealGlyphs.length],
+  };
+};
 
 /* About: angka statistik dihitung dari data, bukan diketik */
 const firstYear = Math.min(...experiences.map((experience) => Number(experience.started_on.slice(0, 4))), new Date().getFullYear());
@@ -352,30 +379,32 @@ const title = profile ? `${fullName} · ${headline}` : 'Portfolio';
           </div>
           {/* tiap sertifikat jadi piagam observatorium: bingkai ganda dan segel medali di pojok */}
           <ul class="diplomas" role="list">
-            {certifications.map((certification) => (
-              <li class="diploma" data-reveal>
-                <svg class="diploma__seal" viewBox="0 0 64 64" aria-hidden="true">
-                  <circle class="diploma__rim" cx="32" cy="32" r="31" />
-                  <path class="diploma__ticks" d={sealTicks} />
-                  <circle class="diploma__ring" cx="32" cy="32" r="24" />
-                  <path class="diploma__rose" d={sealRose} />
-                  <circle class="diploma__core" cx="32" cy="32" r="1.6" />
-                </svg>
-                <h4>{certification.name}</h4>
-                <p class="diploma__issuer">
-                  <span class="label">{dictionary.certification.issuedBy}</span>
-                  {certification.issuer}
-                </p>
-                <p class="diploma__foot label">
-                  <span>{formatMonth(certification.issued_on, lang)}</span>
-                  {certification.credential_url && (
-                    <a href={certification.credential_url} rel="noopener noreferrer">
-                      {dictionary.certification.viewCredential} ↗<span class="visually-hidden">: {certification.name}</span>
-                    </a>
-                  )}
-                </p>
-              </li>
-            ))}
+            {certifications.map((certification, index) => {
+              const seal = sealFor(index);
+              return (
+                <li class="diploma" data-reveal>
+                  <svg class="diploma__seal" viewBox="0 0 64 64" aria-hidden="true">
+                    <circle class="diploma__rim" cx="32" cy="32" r="31" />
+                    <path class="diploma__ticks" d={seal.ticks} />
+                    <circle class="diploma__ring" cx="32" cy="32" r="24" />
+                    {seal.parts.map((part) => <path class:list={['diploma__glyph', { 'diploma__glyph--line': part.line }]} d={part.d} />)}
+                  </svg>
+                  <h4>{certification.name}</h4>
+                  <p class="diploma__issuer">
+                    <span class="label">{dictionary.certification.issuedBy}</span>
+                    {certification.issuer}
+                  </p>
+                  <p class="diploma__foot label">
+                    <span>{formatMonth(certification.issued_on, lang)}</span>
+                    {certification.credential_url && (
+                      <a href={certification.credential_url} rel="noopener noreferrer">
+                        {dictionary.certification.viewCredential} ↗<span class="visually-hidden">: {certification.name}</span>
+                      </a>
+                    )}
+                  </p>
+                </li>
+              );
+            })}
           </ul>
         </div>
       )
