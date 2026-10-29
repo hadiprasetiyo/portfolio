@@ -1222,23 +1222,60 @@
   border-bottom: 1px solid var(--line);
 }
 
+.phases__defs {
+  position: absolute;
+}
+
 .phase svg {
+  position: relative;
+  z-index: 1;
   width: 72px;
   height: 72px;
   overflow: visible;
 }
 
+/* jalur bertitik dari bulan ini ke bulan berikutnya, tergambar saat barisnya muncul */
+.phase:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 120px;
+  left: 35.5px;
+  width: 1px;
+  height: calc(100% - 88px);
+  background: repeating-linear-gradient(to bottom, rgba(217, 194, 154, 0.5) 0 2px, transparent 2px 9px);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 1.6s var(--ease) 0.5s;
+}
+
+.phase.is-in::after {
+  transform: none;
+}
+
 .phase__shadow {
-  fill: #141418;
-  stroke: var(--line);
+  fill: url(#moon-dark);
+  stroke: rgba(217, 194, 154, 0.14);
+  stroke-width: 0.6;
 }
 
 .phase__lit {
-  fill: var(--sun);
+  fill: url(#moon-lit);
+}
+
+.phase__maria {
+  fill: url(#moon-mare);
+  mix-blend-mode: multiply;
 }
 
 .phase--full .phase__lit {
   filter: drop-shadow(0 0 14px rgba(255, 236, 200, 0.75));
+}
+
+/* halo 22° di sekeliling bulan purnama, cincin es tipis di atmosfer */
+.phase__halo {
+  fill: none;
+  stroke: rgba(217, 194, 154, 0.22);
+  stroke-width: 0.6;
 }
 
 .phase__year {
@@ -1533,6 +1570,12 @@
   .phase svg {
     width: 48px;
     height: 48px;
+  }
+
+  .phase:not(:last-child)::after {
+    top: 96px;
+    left: 23.5px;
+    height: calc(100% - 64px);
   }
 
   .phase__year {

@@ -533,7 +533,16 @@ export function startHome() {
     });
     statementCopy.addEventListener('pointerleave', () => sheen.style.setProperty('--sheen', '0'));
   }
-  const phaseRows = [...app.querySelectorAll('.phase')];
+  const moons = [...app.querySelectorAll('.phase')].map((row) => ({ row, lit: row.querySelector('.phase__lit'), phase: Number(row.dataset.phase), drawn: -1 }));
+  // bulan hanya dihitung saat Journey dekat layar; di luar itu scroll tidak perlu membaca posisi barisnya
+  let journeyNear = false;
+  const journey = app.querySelector('.journey');
+  if (journey && !reduce) {
+    new IntersectionObserver(([entry]) => {
+      journeyNear = entry.isIntersecting;
+      if (journeyNear) onScroll();
+    }, { rootMargin: '50% 0px' }).observe(journey);
+  }
   const onScroll = () => {
     if (portrait) {
       const plateBox = portrait.getBoundingClientRect();
@@ -553,11 +562,15 @@ export function startHome() {
       progressBar.style.setProperty('--wp', progress.toFixed(3));
     }
 
-    if (!reduce) {
-      phaseRows.forEach((row) => {
-        const rowBox = row.getBoundingClientRect();
-        const lit = clamp((innerHeight * 0.92 - rowBox.top) / (innerHeight * 0.5), 0, 1);
-        row.querySelector('.phase__lit').setAttribute('d', moonPath(Number(row.dataset.phase) * (1 - Math.pow(1 - lit, 2))));
+    if (journeyNear) {
+      // semua posisi dibaca dulu baru ditulis, supaya browser cukup sekali menghitung layout
+      const tops = moons.map((moon) => moon.row.getBoundingClientRect().top);
+      moons.forEach((moon, index) => {
+        const lit = clamp((innerHeight * 0.92 - tops[index]) / (innerHeight * 0.5), 0, 1);
+        const phase = Math.round(moon.phase * (1 - Math.pow(1 - lit, 2)) * 200) / 200;
+        if (phase === moon.drawn) return;
+        moon.drawn = phase;
+        moon.lit.setAttribute('d', moonPath(phase));
       });
     }
   };

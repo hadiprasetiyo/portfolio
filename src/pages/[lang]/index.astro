@@ -301,17 +301,47 @@ const title = profile ? `${fullName} · ${headline}` : 'Portfolio';
       </div>
       <p data-reveal>{dictionary.journey.intro}</p>
     </div>
+    {/* gradien bersama semua bulan: sisi terang membulat seperti bola, sisi gelap diterangi samar cahaya bumi */}
+    <svg class="phases__defs" width="0" height="0" aria-hidden="true">
+      <defs>
+        <radialGradient id="moon-lit" gradientUnits="userSpaceOnUse" cx="30" cy="28" r="42">
+          <stop offset="0" stop-color="#fffaf0" />
+          <stop offset="0.6" stop-color="#f1e4c6" />
+          <stop offset="1" stop-color="#c9b48d" />
+        </radialGradient>
+        <radialGradient id="moon-dark" gradientUnits="userSpaceOnUse" cx="32" cy="30" r="40">
+          <stop offset="0" stop-color="#1e1d23" />
+          <stop offset="1" stop-color="#0d0d11" />
+        </radialGradient>
+        <radialGradient id="moon-mare">
+          <stop offset="0" stop-color="#8a7a60" stop-opacity="0.42" />
+          <stop offset="0.6" stop-color="#8a7a60" stop-opacity="0.24" />
+          <stop offset="1" stop-color="#8a7a60" stop-opacity="0" />
+        </radialGradient>
+      </defs>
+    </svg>
     <ol class="phases">
       {
         phases.map((item) => (
           <li class:list={['phase', 'drawn', { 'phase--full': item.phase === 1 }]} data-reveal data-phase={item.phase}>
             <svg viewBox="0 0 72 72" role="img" aria-label={phaseName(item.phase)}>
+              {item.phase === 1 && <circle class="phase__halo" cx="36" cy="36" r="47" />}
               <circle class="phase__shadow" cx="36" cy="36" r="30" />
               <path class="phase__lit" d={moonPath(item.phase)} />
+              {/* maria di letak aslinya; dicampur multiply jadi hanya terlihat di sisi yang terang */}
+              <g class="phase__maria">
+                <ellipse cx="28" cy="25" rx="8" ry="7" />
+                <ellipse cx="41" cy="27" rx="6" ry="5" />
+                <ellipse cx="46" cy="36" rx="7" ry="5.5" />
+                <ellipse cx="56" cy="31" rx="3.5" ry="4" />
+                <ellipse cx="21" cy="38" rx="9" ry="12" />
+                <ellipse cx="33" cy="48" rx="6" ry="4.5" />
+              </g>
             </svg>
             <p class="phase__year">
               {item.year}
-              <small class="label">{phaseName(item.phase)}</small>
+              {/* fraksi yang diterangi, sama dengan nilai fase yang dipakai moonPath */}
+              <small class="label">{phaseName(item.phase)} · {Math.round(item.phase * 100)}%</small>
             </p>
             <div>
               <h3>{item.title}</h3>
