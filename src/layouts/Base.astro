@@ -177,6 +177,9 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
           </ol>
           <div class="ledger__foot">
             <a class="ledger__cv" href={`/${lang}/cv`} aria-current={path === '/cv' ? 'page' : undefined}>{dictionary.nav.cv} ↗</a>
+            <button class="sound ledger__sound" type="button" aria-pressed="false" aria-label={dictionary.sound.play} data-play={dictionary.sound.play} data-pause={dictionary.sound.pause}
+              ><span class="sound__bars" aria-hidden="true"><i></i><i></i><i></i></span><span class="sound__label">{dictionary.sound.label}</span></button
+            >
             <span>{dictionary.hero.coordinates}</span>
           </div>
         </div>
@@ -756,6 +759,10 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
     border-color: var(--gold);
   }
 
+  .ledger__sound {
+    display: none;
+  }
+
   /* layar sempit: pelat mengecil di atas tanpa nama di tepi, daftar bab di bawahnya */
   @media (max-width: 56rem) {
     .site-index {
@@ -786,8 +793,16 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
       --gap: 16px;
     }
 
-    .dial-button__text,
-    .sound__label {
+    /* navbar HP terlalu sesak; suara pindah ke bawah indeks, bahasa tetap terlihat */
+    .site-header__inner > .sound {
+      display: none;
+    }
+
+    .ledger__sound {
+      display: inline-flex;
+    }
+
+    .dial-button__text {
       position: absolute;
       width: 1px;
       height: 1px;

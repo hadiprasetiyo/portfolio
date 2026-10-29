@@ -1,7 +1,9 @@
 /* Suara latar: dengung organ dan detak jam samar yang dibangkitkan Web Audio, tanpa file audio.
    Tidak pernah berbunyi sendiri; tombol di navigasi memutar, menjeda, dan melanjutkan. */
 export function startSound() {
-  const soundButton = document.querySelector('.sound');
+  // dua tombol (navbar dan indeks di HP) berbagi satu suara dan satu status
+  const soundButtons = [...document.querySelectorAll('.sound')];
+  const [soundButton] = soundButtons;
   if (!soundButton) return;
   const labels = { play: soundButton.dataset.play, pause: soundButton.dataset.pause };
   let sound = null;
@@ -94,8 +96,10 @@ export function startSound() {
     sound.master.gain.linearRampToValueAtTime(value, now + seconds);
   };
   const setSound = (on) => {
-    soundButton.setAttribute('aria-pressed', String(on));
-    soundButton.setAttribute('aria-label', on ? labels.pause : labels.play);
+    for (const button of soundButtons) {
+      button.setAttribute('aria-pressed', String(on));
+      button.setAttribute('aria-label', on ? labels.pause : labels.play);
+    }
     if (on) {
       if (!sound) sound = createSound();
       sound.context.resume().then(() => {
@@ -113,5 +117,5 @@ export function startSound() {
       }, 900);
     }
   };
-  soundButton.addEventListener('click', () => setSound(soundButton.getAttribute('aria-pressed') !== 'true'));
+  for (const button of soundButtons) button.addEventListener('click', () => setSound(soundButton.getAttribute('aria-pressed') !== 'true'));
 }
