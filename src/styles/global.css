@@ -460,6 +460,55 @@ time {
   rotate: 0deg;
 }
 
+/* selama terkunci: mata panah berdenyut maju ke arah elemen, garis pindai menyapu dari atas ke bawah */
+/* properti dipisah: shorthand tanpa nama animasi diringkas minifier jadi animation: none */
+.cursor-ring.is-locked .cursor-ring__lock b {
+  animation-duration: 0.9s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+.cursor-ring.is-locked .cursor-ring__lock b:nth-of-type(1) {
+  animation-name: cursor-aim-top;
+}
+
+.cursor-ring.is-locked .cursor-ring__lock b:nth-of-type(2) {
+  animation-name: cursor-aim-right;
+}
+
+.cursor-ring.is-locked .cursor-ring__lock b:nth-of-type(3) {
+  animation-name: cursor-aim-bottom;
+}
+
+.cursor-ring.is-locked .cursor-ring__lock b:nth-of-type(4) {
+  animation-name: cursor-aim-left;
+}
+
+@keyframes cursor-aim-top { 50% { translate: 0 calc(var(--h) / -2 - 3px); } }
+@keyframes cursor-aim-right { 50% { translate: calc(var(--w) / 2 + 3px) 0; } }
+@keyframes cursor-aim-bottom { 50% { translate: 0 calc(var(--h) / 2 + 3px); } }
+@keyframes cursor-aim-left { 50% { translate: calc(var(--w) / -2 - 3px) 0; } }
+
+.cursor-ring__lock em {
+  position: absolute;
+  top: 0;
+  left: calc(var(--w) / -2 + 4px);
+  width: calc(var(--w) - 8px);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 244, 222, 0.75), transparent);
+  opacity: 0;
+}
+
+.cursor-ring.is-locked .cursor-ring__lock em {
+  animation: cursor-scan 1.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+@keyframes cursor-scan {
+  0% { translate: 0 calc(var(--h) / -2 + 3px); opacity: 0; }
+  15%, 85% { opacity: 0.9; }
+  100% { translate: 0 calc(var(--h) / 2 - 3px); opacity: 0; }
+}
+
 /* dekat elemen yang terlalu besar untuk dikunci: bidikan sedikit membesar */
 .cursor-ring.is-near .cursor-ring__frame {
   scale: 1.2;

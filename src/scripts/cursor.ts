@@ -26,8 +26,8 @@ export function startCursor() {
     '<svg class="cursor-ring__inner" viewBox="-30 -30 60 60"><circle r="9"></circle></svg>' +
     '<svg class="cursor-ring__cross" viewBox="-30 -30 60 60"><path d="M0 -7V-3M0 3V7M-7 0H-3M3 0H7"></path></svg>' +
     '</span>' +
-    // saat menyorot elemen yang bisa diklik: siku memeluk tepinya dan empat mata panah menunjuk ke tengah tiap sisi
-    '<span class="cursor-ring__lock"><i></i><i></i><i></i><i></i><b></b><b></b><b></b><b></b></span>';
+    // saat menyorot elemen yang bisa diklik: siku memeluk tepinya, empat mata panah menunjuk ke tengah tiap sisi, dan garis pindai menyapu
+    '<span class="cursor-ring__lock"><i></i><i></i><i></i><i></i><b></b><b></b><b></b><b></b><em></em></span>';
   const trail = document.createElement('canvas');
   trail.className = 'cursor-trail';
   for (const element of [dotElement, ring, trail]) element.setAttribute('aria-hidden', 'true');
