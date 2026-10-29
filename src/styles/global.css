@@ -316,71 +316,162 @@ time {
   filter: drop-shadow(0 0 4px rgba(255, 236, 200, 0.9));
 }
 
-/* bidikan empat siku; saat bebas berdiri sebagai belah ketupat, saat mengunci tegak dan memeluk tepi elemen */
 .cursor-ring {
-  --w: 32px;
-  --h: 32px;
+  --w: 54px;
+  --h: 54px;
   --arm: 9px;
   width: 0;
   height: 0;
   transition: opacity 0.4s;
 }
 
+/* bidikan senapan saat bebas: cincin luar berpanah berputar terus, cincin putus-putus di dalam berputar berlawanan, benang silang diam */
 .cursor-ring__frame {
   position: absolute;
   top: 0;
   left: 0;
-  rotate: 45deg;
-  transition: rotate 0.32s cubic-bezier(0.2, 0.9, 0.1, 1), scale 0.12s ease-out;
+  transition: scale 0.35s cubic-bezier(0.2, 0.9, 0.1, 1), opacity 0.25s;
 }
 
-.cursor-ring i {
+.cursor-ring__frame svg {
+  position: absolute;
+  top: -27px;
+  left: -27px;
+  width: 54px;
+  max-width: none;
+  height: 54px;
+  overflow: visible;
+  fill: none;
+  stroke-linecap: round;
+}
+
+.cursor-ring__outer {
+  animation: spin 6s linear infinite;
+}
+
+.cursor-ring__outer circle {
+  stroke: rgba(217, 194, 154, 0.75);
+  stroke-width: 1;
+}
+
+.cursor-ring__arrows {
+  fill: #e6d2ad;
+}
+
+.cursor-ring__ticks {
+  stroke: rgba(217, 194, 154, 0.6);
+  stroke-width: 1;
+}
+
+.cursor-ring__inner {
+  animation: spin 9s linear infinite reverse;
+}
+
+.cursor-ring__inner circle {
+  stroke: rgba(217, 194, 154, 0.5);
+  stroke-width: 0.8;
+  stroke-dasharray: 3.5 2.2;
+}
+
+.cursor-ring__cross path {
+  stroke: rgba(255, 244, 222, 0.85);
+  stroke-width: 1;
+}
+
+/* saat mengunci: siku memeluk tepi elemen dan mata panah menunjuk ke tengah tiap sisi; saat bebas tersembunyi seukuran bidikan */
+.cursor-ring__lock {
   position: absolute;
   top: 0;
   left: 0;
-  width: var(--arm);
-  height: var(--arm);
-  border: 0 solid #e6d2ad;
-  transition: translate 0.32s cubic-bezier(0.2, 0.9, 0.1, 1), border-color 0.25s;
+  opacity: 0;
+  rotate: 45deg;
+  transition: rotate 0.32s cubic-bezier(0.2, 0.9, 0.1, 1), opacity 0.2s, scale 0.12s ease-out;
 }
 
-.cursor-ring i:nth-child(1) {
+.cursor-ring__lock i,
+.cursor-ring__lock b {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: translate 0.32s cubic-bezier(0.2, 0.9, 0.1, 1);
+}
+
+.cursor-ring__lock i {
+  width: var(--arm);
+  height: var(--arm);
+  border: 0 solid var(--sun);
+}
+
+.cursor-ring__lock i:nth-child(1) {
   border-width: 1.7px 0 0 1.7px;
   translate: calc(var(--w) / -2) calc(var(--h) / -2);
 }
 
-.cursor-ring i:nth-child(2) {
+.cursor-ring__lock i:nth-child(2) {
   border-width: 1.7px 1.7px 0 0;
   translate: calc(var(--w) / 2 - var(--arm)) calc(var(--h) / -2);
 }
 
-.cursor-ring i:nth-child(3) {
+.cursor-ring__lock i:nth-child(3) {
   border-width: 0 0 1.7px 1.7px;
   translate: calc(var(--w) / -2) calc(var(--h) / 2 - var(--arm));
 }
 
-.cursor-ring i:nth-child(4) {
+.cursor-ring__lock i:nth-child(4) {
   border-width: 0 1.7px 1.7px 0;
   translate: calc(var(--w) / 2 - var(--arm)) calc(var(--h) / 2 - var(--arm));
 }
 
-/* dekat elemen yang terlalu besar untuk dikunci: siku sedikit melebar dan tegak */
-.cursor-ring.is-near {
-  --w: 38px;
-  --h: 38px;
+/* mata panah lancip: segitiga menunjuk ke bawah, diputar ke tiap sisi supaya selalu menunjuk elemennya */
+.cursor-ring__lock b {
+  width: 8px;
+  height: 7px;
+  margin: -3.5px 0 0 -4px;
+  background: var(--sun);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
 }
 
-.cursor-ring:is(.is-locked, .is-near) .cursor-ring__frame {
+.cursor-ring__lock b:nth-of-type(1) {
+  translate: 0 calc(var(--h) / -2 - 9px);
+}
+
+.cursor-ring__lock b:nth-of-type(2) {
+  translate: calc(var(--w) / 2 + 9px) 0;
+  rotate: 90deg;
+}
+
+.cursor-ring__lock b:nth-of-type(3) {
+  translate: 0 calc(var(--h) / 2 + 9px);
+  rotate: 180deg;
+}
+
+.cursor-ring__lock b:nth-of-type(4) {
+  translate: calc(var(--w) / -2 - 9px) 0;
+  rotate: -90deg;
+}
+
+.cursor-ring.is-locked .cursor-ring__frame {
+  opacity: 0;
+  scale: 0.4;
+}
+
+.cursor-ring.is-locked .cursor-ring__lock {
+  opacity: 1;
   rotate: 0deg;
 }
 
-.cursor-ring.is-locked i {
-  border-color: var(--sun);
+/* dekat elemen yang terlalu besar untuk dikunci: bidikan sedikit membesar */
+.cursor-ring.is-near .cursor-ring__frame {
+  scale: 1.2;
 }
 
-/* hentakan saat diklik: siku menyempit sekejap */
+/* hentakan saat diklik */
 .cursor-ring.is-pressed .cursor-ring__frame {
-  scale: 0.72;
+  scale: 0.8;
+}
+
+.cursor-ring.is-pressed .cursor-ring__lock {
+  scale: 0.9;
 }
 
 .cursor-trail {

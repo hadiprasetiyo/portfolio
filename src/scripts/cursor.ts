@@ -1,6 +1,6 @@
 import { smooth } from './math';
 
-/* Kursor pelacak bintang (desktop): titik berlian, bidikan empat siku yang mengunci tombol dan tautan, dan jejak debu bintang.
+/* Kursor pelacak bintang (desktop): titik berlian, bidikan senapan yang terus berputar dan mengunci tombol serta tautan, dan jejak debu bintang.
    Bagian lain (lubang hitam di hero) bisa memasang penarik supaya kursor terhisap ke intinya. */
 
 export type Attractor = () => { x: number; y: number; horizon: number; active: boolean } | null;
@@ -18,8 +18,16 @@ export function startCursor() {
   dotElement.className = 'cursor';
   const ring = document.createElement('span');
   ring.className = 'cursor-ring';
-  // siku dibungkus bingkai sendiri: putaran dan hentakan klik di bingkai, posisi di cincin, supaya tidak saling mengganggu
-  ring.innerHTML = '<span class="cursor-ring__frame"><i></i><i></i><i></i><i></i></span>';
+  // tiap lapis svg sendiri supaya putarannya animasi CSS yang dikerjakan GPU; skala kunci dan hentakan klik di bingkai pembungkusnya
+  const arrow = 'M0 -12L3.6 -21L0 -18.6L-3.6 -21Z';
+  ring.innerHTML =
+    '<span class="cursor-ring__frame">' +
+    `<svg class="cursor-ring__outer" viewBox="-30 -30 60 60"><circle r="18"></circle><g class="cursor-ring__arrows">${[0, 90, 180, 270].map((angle) => `<path d="${arrow}" transform="rotate(${angle})"></path>`).join('')}</g><path class="cursor-ring__ticks" d="M14.1 -14.1L17 -17M14.1 14.1L17 17M-14.1 14.1L-17 17M-14.1 -14.1L-17 -17"></path></svg>` +
+    '<svg class="cursor-ring__inner" viewBox="-30 -30 60 60"><circle r="9"></circle></svg>' +
+    '<svg class="cursor-ring__cross" viewBox="-30 -30 60 60"><path d="M0 -7V-3M0 3V7M-7 0H-3M3 0H7"></path></svg>' +
+    '</span>' +
+    // saat menyorot elemen yang bisa diklik: siku memeluk tepinya dan empat mata panah menunjuk ke tengah tiap sisi
+    '<span class="cursor-ring__lock"><i></i><i></i><i></i><i></i><b></b><b></b><b></b><b></b></span>';
   const trail = document.createElement('canvas');
   trail.className = 'cursor-trail';
   for (const element of [dotElement, ring, trail]) element.setAttribute('aria-hidden', 'true');
@@ -146,7 +154,7 @@ export function startCursor() {
         const box = locked.getBoundingClientRect();
         aimX = box.left + box.width / 2;
         aimY = box.top + box.height / 2;
-        const size = `${Math.round(box.width + 14)}/${Math.round(box.height + 14)}`;
+        const size = `${Math.round(box.width)}/${Math.round(box.height)}`;
         if (size !== lockedSize) {
           lockedSize = size;
           ring.style.setProperty('--w', `${Math.max(28, Math.round(box.width + 14))}px`);
