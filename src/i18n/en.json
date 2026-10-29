@@ -71,6 +71,8 @@
     "stack": "Stack"
   },
   "certification": {
+    "title": "Credentials, <em>sealed</em>",
+    "issuedBy": "Issued by",
     "viewCredential": "View credential"
   },
   "cv": {

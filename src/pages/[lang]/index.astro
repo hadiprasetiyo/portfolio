@@ -97,6 +97,14 @@ const phases = [
   },
 ];
 
+// segel medali di piagam sertifikat: tepi bergerigi seperti koin dan mawar kompas delapan arah
+const sealPoint = (radius: number, degrees: number) => {
+  const angle = (degrees * Math.PI) / 180;
+  return `${(32 + Math.sin(angle) * radius).toFixed(2)} ${(32 - Math.cos(angle) * radius).toFixed(2)}`;
+};
+const sealTicks = Array.from({ length: 48 }, (_, k) => `M${sealPoint(27.5, k * 7.5)}L${sealPoint(30, k * 7.5)}`).join('');
+const sealRose = `M${Array.from({ length: 16 }, (_, k) => sealPoint(k % 2 ? 3.4 : k % 4 === 0 ? 17 : 10, k * 22.5)).join('L')}Z`;
+
 const homeData = { projects: numerals.map((numeral) => ({ numeral })), signs: signs.map((sign) => ({ latin: sign.latin })) };
 const title = profile ? `${fullName} · ${headline}` : 'Portfolio';
 ---
@@ -327,41 +335,47 @@ const title = profile ? `${fullName} · ${headline}` : 'Portfolio';
     {
       certifications.length > 0 && (
         <div class="certifications">
-          <p class="label chapter" data-reveal>
-            <span>{dictionary.sections.certifications}</span>
-            <i aria-hidden="true" />
-            {String(certifications.length).padStart(2, '0')}
-          </p>
-          {/* katalog bintang tetap: tiap sertifikat satu entri bernomor dengan epoch terbitnya */}
-          <ul class="catalogue" role="list">
-            {certifications.map((certification, index) => {
-              const [year, month] = certification.issued_on.split('-').map(Number);
-              // epoch ditulis seperti astronom menulis J2000.0: tahun desimal di tengah bulan terbit.
-              // dua desimal supaya Desember tidak terbaca sebagai tahun berikutnya (2023.96, bukan 2024.0)
-              const epoch = `J${(year + ((month || 1) - 0.5) / 12).toFixed(2)}`;
-              return (
-                <li class="catalogue__entry drawn" data-reveal>
-                  <p class="catalogue__mark label" aria-hidden="true">
-                    <svg viewBox="0 0 20 20">
-                      <path d="M10 0L11.6 8.4L20 10L11.6 11.6L10 20L8.4 11.6L0 10L8.4 8.4Z" />
-                    </svg>
-                    {String(index + 1).padStart(2, '0')}
-                  </p>
-                  <h3>{certification.name}</h3>
-                  <p class="label">{certification.issuer}</p>
-                  <p class="catalogue__foot label">
-                    <span>
-                      {formatMonth(certification.issued_on, lang)} · {epoch}
-                    </span>
-                    {certification.credential_url && (
-                      <a href={certification.credential_url} rel="noopener noreferrer">
-                        {dictionary.certification.viewCredential} ↗<span class="visually-hidden">: {certification.name}</span>
-                      </a>
-                    )}
-                  </p>
-                </li>
-              );
-            })}
+          <svg class="certifications__defs" width="0" height="0" aria-hidden="true">
+            <defs>
+              {/* kilau logam segel: terang di kiri atas, redup di kanan bawah, senada dengan emas di bagian lain */}
+              <linearGradient id="seal-metal" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#fff4de" />
+                <stop offset="0.35" stop-color="#d9c29a" />
+                <stop offset="0.65" stop-color="#8a7552" />
+                <stop offset="1" stop-color="#cdb68d" />
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="certifications__head" data-reveal>
+            <p class="label">{dictionary.sections.certifications}</p>
+            <h3 set:html={dictionary.certification.title} />
+          </div>
+          {/* tiap sertifikat jadi piagam observatorium: bingkai ganda dan segel medali di pojok */}
+          <ul class="diplomas" role="list">
+            {certifications.map((certification) => (
+              <li class="diploma" data-reveal>
+                <svg class="diploma__seal" viewBox="0 0 64 64" aria-hidden="true">
+                  <circle class="diploma__rim" cx="32" cy="32" r="31" />
+                  <path class="diploma__ticks" d={sealTicks} />
+                  <circle class="diploma__ring" cx="32" cy="32" r="24" />
+                  <path class="diploma__rose" d={sealRose} />
+                  <circle class="diploma__core" cx="32" cy="32" r="1.6" />
+                </svg>
+                <h4>{certification.name}</h4>
+                <p class="diploma__issuer">
+                  <span class="label">{dictionary.certification.issuedBy}</span>
+                  {certification.issuer}
+                </p>
+                <p class="diploma__foot label">
+                  <span>{formatMonth(certification.issued_on, lang)}</span>
+                  {certification.credential_url && (
+                    <a href={certification.credential_url} rel="noopener noreferrer">
+                      {dictionary.certification.viewCredential} ↗<span class="visually-hidden">: {certification.name}</span>
+                    </a>
+                  )}
+                </p>
+              </li>
+            ))}
           </ul>
         </div>
       )

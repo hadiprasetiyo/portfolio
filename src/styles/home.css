@@ -1269,72 +1269,138 @@
   font-style: italic;
 }
 
-/* ---------- sertifikasi: katalog bintang tetap di bawah fase bulan ---------- */
+/* ---------- sertifikasi: piagam observatorium di bawah fase bulan ---------- */
 .certifications {
   display: grid;
-  gap: 28px;
+  gap: 32px;
   margin-top: 96px;
 }
 
-/* kolom menyesuaikan jumlah sertifikat: satu entri tetap selebar satu kolom, bukan melebar penuh */
-.catalogue {
+.certifications__defs {
+  position: absolute;
+}
+
+.certifications__head {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
-  gap: 0 48px;
+  gap: 12px;
+}
+
+.certifications__head .label {
+  color: var(--gold);
+}
+
+.certifications__head h3 {
+  font: 400 clamp(32px, 3.4vw, 48px)/1.05 var(--font-serif);
+  letter-spacing: -0.02em;
+}
+
+/* kolom menyesuaikan jumlah sertifikat: satu piagam tetap selebar satu kolom, bukan melebar penuh */
+.diplomas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+  gap: 24px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.catalogue__entry {
+/* bingkai ganda seperti kertas piagam: garis luar emas tipis, garis dalam lebih samar */
+.diploma {
+  position: relative;
   display: grid;
   align-content: start;
-  gap: 10px;
-  padding-block: 28px 32px;
+  gap: 14px;
+  padding: 32px 28px 24px;
+  border: 1px solid rgba(217, 194, 154, 0.26);
+  background: linear-gradient(160deg, rgba(217, 194, 154, 0.05), rgba(217, 194, 154, 0.012) 55%);
+  transition: border-color 0.6s var(--ease);
 }
 
-.catalogue__mark {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--faint);
+.diploma::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 1px solid rgba(217, 194, 154, 0.1);
+  pointer-events: none;
 }
 
-.catalogue__mark svg {
-  width: 14px;
-  height: 14px;
-  fill: var(--gold);
-  transition: rotate 0.9s var(--ease), scale 0.9s var(--ease);
+.diploma:hover,
+.diploma:focus-within {
+  border-color: rgba(217, 194, 154, 0.5);
 }
 
-.catalogue__entry h3 {
-  font: 400 26px/1.15 var(--font-serif);
+.diploma__seal {
+  width: 56px;
+  height: 56px;
+  margin-bottom: 6px;
+  transition: rotate 1.4s var(--ease);
+}
+
+/* segel berputar pelan seperti dial saat piagamnya disorot */
+.diploma:hover .diploma__seal,
+.diploma:focus-within .diploma__seal {
+  rotate: 45deg;
+}
+
+.diploma__rim {
+  fill: rgba(217, 194, 154, 0.06);
+  stroke: url(#seal-metal);
+  stroke-width: 1.2;
+}
+
+.diploma__ticks {
+  stroke: url(#seal-metal);
+  stroke-width: 0.8;
+}
+
+.diploma__ring {
+  fill: none;
+  stroke: rgba(217, 194, 154, 0.35);
+  stroke-width: 0.6;
+}
+
+.diploma__rose {
+  fill: url(#seal-metal);
+}
+
+.diploma__core {
+  fill: var(--bg);
+}
+
+.diploma h4 {
+  font: 400 28px/1.12 var(--font-serif);
+  letter-spacing: -0.01em;
   text-wrap: balance;
 }
 
-.catalogue__foot {
+.diploma__issuer {
+  display: grid;
+  gap: 4px;
+  color: var(--fg);
+}
+
+.diploma__issuer .label {
+  color: var(--faint);
+}
+
+.diploma__foot {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   gap: 8px 20px;
-  margin-top: 8px;
-  color: var(--faint);
+  margin-top: 10px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(217, 194, 154, 0.14);
+  color: var(--muted);
 }
 
-.catalogue__foot a {
+.diploma__foot a {
   color: var(--gold);
   text-decoration: none;
 }
 
-.catalogue__foot a:hover {
+.diploma__foot a:hover {
   color: var(--sun);
-}
-
-/* bintang berputar 45° dan membesar sedikit saat entrinya disorot, seperti berkelip */
-.catalogue__entry:hover .catalogue__mark svg,
-.catalogue__entry:focus-within .catalogue__mark svg {
-  rotate: 45deg;
-  scale: 1.2;
 }
 
 /* ---------- kontak ---------- */

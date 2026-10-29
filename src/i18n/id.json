@@ -71,6 +71,8 @@
     "stack": "Stack"
   },
   "certification": {
+    "title": "Kredensial, <em>bersegel</em>",
+    "issuedBy": "Diterbitkan oleh",
     "viewCredential": "Lihat kredensial"
   },
   "cv": {
