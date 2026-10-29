@@ -106,8 +106,53 @@ export const astroBand = () => {
 export type SignSkill = { id: string; name: string };
 export type Sign = { group: string; latin: string; skills: SignSkill[] };
 
-// pola rasi dibuat dari jumlah skill: bintang bernama di jalur zig-zag, ditambah satu atau dua bintang pembentuk pola
-const signPattern = (count: number, seed: number) => {
+type Pattern = { stars: [number, number][]; lines: [number, number][]; order: number[] };
+
+// bentuk rasi yang dirancang sendiri-sendiri supaya tiap kelompok skill mudah dibedakan; order = bintang yang diberi nama, berurutan
+const patterns: Pattern[] = [
+  // huruf W seperti Cassiopeia
+  { stars: [[-60, -14], [-30, 18], [0, -6], [30, 20], [58, -18]], lines: [[0, 1], [1, 2], [2, 3], [3, 4]], order: [0, 2, 4, 1, 3] },
+  // gayung bertangkai seperti Biduk
+  {
+    stars: [[-60, -26], [-38, -18], [-16, -8], [4, -2], [36, -8], [40, 24], [8, 26]],
+    lines: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 3]],
+    order: [0, 4, 6, 2, 5, 1, 3],
+  },
+  // salib seperti Cygnus
+  {
+    stars: [[0, -38], [-52, 8], [-26, 4], [0, 0], [24, -4], [50, -8], [0, 36]],
+    lines: [[0, 3], [3, 6], [1, 2], [2, 3], [3, 4], [4, 5]],
+    order: [0, 5, 6, 1, 3, 2, 4],
+  },
+  // layang-layang berekor seperti Corvus
+  { stars: [[-28, -28], [26, -32], [36, 8], [-18, 14], [-54, 36]], lines: [[0, 1], [1, 2], [2, 3], [3, 0], [3, 4]], order: [1, 4, 0, 2, 3] },
+  // busur mahkota seperti Corona Borealis
+  {
+    stars: [[-58, 4], [-42, -20], [-15, -32], [15, -32], [42, -20], [58, 4]],
+    lines: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5]],
+    order: [0, 3, 5, 1, 4, 2],
+  },
+  // bahu, sabuk, dan kaki seperti Orion
+  {
+    stars: [[-34, -34], [30, -30], [-12, 0], [0, -2], [12, -4], [-32, 32], [30, 30]],
+    lines: [[0, 2], [1, 4], [2, 3], [3, 4], [2, 5], [4, 6]],
+    order: [0, 6, 3, 1, 5, 2, 4],
+  },
+];
+
+// kalau skill dalam satu kelompok lebih banyak dari bintang bernama di bentuknya, pakai pola zig-zag yang dibangkitkan
+const signPattern = (count: number, seed: number, index: number) => {
+  const pattern = patterns[index % patterns.length];
+  if (count <= pattern.order.length) {
+    const named = new Map<number, number>();
+    pattern.order.slice(0, count).forEach((star, skill) => named.set(star, skill));
+    return { stars: pattern.stars, lines: pattern.lines, named };
+  }
+  return generatedPattern(count, seed);
+};
+
+// pola cadangan dibuat dari jumlah skill: bintang bernama di jalur zig-zag, ditambah satu atau dua bintang pembentuk pola
+const generatedPattern = (count: number, seed: number) => {
   let state = seed;
   const random = () => {
     state = (state * 16807) % 2147483647;
@@ -127,6 +172,13 @@ const signPattern = (count: number, seed: number) => {
   return { stars, lines, named };
 };
 
+// nama skill menjauhi pusat rasi: bintang di kiri bernama di kirinya, di kanan di kanannya, di tengah di atasnya
+const nameAt = (x: number, y: number) => {
+  if (x < -25) return `x="${(x - 9).toFixed(1)}" y="${(y - 8).toFixed(1)}" text-anchor="end"`;
+  if (x > 25) return `x="${(x + 9).toFixed(1)}" y="${(y - 8).toFixed(1)}"`;
+  return `x="${x.toFixed(1)}" y="${(y - 13).toFixed(1)}" text-anchor="middle"`;
+};
+
 // tiap rasi elemen HTML sendiri di atas roda: roda dan rasi diputar berlawanan lewat CSS supaya dikerjakan GPU dan nama tetap tegak
 export const zodiacSigns = (signs: Sign[]) =>
   signs
@@ -134,7 +186,7 @@ export const zodiacSigns = (signs: Sign[]) =>
       const angle = ((index * (360 / signs.length) - 90) * Math.PI) / 180;
       const cx = 300 + Math.cos(angle) * 140;
       const cy = 300 + Math.sin(angle) * 140;
-      const { stars, lines, named } = signPattern(sign.skills.length, 97 + index * 131);
+      const { stars, lines, named } = signPattern(sign.skills.length, 97 + index * 131, index);
       const path = lines.map(([from, to]) => `M${stars[from].map((v) => v.toFixed(1)).join(' ')}L${stars[to].map((v) => v.toFixed(1)).join(' ')}`).join('');
       const starMarkup = stars
         .map(([x, y], starIndex) => {
@@ -142,7 +194,7 @@ export const zodiacSigns = (signs: Sign[]) =>
           const skill = skillIndex === undefined ? undefined : sign.skills[skillIndex];
           return (
             `<circle class="zodiac__star"${skill ? ` data-skill="${skill.id}"` : ''} cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${skill ? 3.6 : 1.8}"></circle>` +
-            (skill ? `<text class="zodiac__name" data-skill="${skill.id}" x="${(x + 9).toFixed(1)}" y="${(y - 8).toFixed(1)}">${escapeHtml(skill.name)}</text>` : '')
+            (skill ? `<text class="zodiac__name" data-skill="${skill.id}" ${nameAt(x, y)}>${escapeHtml(skill.name)}</text>` : '')
           );
         })
         .join('');
