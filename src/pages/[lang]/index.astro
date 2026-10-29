@@ -7,7 +7,8 @@ import Base from '../../layouts/Base.astro';
 import { formatMonth, getDictionary, LOCALES, localized, type Locale } from '../../i18n';
 import { getCertifications, getExperiences, getProfile, getPublishedProjects, getSkills, type Skill } from '../../lib/db';
 import {
-  astroTicks,
+  astroBand,
+  astroLimb,
   bodyFor,
   moonPath,
   planetMarkup,
@@ -251,14 +252,18 @@ const title = profile ? `${fullName} · ${headline}` : 'Portfolio';
           <p class="zodiac__caption label" aria-live="polite">
             {dictionary.toolkit.charting} · <b>{signs[0].latin}</b>
           </p>
-          <svg class="astro zodiac" viewBox="0 0 600 600" aria-hidden="true">
-            <g class="astro__outer" set:html={`${astroTicks()}<circle class="astro__ring" cx="300" cy="300" r="290"></circle>`} />
-            <circle class="astro__ring" cx="300" cy="300" r="250" />
-            <circle class="astro__ring astro__ring--dash" cx="300" cy="300" r="56" />
-            <g class="zodiac__wheel" set:html={zodiacSigns(signs)} />
-            <path class="zodiac__pointer" d="M300 22L293 10H307Z" />
-            <circle class="astro__core" cx="300" cy="300" r="5" />
-          </svg>
+          {/* lapisan HTML terpisah supaya pita dan roda berputar di GPU tanpa menggambar ulang SVG tiap frame */}
+          <div class="astro zodiac" aria-hidden="true">
+            <svg class="astro__limb" viewBox="0 0 600 600" set:html={astroLimb()} />
+            <div class="astro__band"><svg viewBox="0 0 600 600" set:html={astroBand()} /></div>
+            <div class="zodiac__wheel" set:html={zodiacSigns(signs)} />
+            <svg class="astro__top" viewBox="0 0 600 600">
+              <path class="zodiac__pointer" d="M300 31L305.5 9L300 13.5L294.5 9Z" />
+              <line class="zodiac__reading" x1="300" y1="33" x2="300" y2="62" />
+              <circle class="astro__pin" cx="300" cy="300" r="7" />
+              <circle class="astro__core" cx="300" cy="300" r="2.6" />
+            </svg>
+          </div>
         </div>
         <div class="tools__head">
           <p class="label chapter" data-reveal>

@@ -69,22 +69,39 @@ export const toRoman = (value: number) => {
 };
 
 /* ---------- planisfer zodiak ---------- */
-export const astroTicks = () =>
-  Array.from({ length: 72 }, (_, index) => {
-    const degree = index * 5;
-    // 0° di puncak dan bertambah searah jarum jam, seperti dial astronomi dan navbar
-    const angle = (degree * Math.PI) / 180;
-    const length = degree % 30 === 0 ? 14 : 6;
-    const x1 = 300 + Math.sin(angle) * 288;
-    const y1 = 300 - Math.cos(angle) * 288;
-    const x2 = 300 + Math.sin(angle) * (288 - length);
-    const y2 = 300 - Math.cos(angle) * (288 - length);
-    const label =
-      degree % 30 === 0
-        ? `<text class="astro__deg" x="${(300 + Math.sin(angle) * 258).toFixed(1)}" y="${(300 - Math.cos(angle) * 258 + 3).toFixed(1)}" text-anchor="middle">${String(degree).padStart(3, '0')}°</text>`
-        : '';
-    return `<line class="astro__tick" x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}"></line>${label}`;
-  }).join('');
+// 0° di puncak dan bertambah searah jarum jam, seperti dial astronomi dan navbar
+const dialPoint = (radius: number, degree: number) => {
+  const angle = (degree * Math.PI) / 180;
+  return [300 + Math.sin(angle) * radius, 300 - Math.cos(angle) * radius].map((value) => value.toFixed(1));
+};
+
+// pinggiran tetap: skala tiap 1° bertingkat dan angka derajat yang selalu tegak
+export const astroLimb = () => {
+  let html =
+    '<defs><linearGradient id="astro-metal" gradientUnits="userSpaceOnUse" x1="70" y1="40" x2="530" y2="560"><stop offset="0" stop-color="#fff4de"></stop><stop offset="0.3" stop-color="#d9c29a"></stop><stop offset="0.55" stop-color="#7d6a4b"></stop><stop offset="0.78" stop-color="#cdb68d"></stop><stop offset="1" stop-color="#6b5a3f"></stop></linearGradient></defs>' +
+    '<circle class="astro__hair" cx="300" cy="300" r="295"></circle><circle class="astro__metal" cx="300" cy="300" r="290"></circle><circle class="astro__ring" cx="300" cy="300" r="268"></circle><circle class="astro__ring astro__ring--dash" cx="300" cy="300" r="56"></circle>';
+  for (let degree = 0; degree < 360; degree++) {
+    const tier = degree % 30 === 0 ? 'major' : degree % 10 === 0 ? 'mid' : degree % 5 === 0 ? 'five' : 'one';
+    const [x1, y1] = dialPoint({ major: 268, mid: 277, five: 280.5, one: 284 }[tier], degree);
+    const [x2, y2] = dialPoint(290, degree);
+    html += `<line class="astro__tick astro__tick--${tier}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"></line>`;
+    if (tier !== 'major') continue;
+    const [x, y] = dialPoint(253, degree);
+    html += `<text class="astro__deg" x="${x}" y="${(Number(y) + 3).toFixed(1)}" text-anchor="middle">${String(degree).padStart(3, '0')}°</text>`;
+  }
+  return html;
+};
+
+// pita ekliptika yang berputar pelan sendiri: titik tiap 2° dan tanda belah ketupat di tengah tiap rumah zodiak
+export const astroBand = () => {
+  let html = '<circle class="astro__band-ring" cx="300" cy="300" r="236"></circle><circle class="astro__dots" cx="300" cy="300" r="228"></circle>';
+  for (let house = 0; house < 12; house++) {
+    const degree = house * 30 + 15;
+    const [x, y] = dialPoint(236, degree);
+    html += `<path class="astro__house" d="M0 -4L2.2 0L0 4L-2.2 0Z" transform="translate(${x} ${y}) rotate(${degree})"></path>`;
+  }
+  return html;
+};
 
 export type SignSkill = { id: string; name: string };
 export type Sign = { group: string; latin: string; skills: SignSkill[] };
@@ -110,6 +127,7 @@ const signPattern = (count: number, seed: number) => {
   return { stars, lines, named };
 };
 
+// tiap rasi elemen HTML sendiri di atas roda: roda dan rasi diputar berlawanan lewat CSS supaya dikerjakan GPU dan nama tetap tegak
 export const zodiacSigns = (signs: Sign[]) =>
   signs
     .map((sign, index) => {
@@ -117,11 +135,9 @@ export const zodiacSigns = (signs: Sign[]) =>
       const cx = 300 + Math.cos(angle) * 140;
       const cy = 300 + Math.sin(angle) * 140;
       const { stars, lines, named } = signPattern(sign.skills.length, 97 + index * 131);
-      const at = (star: [number, number]) => [cx + star[0], cy + star[1]];
-      const path = lines.map(([from, to]) => `M${at(stars[from]).map((v) => v.toFixed(1)).join(' ')}L${at(stars[to]).map((v) => v.toFixed(1)).join(' ')}`).join('');
+      const path = lines.map(([from, to]) => `M${stars[from].map((v) => v.toFixed(1)).join(' ')}L${stars[to].map((v) => v.toFixed(1)).join(' ')}`).join('');
       const starMarkup = stars
-        .map((star, starIndex) => {
-          const [x, y] = at(star);
+        .map(([x, y], starIndex) => {
           const skillIndex = named.get(starIndex);
           const skill = skillIndex === undefined ? undefined : sign.skills[skillIndex];
           return (
@@ -130,6 +146,9 @@ export const zodiacSigns = (signs: Sign[]) =>
           );
         })
         .join('');
-      return `<g class="zodiac__sign" data-sign="${index}"><g class="zodiac__body" data-cx="${cx.toFixed(1)}" data-cy="${cy.toFixed(1)}"><circle class="zodiac__hit" cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="74"></circle><path class="zodiac__lines" pathLength="1" d="${path}"></path>${starMarkup}<text class="zodiac__title" x="${cx.toFixed(1)}" y="${(cy + 76).toFixed(1)}" text-anchor="middle">${sign.latin}</text><text class="zodiac__sub" x="${cx.toFixed(1)}" y="${(cy + 91).toFixed(1)}" text-anchor="middle">${escapeHtml(sign.group.toUpperCase())}</text></g></g>`;
+      // kotak rasi 200 satuan dari roda 600, jadi sepertiga lebar roda
+      const left = (((cx - 100) / 600) * 100).toFixed(3);
+      const top = (((cy - 100) / 600) * 100).toFixed(3);
+      return `<div class="zodiac__sign" data-sign="${index}" style="left:${left}%;top:${top}%"><svg viewBox="-100 -100 200 200"><path class="zodiac__lines" pathLength="1" d="${path}"></path>${starMarkup}<text class="zodiac__title" y="76" text-anchor="middle">${sign.latin}</text><text class="zodiac__sub" y="91" text-anchor="middle">${escapeHtml(sign.group.toUpperCase())}</text></svg></div>`;
     })
     .join('');

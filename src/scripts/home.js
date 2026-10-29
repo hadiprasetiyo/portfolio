@@ -406,40 +406,28 @@ export function startHome() {
   const zodiac = app.querySelector('.zodiac');
   const zodiacWheel = zodiac.querySelector('.zodiac__wheel');
   const zodiacSignEls = [...zodiac.querySelectorAll('.zodiac__sign')];
-  const zodiacBodies = zodiacSignEls.map((sign) => sign.querySelector('.zodiac__body'));
   const zodiacCaption = app.querySelector('.zodiac__caption b');
   const kitRows = [...app.querySelectorAll('.kit [data-sign]')];
   let signActive = -1;
   let wheelTurn = 0;
-  let wheelTarget = 0;
   let lastPick = -Infinity;
   let nextAuto = 0;
-  const drawWheel = () => {
-    zodiacWheel.setAttribute('transform', `rotate(${wheelTurn.toFixed(2)} 300 300)`);
-    // isi tiap rasi diputar balik supaya nama tetap tegak
-    zodiacBodies.forEach((body) => body.setAttribute('transform', `rotate(${(-wheelTurn).toFixed(2)} ${body.dataset.cx} ${body.dataset.cy})`));
-  };
   const pickSign = (index) => {
     if (index === signActive) return;
     signActive = index;
-    const desired = -index * 90;
-    wheelTarget += ((((desired - wheelTarget) % 360) + 540) % 360) - 180;
+    // jalur terpendek; putaran sendiri dikerjakan transisi CSS, rasi diputar balik dengan transisi yang sama
+    const desired = -index * (360 / signs.length);
+    wheelTurn += ((((desired - wheelTurn) % 360) + 540) % 360) - 180;
+    zodiacWheel.style.setProperty('--turn', `${wheelTurn}deg`);
     zodiacSignEls.forEach((sign, signIndex) => sign.classList.toggle('is-active', signIndex === index));
     kitRows.forEach((row) => row.classList.toggle('is-active', Number(row.dataset.sign) === index));
     zodiacCaption.textContent = signs[index].latin;
-    if (reduce) {
-      wheelTurn = wheelTarget;
-      drawWheel();
-    }
   };
-  const turnZodiac = (now, seconds) => {
-    // berputar sendiri pelan-pelan, berhenti sementara setelah pengunjung memilih
-    if (!reduce && now > nextAuto && now - lastPick > 12000) {
-      pickSign((signActive + 1) % signs.length);
-      nextAuto = now + 6500;
-    }
-    wheelTurn += (wheelTarget - wheelTurn) * Math.min(1, seconds * 2.6);
-    drawWheel();
+  // berpindah sendiri ke rasi berikutnya, berhenti sementara setelah pengunjung memilih
+  const autoZodiac = (now) => {
+    if (reduce || now < nextAuto || now - lastPick < 12000) return;
+    pickSign((signActive + 1) % signs.length);
+    nextAuto = now + 6500;
   };
   const choose = (index) => {
     lastPick = performance.now();
@@ -464,9 +452,6 @@ export function startHome() {
     button.addEventListener('pointerleave', () => highlight(null));
     button.addEventListener('blur', () => highlight(null));
   });
-
-
-
 
   /* ---------- rasi bintang di kontak ---------- */
   const constellationMap = app.querySelector('.constellation');
@@ -570,7 +555,6 @@ export function startHome() {
   layoutOrrery();
   onScroll();
   placeOrrery(0);
-  drawWheel();
   if (reduce) return;
 
   // tombol kontak berbentuk planet sedikit tertarik ke kursor yang mendekat
@@ -591,7 +575,7 @@ export function startHome() {
     const stepSeconds = previousFrame === null ? 1 / 60 : Math.min(0.05, (now - previousFrame) / 1000);
     previousFrame = now;
     if (visible.has(works)) placeOrrery(stepSeconds);
-    if (visible.has(zodiac)) turnZodiac(now, stepSeconds);
+    if (visible.has(zodiac)) autoZodiac(now);
     if (cta && visible.has(cta)) {
       let goalX = 0;
       let goalY = 0;
