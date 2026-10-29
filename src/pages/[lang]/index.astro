@@ -326,21 +326,44 @@ const title = profile ? `${fullName} · ${headline}` : 'Portfolio';
     </ol>
     {
       certifications.length > 0 && (
-        <ul class="certifications" role="list">
-          {certifications.map((certification) => (
-            <li class="certification drawn" data-reveal>
-              <span class="label">{formatMonth(certification.issued_on, lang)}</span>
-              <span class="certification__name">{certification.name}</span>
-              <span class="label">{certification.issuer}</span>
-              {certification.credential_url && (
-                <a class="link" href={certification.credential_url} rel="noopener noreferrer">
-                  {dictionary.certification.viewCredential}
-                  <span class="visually-hidden">: {certification.name}</span>
-                </a>
-              )}
-            </li>
-          ))}
-        </ul>
+        <div class="certifications">
+          <p class="label chapter" data-reveal>
+            <span>{dictionary.sections.certifications}</span>
+            <i aria-hidden="true" />
+            {String(certifications.length).padStart(2, '0')}
+          </p>
+          {/* katalog bintang tetap: tiap sertifikat satu entri bernomor dengan epoch terbitnya */}
+          <ul class="catalogue" role="list">
+            {certifications.map((certification, index) => {
+              const [year, month] = certification.issued_on.split('-').map(Number);
+              // epoch ditulis seperti astronom menulis J2000.0: tahun desimal di tengah bulan terbit.
+              // dua desimal supaya Desember tidak terbaca sebagai tahun berikutnya (2023.96, bukan 2024.0)
+              const epoch = `J${(year + ((month || 1) - 0.5) / 12).toFixed(2)}`;
+              return (
+                <li class="catalogue__entry drawn" data-reveal>
+                  <p class="catalogue__mark label" aria-hidden="true">
+                    <svg viewBox="0 0 20 20">
+                      <path d="M10 0L11.6 8.4L20 10L11.6 11.6L10 20L8.4 11.6L0 10L8.4 8.4Z" />
+                    </svg>
+                    {String(index + 1).padStart(2, '0')}
+                  </p>
+                  <h3>{certification.name}</h3>
+                  <p class="label">{certification.issuer}</p>
+                  <p class="catalogue__foot label">
+                    <span>
+                      {formatMonth(certification.issued_on, lang)} · {epoch}
+                    </span>
+                    {certification.credential_url && (
+                      <a href={certification.credential_url} rel="noopener noreferrer">
+                        {dictionary.certification.viewCredential} ↗<span class="visually-hidden">: {certification.name}</span>
+                      </a>
+                    )}
+                  </p>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       )
     }
   </section>

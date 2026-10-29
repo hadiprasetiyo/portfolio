@@ -1269,6 +1269,74 @@
   font-style: italic;
 }
 
+/* ---------- sertifikasi: katalog bintang tetap di bawah fase bulan ---------- */
+.certifications {
+  display: grid;
+  gap: 28px;
+  margin-top: 96px;
+}
+
+/* kolom menyesuaikan jumlah sertifikat: satu entri tetap selebar satu kolom, bukan melebar penuh */
+.catalogue {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  gap: 0 48px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.catalogue__entry {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  padding-block: 28px 32px;
+}
+
+.catalogue__mark {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--faint);
+}
+
+.catalogue__mark svg {
+  width: 14px;
+  height: 14px;
+  fill: var(--gold);
+  transition: rotate 0.9s var(--ease), scale 0.9s var(--ease);
+}
+
+.catalogue__entry h3 {
+  font: 400 26px/1.15 var(--font-serif);
+  text-wrap: balance;
+}
+
+.catalogue__foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 20px;
+  margin-top: 8px;
+  color: var(--faint);
+}
+
+.catalogue__foot a {
+  color: var(--gold);
+  text-decoration: none;
+}
+
+.catalogue__foot a:hover {
+  color: var(--sun);
+}
+
+/* bintang berputar 45° dan membesar sedikit saat entrinya disorot, seperti berkelip */
+.catalogue__entry:hover .catalogue__mark svg,
+.catalogue__entry:focus-within .catalogue__mark svg {
+  rotate: 45deg;
+  scale: 1.2;
+}
+
 /* ---------- kontak ---------- */
 .contact {
   position: relative;
