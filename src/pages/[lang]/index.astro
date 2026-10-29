@@ -45,6 +45,14 @@ const work = experiences.filter((experience) => experience.kind === 'work');
 const currentRole = work.find((experience) => experience.ended_on === null) ?? work[0];
 const city = profile?.location.split(',')[0] ?? '';
 
+// segel medali di piagam sertifikat: tepi bergerigi seperti koin dan mawar kompas delapan arah
+const sealPoint = (radius: number, degrees: number) => {
+  const angle = (degrees * Math.PI) / 180;
+  return `${(32 + Math.sin(angle) * radius).toFixed(2)} ${(32 - Math.cos(angle) * radius).toFixed(2)}`;
+};
+const sealTicks = Array.from({ length: 48 }, (_, k) => `M${sealPoint(27.5, k * 7.5)}L${sealPoint(30, k * 7.5)}`).join('');
+const sealRose = `M${Array.from({ length: 16 }, (_, k) => sealPoint(k % 2 ? 3.4 : k % 4 === 0 ? 17 : 10, k * 22.5)).join('L')}Z`;
+
 /* About: angka statistik dihitung dari data, bukan diketik */
 const firstYear = Math.min(...experiences.map((experience) => Number(experience.started_on.slice(0, 4))), new Date().getFullYear());
 const stats = [
@@ -96,14 +104,6 @@ const phases = [
     description: dictionary.journey.nextDescription,
   },
 ];
-
-// segel medali di piagam sertifikat: tepi bergerigi seperti koin dan mawar kompas delapan arah
-const sealPoint = (radius: number, degrees: number) => {
-  const angle = (degrees * Math.PI) / 180;
-  return `${(32 + Math.sin(angle) * radius).toFixed(2)} ${(32 - Math.cos(angle) * radius).toFixed(2)}`;
-};
-const sealTicks = Array.from({ length: 48 }, (_, k) => `M${sealPoint(27.5, k * 7.5)}L${sealPoint(30, k * 7.5)}`).join('');
-const sealRose = `M${Array.from({ length: 16 }, (_, k) => sealPoint(k % 2 ? 3.4 : k % 4 === 0 ? 17 : 10, k * 22.5)).join('L')}Z`;
 
 const homeData = { projects: numerals.map((numeral) => ({ numeral })), signs: signs.map((sign) => ({ latin: sign.latin })) };
 const title = profile ? `${fullName} · ${headline}` : 'Portfolio';
