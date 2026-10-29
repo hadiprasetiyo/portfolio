@@ -228,11 +228,14 @@ const title = profile ? `${fullName} · ${headline}` : 'Portfolio';
               return (
                 <button class="orrery__planet" type="button" data-work={index} style={planetStyle(index)} aria-label={`${dictionary.work.show} ${projectTitle}`}>
                   <Fragment set:html={planetMarkup(index)} />
+                  {/* anotasi bersiku seperti di hero, berjangkar di tepi atas bola */}
                   <span class="orrery__label">
-                    <span class="label">
-                      {numerals[index]} · {bodyFor(index).name}
+                    <span class="orrery__note">
+                      <span class="label">
+                        {numerals[index]} · {bodyFor(index).name} · {project.published_at.slice(0, 4)}
+                      </span>
+                      <span class="orrery__title">{projectTitle}</span>
                     </span>
-                    <span class="orrery__title">{projectTitle}</span>
                   </span>
                 </button>
               );

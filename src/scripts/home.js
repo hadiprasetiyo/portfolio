@@ -284,33 +284,52 @@ export function startHome() {
     skyContext.setTransform(orreryBox.ratio, 0, 0, orreryBox.ratio, 0, 0);
     orrerySun.style.left = `${orreryBox.cx}px`;
     orrerySun.style.top = `${orreryBox.cy}px`;
+    // ukuran tombol dan bola hanya berubah saat resize; dibaca di sini supaya tidak memaksa hitung ulang style tiap frame
+    planetsState.forEach((planet) => {
+      planet.width = planet.button.offsetWidth;
+      planet.sphereHalf = planet.sphere.offsetHeight / 2;
+    });
+    placeLabel();
   };
+  // separuh belakang orbit lebih redup dari separuh depan, jadi bidang tata surya terasa miring ke arah penonton
+  const strokeOrbit = (radius, front, back) => {
+    const { cx, cy } = orreryBox;
+    [[Math.PI, Math.PI * 2, back], [0, Math.PI, front]].forEach(([from, to, color]) => {
+      skyContext.beginPath();
+      skyContext.ellipse(cx, cy, radius, radius * tilt, 0, from, to);
+      skyContext.strokeStyle = color;
+      skyContext.stroke();
+    });
+  };
+  // sudut di elips ke sudut layar yang dipakai gradien kerucut
+  const screenAngle = (angle) => Math.atan2(Math.sin(angle) * tilt, Math.cos(angle));
   const drawSky = (seconds) => {
     const { cx, cy, reach } = orreryBox;
     skyContext.clearRect(0, 0, orreryBox.width, orreryBox.height);
-    // orbit tiap planet; orbit proyek aktif berwarna emas
+    skyContext.lineWidth = 1;
     orbitShares.forEach((share, index) => {
-      skyContext.beginPath();
-      skyContext.ellipse(cx, cy, reach * share, reach * share * tilt, 0, 0, Math.PI * 2);
-      skyContext.strokeStyle = index === activeWork ? 'rgba(217, 194, 154, 0.42)' : 'rgba(242, 238, 230, 0.075)';
-      skyContext.lineWidth = 1;
-      skyContext.stroke();
+      if (index === activeWork) strokeOrbit(reach * share, 'rgba(232, 208, 160, 0.55)', 'rgba(217, 194, 154, 0.16)');
+      else strokeOrbit(reach * share, 'rgba(242, 238, 230, 0.11)', 'rgba(242, 238, 230, 0.045)');
     });
-    // jejak lintasan memudar di belakang tiap planet
+    // jejak lintasan: satu goresan bergradasi per planet, terang di dekat planet dan memudar ke belakang
     planetsState.forEach((planet, index) => {
+      const active = index === activeWork;
       const radius = reach * orbitShares[index];
-      const steps = 28;
-      const length = index === activeWork ? 1.4 : 0.9;
-      for (let step = 0; step < steps; step++) {
-        const from = planet.angle - length * (1 - step / steps);
-        const to = planet.angle - length * (1 - (step + 1) / steps);
-        skyContext.beginPath();
-        skyContext.ellipse(cx, cy, radius, radius * tilt, 0, from, to);
-        const strength = Math.pow((step + 1) / steps, 2);
-        skyContext.strokeStyle = index === activeWork ? `rgba(232, 208, 160, ${(strength * 0.85).toFixed(3)})` : `rgba(242, 238, 230, ${(strength * 0.32).toFixed(3)})`;
-        skyContext.lineWidth = 1.2 + strength * 0.6;
-        skyContext.stroke();
-      }
+      const tail = planet.angle - (active ? 1.4 : 0.9);
+      const start = screenAngle(tail);
+      const span = (((screenAngle(planet.angle) - start) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2) / (Math.PI * 2);
+      const gradient = skyContext.createConicGradient(start, cx, cy);
+      const color = active ? '232, 208, 160' : '242, 238, 230';
+      const peak = active ? 0.85 : 0.3;
+      gradient.addColorStop(0, `rgba(${color}, 0)`);
+      gradient.addColorStop(span * 0.6, `rgba(${color}, ${peak * 0.3})`);
+      gradient.addColorStop(span, `rgba(${color}, ${peak})`);
+      gradient.addColorStop(Math.min(1, span + 0.001), `rgba(${color}, 0)`);
+      skyContext.beginPath();
+      skyContext.ellipse(cx, cy, radius, radius * tilt, 0, tail, planet.angle);
+      skyContext.strokeStyle = gradient;
+      skyContext.lineWidth = active ? 1.8 : 1.3;
+      skyContext.stroke();
     });
     // butir asteroid; yang di belakang matahari disembunyikan
     skyContext.fillStyle = '#D8CDBA';
@@ -328,6 +347,12 @@ export function startHome() {
   };
   // planet aktif berhenti di kanan agak depan; di orbit dalam ukurannya dibatasi supaya tidak menutupi matahari
   const showcaseAngle = 0.42;
+  // anotasi planet aktif pindah ke kiri kalau di tempat berhentinya tidak cukup ruang di kanan
+  function placeLabel() {
+    const stop = orreryBox.cx + Math.cos(showcaseAngle) * orreryBox.reach * orbitShares[activeWork];
+    // ruang yang dibutuhkan: tepi planet, garis serong, dan judul proyek
+    planetsState[activeWork].button.classList.toggle('is-flipped', stop + 400 > orreryBox.width);
+  }
   const placeOrrery = (seconds) => {
     if (stacked.matches || !orreryBox.width) return;
     requestTextures();
@@ -348,20 +373,33 @@ export function startHome() {
       const fromSun = Math.hypot(x - orreryBox.cx, y - orreryBox.cy);
       const roomy = clamp((2 * (fromSun - 26)) / 124, 0.45, 1);
       const scale = (active ? roomy : planet.rest) * (0.82 + 0.18 * depth);
-      const size = planet.button.offsetWidth;
-      const sphereHalf = planet.sphere.offsetHeight / 2;
-      planet.button.style.transform = `translate(${(x - size / 2).toFixed(1)}px, ${(y - sphereHalf * scale).toFixed(1)}px) scale(${scale.toFixed(3)})`;
+      planet.button.style.transform = `translate(${(x - planet.width / 2).toFixed(1)}px, ${(y - planet.sphereHalf * scale).toFixed(1)}px) scale(${scale.toFixed(3)})`;
       planet.button.style.opacity = (active ? 1 : 0.6 + 0.4 * depth).toFixed(3);
+      // nilai yang jarang berubah hanya ditulis saat berubah, supaya browser tidak menghitung ulang style tiap frame
+      const counter = scale.toFixed(2);
+      // label hanya terlihat di planet aktif atau yang disorot; planet lain tidak perlu diperbarui
+      if ((active || planet.showing) && planet.counter !== counter) {
+        planet.counter = counter;
+        // label dibalik skalanya supaya ukuran teksnya tetap, sekecil apa pun planetnya
+        planet.button.style.setProperty('--s', counter);
+      }
       // di belakang matahari saat berada di separuh atas orbit; planet aktif selalu paling depan supaya labelnya tidak tertutup
-      planet.button.style.zIndex = active ? '40' : String(depth > 0.5 ? 20 + Math.round(depth * 10) : 5 + Math.round(depth * 8));
+      const layer = active ? '40' : String(depth > 0.5 ? 20 + Math.round(depth * 10) : 5 + Math.round(depth * 8));
+      if (planet.layer !== layer) {
+        planet.layer = layer;
+        planet.button.style.zIndex = layer;
+      }
       // arah ke matahari di ruang pandang: sumbu x kanan, y ke bawah layar, z ke arah penonton
       const light = [-Math.cos(planet.angle), -Math.sin(planet.angle) * viewSine, -Math.sin(planet.angle) * viewCosine];
-      const towardX = light[0];
-      const towardY = light[1] - 0.2;
-      const length = Math.hypot(towardX, towardY) || 1;
-      planet.sphere.style.setProperty('--lx', `${(50 + (towardX / length) * 30).toFixed(1)}%`);
-      planet.sphere.style.setProperty('--ly', `${(50 + (towardY / length) * 30).toFixed(1)}%`);
-      if (!planet.texture) return;
+      if (!planet.texture) {
+        // cahaya CSS hanya dipakai sebelum tekstur siap; setelah itu kanvas yang menyinari planet
+        const towardX = light[0];
+        const towardY = light[1] - 0.2;
+        const length = Math.hypot(towardX, towardY) || 1;
+        planet.sphere.style.setProperty('--lx', `${(50 + (towardX / length) * 30).toFixed(1)}%`);
+        planet.sphere.style.setProperty('--ly', `${(50 + (towardY / length) * 30).toFixed(1)}%`);
+        return;
+      }
       // resolusi kanvas mengikuti ukuran tampil, dibulatkan supaya tidak dibuat ulang tiap frame
       const wanted = clamp(Math.round((124 * scale * Math.min(orreryBox.ratio, 1.5)) / 8) * 8, 16, 192);
       let resized = false;
@@ -389,10 +427,16 @@ export function startHome() {
     activeWork = index;
     progressIndex.textContent = data.projects[index].numeral;
     planetsState.forEach((planet, planetIndex) => planet.button.classList.toggle('is-active', planetIndex === index));
+    placeLabel();
     if (reduce) placeOrrery(0);
   };
   planetsState[0].button.classList.add('is-active');
   // klik planet menggulir halaman ke titik proyek itu, jadi scroll dan klik selalu sepakat
+  planetsState.forEach((planet) => {
+    const show = (value) => () => (planet.showing = value);
+    ['pointerenter', 'focus'].forEach((type) => planet.button.addEventListener(type, show(true)));
+    ['pointerleave', 'blur'].forEach((type) => planet.button.addEventListener(type, show(false)));
+  });
   planetButtons.forEach((button) => {
     if (!button.dataset.work) return;
     button.addEventListener('click', () => {
