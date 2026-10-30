@@ -1021,11 +1021,6 @@
   stroke-width: 0.7;
 }
 
-.astro__ring--dash {
-  stroke: var(--line);
-  stroke-dasharray: 2 6;
-}
-
 .astro__tick {
   stroke: rgba(217, 194, 154, 0.16);
   stroke-width: 0.5;
@@ -1080,6 +1075,38 @@
   --turn: 0deg;
   rotate: var(--turn);
   transition: rotate 2.2s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* peta langit di roda: semuanya samar supaya rasi yang aktif tetap paling menonjol */
+.zodiac__chart {
+  pointer-events: none;
+}
+
+.zodiac__field {
+  fill: var(--fg);
+}
+
+.zodiac__grid,
+.zodiac__spokes {
+  fill: none;
+  stroke: rgba(242, 238, 230, 0.06);
+  stroke-width: 0.7;
+}
+
+.zodiac__ecliptic {
+  fill: none;
+  stroke: rgba(217, 194, 154, 0.3);
+  stroke-width: 0.8;
+  stroke-dasharray: 5 6;
+}
+
+/* kutub langit: cincin 24 titik, satu tiap jam */
+.zodiac__pole {
+  fill: none;
+  stroke: rgba(217, 194, 154, 0.45);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-dasharray: 0 13.614;
 }
 
 /* diputar balik dengan transisi yang sama persis dengan roda, jadi nama rasi tetap tegak sepanjang putaran */

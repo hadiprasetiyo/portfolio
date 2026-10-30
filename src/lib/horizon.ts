@@ -79,7 +79,7 @@ const dialPoint = (radius: number, degree: number) => {
 export const astroLimb = () => {
   let html =
     '<defs><linearGradient id="astro-metal" gradientUnits="userSpaceOnUse" x1="70" y1="40" x2="530" y2="560"><stop offset="0" stop-color="#fff4de"></stop><stop offset="0.3" stop-color="#d9c29a"></stop><stop offset="0.55" stop-color="#7d6a4b"></stop><stop offset="0.78" stop-color="#cdb68d"></stop><stop offset="1" stop-color="#6b5a3f"></stop></linearGradient></defs>' +
-    '<circle class="astro__hair" cx="300" cy="300" r="295"></circle><circle class="astro__metal" cx="300" cy="300" r="290"></circle><circle class="astro__ring" cx="300" cy="300" r="268"></circle><circle class="astro__ring astro__ring--dash" cx="300" cy="300" r="56"></circle>';
+    '<circle class="astro__hair" cx="300" cy="300" r="295"></circle><circle class="astro__metal" cx="300" cy="300" r="290"></circle><circle class="astro__ring" cx="300" cy="300" r="268"></circle>';
   for (let degree = 0; degree < 360; degree++) {
     const tier = degree % 30 === 0 ? 'major' : degree % 10 === 0 ? 'mid' : degree % 5 === 0 ? 'five' : 'one';
     const [x1, y1] = dialPoint({ major: 268, mid: 277, five: 280.5, one: 284 }[tier], degree);
@@ -92,7 +92,7 @@ export const astroLimb = () => {
   return html;
 };
 
-// pita ekliptika yang berputar pelan sendiri: titik tiap 2° dan tanda belah ketupat di tengah tiap rumah zodiak
+// pita zodiak yang berputar pelan sendiri: titik tiap 2° dan tanda belah ketupat di tengah tiap rumah zodiak
 export const astroBand = () => {
   let html = '<circle class="astro__band-ring" cx="300" cy="300" r="236"></circle><circle class="astro__dots" cx="300" cy="300" r="228"></circle>';
   for (let house = 0; house < 12; house++) {
@@ -101,6 +101,37 @@ export const astroBand = () => {
     html += `<path class="astro__house" d="M0 -4L2.2 0L0 4L-2.2 0Z" transform="translate(${x} ${y}) rotate(${degree})"></path>`;
   }
   return html;
+};
+
+// peta langit di roda, ikut berputar bersama rasi: bintang latar, kisi jam dan deklinasi, ekliptika, dan kutub langit di pusat
+export const astroChart = () => {
+  let state = 2026;
+  const random = () => {
+    state = (state * 16807) % 2147483647;
+    return state / 2147483647;
+  };
+  const spokes = Array.from({ length: 12 }, (_, hour) => {
+    const [x1, y1] = dialPoint(64, hour * 30);
+    const [x2, y2] = dialPoint(214, hour * 30);
+    return `M${x1} ${y1}L${x2} ${y2}`;
+  }).join('');
+  // sebaran merata di cincin antara pusat dan pita: akar acak supaya tidak menumpuk di tengah
+  const stars = Array.from({ length: 120 }, () => {
+    const radius = Math.sqrt(64 * 64 + random() * (216 * 216 - 64 * 64));
+    const [x, y] = dialPoint(radius, random() * 360);
+    const bright = random() ** 4;
+    return `<circle cx="${x}" cy="${y}" r="${(0.5 + bright * 1.3).toFixed(2)}" opacity="${(0.18 + bright * 0.55).toFixed(2)}"></circle>`;
+  }).join('');
+  return (
+    '<svg class="zodiac__chart" viewBox="0 0 600 600">' +
+    `<g class="zodiac__field">${stars}</g>` +
+    '<circle class="zodiac__grid" cx="300" cy="300" r="112"></circle><circle class="zodiac__grid" cx="300" cy="300" r="176"></circle>' +
+    `<path class="zodiac__spokes" d="${spokes}"></path>` +
+    // ekliptika tampak bergeser dari kutub karena bidang orbit Bumi miring 23,4° terhadap ekuator langit
+    '<circle class="zodiac__ecliptic" cx="300" cy="322" r="164"></circle>' +
+    '<circle class="zodiac__pole" cx="300" cy="300" r="52"></circle>' +
+    '</svg>'
+  );
 };
 
 export type SignSkill = { id: string; name: string };
