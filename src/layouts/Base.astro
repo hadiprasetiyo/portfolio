@@ -167,26 +167,27 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
             }
             {plateSparks.map((spark) => <path class="plate__spark" d="M0 -4.5L1 -1L4.5 0L1 1L0 4.5L-1 1L-4.5 0L-1 -1Z" transform={`translate(${spark.x} ${spark.y}) rotate(${spark.angle})`}></path>)}
           </svg>
-          {/* jarum dauphine berfaset di lapisan sendiri, jadi putaran dan kilaunya tidak menggambar ulang pelat */}
+          {/* jarum benang emas di lapisan sendiri, jadi putaran dan kilaunya tidak menggambar ulang pelat */}
           <div class="plate__needle" aria-hidden="true">
             <svg viewBox="0 0 480 480">
               <defs>
-                <clipPath id="needle-blade"><path d="M240 53 C239 70 236 86 236 100 C236 114 238.8 128 238.8 140 L241.2 140 C241.2 128 244 114 244 100 C244 86 241 70 240 53 Z"></path></clipPath>
+                <clipPath id="needle-blade"><path d="M239.45 140 L240.55 140 L240.35 72 L242.2 74 L240 54 L237.8 74 L239.65 72 Z"></path></clipPath>
                 <linearGradient id="needle-glint" x1="0" y1="1" x2="0" y2="0">
                   <stop offset="0" stop-color="#fffaf0" stop-opacity="0"></stop>
                   <stop offset="0.5" stop-color="#fffaf0"></stop>
                   <stop offset="1" stop-color="#fffaf0" stop-opacity="0"></stop>
                 </linearGradient>
               </defs>
-              {/* dua faset: sisi kiri tertimpa cahaya, sisi kanan dalam bayangan, seperti logam yang diasah bersudut */}
-              <path class="plate__facet" d="M240 53 C239 70 236 86 236 100 C236 114 238.8 128 238.8 140 L240 140 Z"></path>
-              <path class="plate__facet plate__facet--shade" d="M240 53 C241 70 244 86 244 100 C244 114 241.2 128 241.2 140 L240 140 Z"></path>
-              <path class="plate__facet" d="M240 384 C239.4 376 237.5 368 237.5 362 C237.5 354 238.9 346 238.9 340 L240 340 Z"></path>
-              <path class="plate__facet plate__facet--shade" d="M240 384 C240.6 376 242.5 368 242.5 362 C242.5 354 241.1 346 241.1 340 L240 340 Z"></path>
-              {/* bintang terpotong menembus bilah di bagian terlebar */}
-              <path class="plate__cut" d="M240 95.6 L240.9 99.1 L242.4 100 L240.9 100.9 L240 104.4 L239.1 100.9 L237.6 100 L239.1 99.1 Z"></path>
-              <path class="plate__finial" d="M240 387 L240.9 391.1 L244 392 L240.9 392.9 L240 397 L239.1 392.9 L236 392 L239.1 391.1 Z"></path>
-              <g clip-path="url(#needle-blade)"><rect class="plate__glint" x="234" y="126" width="12" height="24" fill="url(#needle-glint)"></rect></g>
+              {/* benang setipis rambut; mata panah dan bintang berfaset dua: sisi kiri tertimpa cahaya, kanan dalam bayangan */}
+              <path class="plate__facet" d="M239.45 140 L240.55 140 L240.35 72 L239.65 72 Z"></path>
+              <path class="plate__facet" d="M240 54 L237.8 74 L240 70.6 Z"></path>
+              <path class="plate__facet plate__facet--shade" d="M240 54 L242.2 74 L240 70.6 Z"></path>
+              <path class="plate__facet" d="M240 95 L239.1 99.1 L236.4 100 L239.1 100.9 L240 105 Z"></path>
+              <path class="plate__facet plate__facet--shade" d="M240 95 L240.9 99.1 L243.6 100 L240.9 100.9 L240 105 Z"></path>
+              <path class="plate__facet" d="M239.5 340 L240.5 340 L240.3 369 L239.7 369 Z"></path>
+              <path class="plate__facet" d="M240 370 L239.2 373.3 L237 374 L239.2 374.7 L240 378 Z"></path>
+              <path class="plate__facet plate__facet--shade" d="M240 370 L240.8 373.3 L243 374 L240.8 374.7 L240 378 Z"></path>
+              <g clip-path="url(#needle-blade)"><rect class="plate__glint" x="234" y="124" width="12" height="20" fill="url(#needle-glint)"></rect></g>
             </svg>
           </div>
           {/* angka di atas jarum: tepi sewarna latar memotong jarum yang lewat di belakangnya */}
@@ -633,11 +634,13 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
     filter: drop-shadow(0 0 3px rgba(255, 236, 200, 0.8));
   }
 
-  /* sedikit melewati sasaran lalu kembali, seperti jarum instrumen yang mengayun sebelum diam */
+  /* pegas teredam: melewati sasaran, berayun balik sekali lagi lalu diam, seperti jarum kompas sungguhan */
   .plate__needle {
     position: absolute;
     inset: 0;
+    /* cadangan untuk browser yang belum mengenal linear(): cukup satu kali lewat sasaran */
     transition: rotate 1.3s cubic-bezier(0.34, 1.32, 0.64, 1);
+    transition: rotate 1.9s linear(0, 0.202, 0.43, 0.652, 0.847, 1, 1.108, 1.173, 1.2, 1.197, 1.174, 1.139, 1.099, 1.06, 1.027, 1, 0.981, 0.97, 0.965, 0.966, 0.97, 0.976, 0.983, 0.99, 0.995, 1, 1.003, 1.005, 1.006, 1.006, 1.005, 1.004, 1.003, 1.002, 1.001, 1);
     filter: drop-shadow(0 0 5px rgba(255, 236, 200, 0.2));
   }
 
@@ -647,14 +650,6 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
 
   .plate__facet--shade {
     fill: #8a7350;
-  }
-
-  .plate__cut {
-    fill: var(--bg);
-  }
-
-  .plate__finial {
-    fill: #e9d6b0;
   }
 
   /* kilau cahaya menyapu bilah dari pangkal ke ujung sesekali, hanya selama indeks terbuka */
@@ -672,9 +667,9 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
 
   @keyframes needle-glint {
     0% { translate: 0 0; opacity: 0; }
-    3% { opacity: 0.9; }
-    16% { translate: 0 -96px; opacity: 0; }
-    100% { translate: 0 -96px; opacity: 0; }
+    3% { opacity: 1; }
+    16% { translate: 0 -82px; opacity: 0; }
+    100% { translate: 0 -82px; opacity: 0; }
   }
 
   /* bab di tepi pelat, seperti angka jam */
