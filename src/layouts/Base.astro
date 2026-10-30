@@ -182,23 +182,22 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
                   <stop offset="0" stop-color="#7d6a4b"></stop>
                   <stop offset="1" stop-color="#fff4de"></stop>
                 </linearGradient>
-                <linearGradient id="needle-tail" gradientUnits="userSpaceOnUse" x1="0" y1="340" x2="0" y2="369">
+                <linearGradient id="needle-tail" gradientUnits="userSpaceOnUse" x1="0" y1="340" x2="0" y2="384">
                   <stop offset="0" stop-color="#7d6a4b"></stop>
                   <stop offset="1" stop-color="#d9c29a"></stop>
                 </linearGradient>
               </defs>
-              {/* benang setipis rambut berbulu panah di pangkal; mata panah dan bintang berfaset dua: kiri tertimpa cahaya, kanan dalam bayangan */}
+              {/* benang setipis rambut; mata panah dan bintang berfaset dua: kiri tertimpa cahaya, kanan dalam bayangan */}
               <path d="M239.45 140 L240.55 140 L240.35 72 L239.65 72 Z" fill="url(#needle-thread)"></path>
-              <path class="plate__fletch" d="M240 127 L236.6 133.5 M240 127 L243.4 133.5 M240 132.5 L236.6 139 M240 132.5 L243.4 139"></path>
               <path class="plate__facet" d="M240 54 L237.8 74 L240 70.6 Z"></path>
               <path class="plate__facet plate__facet--shade" d="M240 54 L242.2 74 L240 70.6 Z"></path>
               <g class="plate__twinkle">
                 <path class="plate__facet" d="M240 95 L239.1 99.1 L236.4 100 L239.1 100.9 L240 105 Z"></path>
                 <path class="plate__facet plate__facet--shade" d="M240 95 L240.9 99.1 L243.6 100 L240.9 100.9 L240 105 Z"></path>
               </g>
-              {/* ekor berakhir di bulan sabit: bintang di depan, bulan di belakang */}
-              <path d="M239.5 340 L240.5 340 L240.3 369 L239.7 369 Z" fill="url(#needle-tail)"></path>
-              <path class="plate__facet" d="M240 369.5 A4.5 4.5 0 0 1 240 378.5 A2.3 4.5 0 0 0 240 369.5 Z"></path>
+              {/* ekor berbulu seperti pangkal anak panah, jadi satu jarum terbaca sebagai satu panah utuh */}
+              <path d="M239.5 340 L240.5 340 L240.3 384 L239.7 384 Z" fill="url(#needle-tail)"></path>
+              <path class="plate__fletch" d="M240 366 L236.4 372.5 M240 366 L243.6 372.5 M240 371.5 L236.4 378 M240 371.5 L243.6 378 M240 377 L236.4 383.5 M240 377 L243.6 383.5"></path>
               <g clip-path="url(#needle-blade)"><rect class="plate__glint" x="234" y="124" width="12" height="20" fill="url(#needle-glint)"></rect></g>
             </svg>
           </div>
