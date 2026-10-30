@@ -1041,6 +1041,13 @@
   stroke-width: 1.1;
 }
 
+/* nama zodiak di cincin luar, terukir seperti inskripsi pada logam */
+.astro__sign {
+  fill: rgba(217, 194, 154, 0.6);
+  font: 400 8px var(--font-mono);
+  letter-spacing: 0.32em;
+}
+
 .astro__deg {
   fill: var(--faint);
   font: 400 9px var(--font-mono);
@@ -1112,7 +1119,8 @@
 /* diputar balik dengan transisi yang sama persis dengan roda, jadi nama rasi tetap tegak sepanjang putaran */
 .zodiac__sign {
   position: absolute;
-  width: 33.333%;
+  /* 200 satuan dari viewBox 652 (lihat ASTRO_VIEW di horizon.ts) */
+  width: 30.675%;
   aspect-ratio: 1;
   cursor: pointer;
   opacity: 0.38;

@@ -69,6 +69,10 @@ export const toRoman = (value: number) => {
 };
 
 /* ---------- planisfer zodiak ---------- */
+// roda 600 satuan ditambah 26 di tiap sisi untuk cincin zodiak di luar skala derajat; semua lapisan memakai viewBox yang sama
+const ASTRO_PAD = 26;
+export const ASTRO_VIEW = `${-ASTRO_PAD} ${-ASTRO_PAD} ${600 + ASTRO_PAD * 2} ${600 + ASTRO_PAD * 2}`;
+const zodiacNames = ['ARIES', 'TAURUS', 'GEMINI', 'CANCER', 'LEO', 'VIRGO', 'LIBRA', 'SCORPIUS', 'SAGITTARIUS', 'CAPRICORNUS', 'AQUARIUS', 'PISCES'];
 // 0° di puncak dan bertambah searah jarum jam, seperti dial astronomi dan navbar
 const dialPoint = (radius: number, degree: number) => {
   const angle = (degree * Math.PI) / 180;
@@ -80,6 +84,21 @@ export const astroLimb = () => {
   let html =
     '<defs><linearGradient id="astro-metal" gradientUnits="userSpaceOnUse" x1="70" y1="40" x2="530" y2="560"><stop offset="0" stop-color="#fff4de"></stop><stop offset="0.3" stop-color="#d9c29a"></stop><stop offset="0.55" stop-color="#7d6a4b"></stop><stop offset="0.78" stop-color="#cdb68d"></stop><stop offset="1" stop-color="#6b5a3f"></stop></linearGradient></defs>' +
     '<circle class="astro__hair" cx="300" cy="300" r="295"></circle><circle class="astro__metal" cx="300" cy="300" r="290"></circle><circle class="astro__ring" cx="300" cy="300" r="268"></circle>';
+  // cincin zodiak: dua belas sektor 30° bernama Latin; separuh bawah ditulis berlawanan arah seperti inskripsi koin supaya tetap tegak
+  html += '<circle class="astro__metal" cx="300" cy="300" r="318"></circle><circle class="astro__hair" cx="300" cy="300" r="322"></circle>';
+  zodiacNames.forEach((name, house) => {
+    const from = house * 30;
+    const [x1, y1] = dialPoint(290, from);
+    const [x2, y2] = dialPoint(318, from);
+    html += `<line class="astro__tick astro__tick--major" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"></line>`;
+    const middle = from + 15;
+    const lower = middle > 90 && middle < 270;
+    const radius = lower ? 309 : 301;
+    const [sx, sy] = dialPoint(radius, lower ? from + 28 : from + 2);
+    const [ex, ey] = dialPoint(radius, lower ? from + 2 : from + 28);
+    html += `<path id="zodiac-arc-${house}" d="M${sx} ${sy}A${radius} ${radius} 0 0 ${lower ? 0 : 1} ${ex} ${ey}" fill="none"></path>`;
+    html += `<text class="astro__sign"><textPath href="#zodiac-arc-${house}" startOffset="50%" text-anchor="middle">${name}</textPath></text>`;
+  });
   for (let degree = 0; degree < 360; degree++) {
     const tier = degree % 30 === 0 ? 'major' : degree % 10 === 0 ? 'mid' : degree % 5 === 0 ? 'five' : 'one';
     const [x1, y1] = dialPoint({ major: 268, mid: 277, five: 280.5, one: 284 }[tier], degree);
@@ -123,12 +142,12 @@ export const astroChart = () => {
     return `<circle cx="${x}" cy="${y}" r="${(0.5 + bright * 1.3).toFixed(2)}" opacity="${(0.18 + bright * 0.55).toFixed(2)}"></circle>`;
   }).join('');
   return (
-    '<svg class="zodiac__chart" viewBox="0 0 600 600">' +
+    `<svg class="zodiac__chart" viewBox="${ASTRO_VIEW}">` +
     `<g class="zodiac__field">${stars}</g>` +
     '<circle class="zodiac__grid" cx="300" cy="300" r="112"></circle><circle class="zodiac__grid" cx="300" cy="300" r="176"></circle>' +
     `<path class="zodiac__spokes" d="${spokes}"></path>` +
-    // ekliptika tampak bergeser dari kutub karena bidang orbit Bumi miring 23,4° terhadap ekuator langit
-    '<circle class="zodiac__ecliptic" cx="300" cy="322" r="164"></circle>' +
+    // ekliptika dibuat sepusat dengan kutub; versi bergeser yang akurat terbaca seperti lingkaran yang meleset
+    '<circle class="zodiac__ecliptic" cx="300" cy="300" r="144"></circle>' +
     '<circle class="zodiac__pole" cx="300" cy="300" r="52"></circle>' +
     '</svg>'
   );
@@ -229,9 +248,10 @@ export const zodiacSigns = (signs: Sign[]) =>
           );
         })
         .join('');
-      // kotak rasi 200 satuan dari roda 600, jadi sepertiga lebar roda
-      const left = (((cx - 100) / 600) * 100).toFixed(3);
-      const top = (((cy - 100) / 600) * 100).toFixed(3);
+      // kotak rasi 200 satuan di dalam viewBox yang diperlebar cincin zodiak; lebarnya di CSS (.zodiac__sign) harus sama
+      const span = 600 + ASTRO_PAD * 2;
+      const left = (((cx - 100 + ASTRO_PAD) / span) * 100).toFixed(3);
+      const top = (((cy - 100 + ASTRO_PAD) / span) * 100).toFixed(3);
       return `<div class="zodiac__sign" data-sign="${index}" style="left:${left}%;top:${top}%"><svg viewBox="-100 -100 200 200"><path class="zodiac__lines" pathLength="1" d="${path}"></path>${starMarkup}<text class="zodiac__title" y="76" text-anchor="middle">${sign.latin}</text><text class="zodiac__sub" y="91" text-anchor="middle">${escapeHtml(sign.group.toUpperCase())}</text></svg></div>`;
     })
     .join('');
