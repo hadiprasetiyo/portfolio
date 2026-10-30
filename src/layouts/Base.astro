@@ -126,7 +126,7 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
     <nav class="site-index" id="site-index" aria-label={dictionary.mainNavigation} inert>
       <div class="wrap site-index__inner">
         <div class="plate">
-          {/* pelat astrolabe: skala derajat, lingkaran tropika, jarum alidade yang membidik bab */}
+          {/* pelat astrolabe: skala derajat, lingkaran tropika, dan tanda bab */}
           <svg viewBox="0 0 480 480" aria-hidden="true">
             <defs>
               {/* kilau logam: terang di kiri atas seperti tertimpa lampu, redup di kanan bawah */}
@@ -136,13 +136,6 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
                 <stop offset="0.55" stop-color="#7d6a4b"></stop>
                 <stop offset="0.78" stop-color="#cdb68d"></stop>
                 <stop offset="1" stop-color="#6b5a3f"></stop>
-              </linearGradient>
-              {/* bilah alidade seperti batang logam bulat: gelap di tepi, terang di punggung */}
-              <linearGradient id="alidade-metal" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0" stop-color="#6b5a3f"></stop>
-                <stop offset="0.42" stop-color="#fff4de"></stop>
-                <stop offset="0.6" stop-color="#d9c29a"></stop>
-                <stop offset="1" stop-color="#5e4f37"></stop>
               </linearGradient>
               <path id="plate-inscription" d="M240 122 A118 118 0 1 1 239.99 122"></path>
             </defs>
@@ -173,17 +166,31 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
               ))
             }
             {plateSparks.map((spark) => <path class="plate__spark" d="M0 -4.5L1 -1L4.5 0L1 1L0 4.5L-1 1L-4.5 0L-1 -1Z" transform={`translate(${spark.x} ${spark.y}) rotate(${spark.angle})`}></path>)}
-            {/* alidade: bilah ramping, belah ketupat berongga berpermata, lalu benang bidik putus-putus sampai mata panah */}
-            <g class="plate__alidade">
-              <path class="plate__blade" d="M238.6 140 L241.4 140 L240.7 109 L239.3 109 Z"></path>
-              <path class="plate__lozenge" d="M240 91 L244.5 100 L240 109 L235.5 100 Z"></path>
-              <path class="plate__jewel" d="M240 97 L241.5 100 L240 103 L238.5 100 Z"></path>
-              <line class="plate__thread" x1="240" y1="89" x2="240" y2="53"></line>
-              <path class="plate__blade" d="M240 41 L243 52 L240 49.6 L237 52 Z"></path>
-              <path class="plate__blade" d="M238.8 340 L241.2 340 L240.6 365 L239.4 365 Z"></path>
-              <path class="plate__lozenge" d="M240 365 L243.5 372 L240 379 L236.5 372 Z"></path>
-            </g>
-            {/* angka di atas jarum: tepi sewarna latar memotong jarum yang lewat di belakangnya */}
+          </svg>
+          {/* jarum dauphine berfaset di lapisan sendiri, jadi putaran dan kilaunya tidak menggambar ulang pelat */}
+          <div class="plate__needle" aria-hidden="true">
+            <svg viewBox="0 0 480 480">
+              <defs>
+                <clipPath id="needle-blade"><path d="M240 53 C239 70 236 86 236 100 C236 114 238.8 128 238.8 140 L241.2 140 C241.2 128 244 114 244 100 C244 86 241 70 240 53 Z"></path></clipPath>
+                <linearGradient id="needle-glint" x1="0" y1="1" x2="0" y2="0">
+                  <stop offset="0" stop-color="#fffaf0" stop-opacity="0"></stop>
+                  <stop offset="0.5" stop-color="#fffaf0"></stop>
+                  <stop offset="1" stop-color="#fffaf0" stop-opacity="0"></stop>
+                </linearGradient>
+              </defs>
+              {/* dua faset: sisi kiri tertimpa cahaya, sisi kanan dalam bayangan, seperti logam yang diasah bersudut */}
+              <path class="plate__facet" d="M240 53 C239 70 236 86 236 100 C236 114 238.8 128 238.8 140 L240 140 Z"></path>
+              <path class="plate__facet plate__facet--shade" d="M240 53 C241 70 244 86 244 100 C244 114 241.2 128 241.2 140 L240 140 Z"></path>
+              <path class="plate__facet" d="M240 384 C239.4 376 237.5 368 237.5 362 C237.5 354 238.9 346 238.9 340 L240 340 Z"></path>
+              <path class="plate__facet plate__facet--shade" d="M240 384 C240.6 376 242.5 368 242.5 362 C242.5 354 241.1 346 241.1 340 L240 340 Z"></path>
+              {/* bintang terpotong menembus bilah di bagian terlebar */}
+              <path class="plate__cut" d="M240 95.6 L240.9 99.1 L242.4 100 L240.9 100.9 L240 104.4 L239.1 100.9 L237.6 100 L239.1 99.1 Z"></path>
+              <path class="plate__finial" d="M240 387 L240.9 391.1 L244 392 L240.9 392.9 L240 397 L239.1 392.9 L236 392 L239.1 391.1 Z"></path>
+              <g clip-path="url(#needle-blade)"><rect class="plate__glint" x="234" y="126" width="12" height="24" fill="url(#needle-glint)"></rect></g>
+            </svg>
+          </div>
+          {/* angka di atas jarum: tepi sewarna latar memotong jarum yang lewat di belakangnya */}
+          <svg class="plate__labels" viewBox="0 0 480 480" aria-hidden="true">
             <g class="plate__rete">{degreeLabels.map((label) => <text class="plate__degree" x={label.x} y={label.y} text-anchor="middle">{label.text}</text>)}</g>
           </svg>
           {/* nama di tepi hanya untuk mouse; pembaca layar dan keyboard memakai daftar di sebelahnya */}
@@ -626,31 +633,48 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
     filter: drop-shadow(0 0 3px rgba(255, 236, 200, 0.8));
   }
 
-  .plate__alidade {
-    transform-origin: 240px 240px;
-    transition: transform 1.1s var(--ease);
-    filter: drop-shadow(0 0 5px rgba(255, 236, 200, 0.18));
+  /* sedikit melewati sasaran lalu kembali, seperti jarum instrumen yang mengayun sebelum diam */
+  .plate__needle {
+    position: absolute;
+    inset: 0;
+    transition: rotate 1.3s cubic-bezier(0.34, 1.32, 0.64, 1);
+    filter: drop-shadow(0 0 5px rgba(255, 236, 200, 0.2));
   }
 
-  .plate__blade {
-    fill: url(#alidade-metal);
+  .plate__facet {
+    fill: #f3e6c8;
   }
 
-  .plate__lozenge {
-    fill: none;
-    stroke: url(#alidade-metal);
-    stroke-width: 1.1;
-    stroke-linejoin: miter;
+  .plate__facet--shade {
+    fill: #8a7350;
   }
 
-  .plate__thread {
-    stroke: #e9d6b0;
-    stroke-width: 0.8;
-    stroke-dasharray: 3.2 2.4;
+  .plate__cut {
+    fill: var(--bg);
   }
 
-  .plate__jewel {
-    fill: var(--sun);
+  .plate__finial {
+    fill: #e9d6b0;
+  }
+
+  /* kilau cahaya menyapu bilah dari pangkal ke ujung sesekali, hanya selama indeks terbuka */
+  .plate__glint {
+    opacity: 0;
+  }
+
+  .site-index.is-open .plate__glint {
+    animation-name: needle-glint;
+    animation-duration: 5.5s;
+    animation-delay: 1.8s;
+    animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
+    animation-iteration-count: infinite;
+  }
+
+  @keyframes needle-glint {
+    0% { translate: 0 0; opacity: 0; }
+    3% { opacity: 0.9; }
+    16% { translate: 0 -96px; opacity: 0; }
+    100% { translate: 0 -96px; opacity: 0; }
   }
 
   /* bab di tepi pelat, seperti angka jam */
@@ -925,7 +949,7 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
     .site-index,
     .site-index.is-open,
     .plate__draw,
-    .plate__alidade,
+    .plate__needle,
     .plate__rete,
     .dial__needle,
     .ledger li,
