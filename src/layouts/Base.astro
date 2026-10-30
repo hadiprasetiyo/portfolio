@@ -48,6 +48,11 @@ const platePoints = chapters.map((_, i) => {
   const [left, top] = polar(50, 49.2, i * step);
   return { angle: i * step, x, y, left, top };
 });
+// bintang kecil di tengah antara dua bab, mengisi lis luar supaya tidak polos
+const plateSparks = chapters.map((_, i) => {
+  const [x, y] = polar(240, 200, (i + 0.5) * step);
+  return { angle: (i + 0.5) * step, x, y };
+});
 const degreeLabels = Array.from({ length: 12 }, (_, k) => {
   const [x, y] = polar(240, 170, k * 30);
   return { x, y: y + 2.5, text: `${String(k * 30).padStart(3, '0')}°` };
@@ -141,7 +146,9 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
               </linearGradient>
               <path id="plate-inscription" d="M240 122 A118 118 0 1 1 239.99 122"></path>
             </defs>
-            <circle class="plate__ring plate__ring--hair" cx="240" cy="240" r="204"></circle>
+            {/* untaian manik seperti tepi koin, dibatasi garis rambut di luarnya */}
+            <circle class="plate__ring plate__ring--hair" cx="240" cy="240" r="214"></circle>
+            <circle class="plate__beads" cx="240" cy="240" r="208" pathLength="360"></circle>
             <circle class="plate__ring plate__ring--metal plate__draw" cx="240" cy="240" r="200" style={`--length:${circleLength(200)}`}></circle>
             <circle class="plate__ring plate__draw" cx="240" cy="240" r="182" style={`--length:${circleLength(182)}`}></circle>
             {/* skala derajat berputar masuk ke tempatnya saat indeks dibuka, seperti rete astrolabe */}
@@ -154,16 +161,18 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
             <circle class="plate__ring plate__ring--metal plate__draw" cx="240" cy="240" r="96" style={`--length:${circleLength(96)}`}></circle>
             {/* inskripsi pembuat terukir melingkar, seperti tanda tangan di astrolabe asli */}
             <text class="plate__inscription"><textPath href="#plate-inscription" textLength={circleLength(118) - 6} lengthAdjust="spacing">{'HADIIYOK · ASTROLABIUM · JAKARTA · MMXXVI · VI°S · CVI°E · '.repeat(2)}</textPath></text>
+            {/* bab ditandai bintang empat sudut yang memutus lis emas; tepi sewarna latar menjadi celahnya */}
             {
               platePoints.map((point, i) => (
                 <path
                   class="plate__marker"
                   data-chapter={i}
-                  d={`M${point.x} ${point.y - 5} L${point.x + 3} ${point.y} L${point.x} ${point.y + 5} L${point.x - 3} ${point.y} Z`}
-                  transform={`rotate(${point.angle} ${point.x} ${point.y})`}
+                  d="M0 -9L1.8 -1.8L5 0L1.8 1.8L0 9L-1.8 1.8L-5 0L-1.8 -1.8Z"
+                  transform={`translate(${point.x} ${point.y}) rotate(${point.angle})`}
                 ></path>
               ))
             }
+            {plateSparks.map((spark) => <path class="plate__spark" d="M0 -4.5L1 -1L4.5 0L1 1L0 4.5L-1 1L-4.5 0L-1 -1Z" transform={`translate(${spark.x} ${spark.y}) rotate(${spark.angle})`}></path>)}
             {/* alidade: bilah meruncing ke ujung bidik, garis tengah terukir, pemberat berlubang bidik di ekor */}
             <g class="plate__alidade">
               <path class="plate__blade" d="M236.6 140 L243.4 140 L241.3 66 L240 50 L238.7 66 Z"></path>
@@ -565,7 +574,26 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
     transition: opacity 1.2s var(--ease) 0.8s;
   }
 
-  .site-index.is-open :is(.plate__dots, .plate__inscription) {
+  .plate__beads {
+    fill: none;
+    stroke: rgba(217, 194, 154, 0.42);
+    stroke-width: 1.3;
+    stroke-linecap: round;
+    stroke-dasharray: 0 2;
+    opacity: 0;
+    transition: opacity 1.2s var(--ease) 0.6s;
+  }
+
+  .plate__spark {
+    fill: rgba(217, 194, 154, 0.6);
+    stroke: var(--bg);
+    stroke-width: 3;
+    paint-order: stroke;
+    opacity: 0;
+    transition: opacity 1.2s var(--ease) 0.9s;
+  }
+
+  .site-index.is-open :is(.plate__dots, .plate__inscription, .plate__beads, .plate__spark) {
     opacity: 1;
   }
 
@@ -582,6 +610,9 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
 
   .plate__marker {
     fill: var(--faint);
+    stroke: var(--bg);
+    stroke-width: 3;
+    paint-order: stroke;
     transition: fill 0.5s var(--ease), filter 0.5s var(--ease);
   }
 
