@@ -16,6 +16,7 @@ import {
   moonPath,
   planetMarkup,
   planetStyle,
+  signDegree,
   SOLAR_PLANET_COUNT,
   toRoman,
   wordSpans,
@@ -103,7 +104,7 @@ const phases = [
   },
 ];
 
-const homeData = { projects: numerals.map((numeral) => ({ numeral })), signs: signs.map((sign, index) => ({ latin: sign.latin, mark: signMarks[index] })) };
+const homeData = { projects: numerals.map((numeral) => ({ numeral })), signs: signs.map((sign, index) => ({ latin: sign.latin, mark: signMarks[index], degree: signDegree(index) })) };
 const title = profile ? `${fullName} · ${headline}` : 'Portfolio';
 ---
 

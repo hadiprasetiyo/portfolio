@@ -409,6 +409,8 @@ export function startHome() {
   const cartouche = app.querySelector('.zodiac__cartouche');
   const [cartoucheName, cartoucheMark] = [cartouche.querySelector('b'), cartouche.querySelector('small')];
   let cartoucheSwap = 0;
+  const ringNames = [...zodiac.querySelectorAll('.astro__sign')];
+  let ringSwap = 0;
   const kitRows = [...app.querySelectorAll('.kit [data-sign]')];
   let signActive = -1;
   let wheelTurn = 0;
@@ -418,9 +420,17 @@ export function startHome() {
     if (index === signActive) return;
     signActive = index;
     // jalur terpendek; putaran sendiri dikerjakan transisi CSS, rasi diputar balik dengan transisi yang sama
-    const desired = -index * (360 / signs.length);
+    const desired = -signs[index].degree;
     wheelTurn += ((((desired - wheelTurn) % 360) + 540) % 360) - 180;
     zodiacWheel.style.setProperty('--turn', `${wheelTurn}deg`);
+    // nama zodiak yang akan berhenti di separuh bawah ditukar ke versi tegaknya saat roda berputar paling cepat, jadi pergantiannya tidak terlihat
+    clearTimeout(ringSwap);
+    ringSwap = setTimeout(() => {
+      ringNames.forEach((name, house) => {
+        const screen = (((house * 30 + 15 + wheelTurn) % 360) + 360) % 360;
+        name.classList.toggle('is-flipped', screen > 90 && screen < 270);
+      });
+    }, reduce ? 0 : 1100);
     zodiacSignEls.forEach((sign, signIndex) => sign.classList.toggle('is-active', signIndex === index));
     kitRows.forEach((row) => row.classList.toggle('is-active', Number(row.dataset.sign) === index));
     // teks memudar dulu, berganti, lalu muncul lagi bersama garis emasnya yang tergambar ulang

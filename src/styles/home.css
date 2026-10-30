@@ -1066,6 +1066,15 @@
   letter-spacing: 0.32em;
 }
 
+.astro__sign [data-lower],
+.astro__sign.is-flipped text:not([data-lower]) {
+  display: none;
+}
+
+.astro__sign.is-flipped [data-lower] {
+  display: inline;
+}
+
 .astro__deg {
   fill: var(--faint);
   font: 400 9px var(--font-mono);
