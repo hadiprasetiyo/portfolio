@@ -5,7 +5,7 @@ import signature from '../../components/horizon/signature.svg?raw';
 import ContactForm from '../../components/ContactForm.astro';
 import Base from '../../layouts/Base.astro';
 import { formatMonth, getDictionary, LOCALES, localized, type Locale } from '../../i18n';
-import { getCertifications, getExperiences, getProfile, getPublishedProjects, getSkills, type Skill } from '../../lib/db';
+import { getCertifications, getExperiences, getProfile, getPublishedProjects, getSkills } from '../../lib/db';
 import {
   ASTRO_VIEW,
   astroBand,
@@ -62,12 +62,10 @@ const stats = [
 const planetCount = Math.max(SOLAR_PLANET_COUNT, projects.length);
 const numerals = projects.map((_, index) => toRoman(index + 1));
 
-/* Toolkit: tiap kategori skill jadi satu rasi bernama Latin */
-const latinNames: Record<Skill['category'], string> = { language: 'Lingua', framework: 'Fabrica', database: 'Thesaurus', tool: 'Instrumenta' };
+/* Toolkit: tiap kategori skill jadi satu rasi zodiak */
 const categories = [...new Set(skills.map((skill) => skill.category))];
 const signs: Sign[] = categories.map((category) => ({
   group: dictionary.skillCategories[category],
-  latin: latinNames[category],
   skills: skills.filter((skill) => skill.category === category).map((skill) => ({ id: `s${skill.id}`, name: skill.name })),
 }));
 // bacaan di kartus: urutan rasi dan rasi zodiak yang dipinjam bentuknya, mis. "II / IV · SCORPIUS"
@@ -104,7 +102,7 @@ const phases = [
   },
 ];
 
-const homeData = { projects: numerals.map((numeral) => ({ numeral })), signs: signs.map((sign, index) => ({ latin: sign.latin, mark: signMarks[index], degree: signDegree(index) })) };
+const homeData = { projects: numerals.map((numeral) => ({ numeral })), signs: signs.map((sign, index) => ({ group: sign.group, mark: signMarks[index], degree: signDegree(index) })) };
 const title = profile ? `${fullName} · ${headline}` : 'Portfolio';
 ---
 
@@ -257,7 +255,7 @@ const title = profile ? `${fullName} · ${headline}` : 'Portfolio';
         <div class="astro-wrap">
           {/* kartus seperti label rasi di planisfer antik; tidak diumumkan pembaca layar karena berganti sendiri tiap beberapa detik */}
           <p class="zodiac__cartouche" aria-hidden="true">
-            <i></i><b>{signs[0].latin}</b><i></i>
+            <i></i><b>{signs[0].group}</b><i></i>
             <small>{signMarks[0]}</small>
           </p>
           {/* lapisan HTML terpisah supaya pita dan roda berputar di GPU tanpa menggambar ulang SVG tiap frame */}
@@ -288,7 +286,7 @@ const title = profile ? `${fullName} · ${headline}` : 'Portfolio';
               <div class="drawn" data-reveal data-sign={index}>
                 <dt>
                   <button class="kit__group label" type="button">
-                    {sign.latin} · {sign.group}
+                    {sign.group}
                   </button>
                 </dt>
                 <dd>

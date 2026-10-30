@@ -437,7 +437,7 @@ export function startHome() {
     cartouche.classList.add('is-swapping');
     clearTimeout(cartoucheSwap);
     cartoucheSwap = setTimeout(() => {
-      cartoucheName.textContent = signs[index].latin;
+      cartoucheName.textContent = signs[index].group;
       cartoucheMark.textContent = signs[index].mark;
       cartouche.classList.remove('is-swapping');
     }, reduce ? 0 : 450);

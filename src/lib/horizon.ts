@@ -169,7 +169,7 @@ export const astroChart = () => {
 };
 
 export type SignSkill = { id: string; name: string };
-export type Sign = { group: string; latin: string; skills: SignSkill[] };
+export type Sign = { group: string; skills: SignSkill[] };
 
 type Pattern = { name: string; stars: [number, number][]; lines: [number, number][]; order: number[] };
 
@@ -271,6 +271,6 @@ export const zodiacSigns = (signs: Sign[]) =>
       const span = 600 + ASTRO_PAD * 2;
       const left = (((cx - 100 + ASTRO_PAD) / span) * 100).toFixed(3);
       const top = (((cy - 100 + ASTRO_PAD) / span) * 100).toFixed(3);
-      return `<div class="zodiac__sign" data-sign="${index}" style="left:${left}%;top:${top}%"><svg viewBox="-100 -100 200 200"><path class="zodiac__lines" pathLength="1" d="${path}"></path>${starMarkup}<text class="zodiac__title" y="76" text-anchor="middle">${sign.latin}</text><text class="zodiac__sub" y="91" text-anchor="middle">${escapeHtml(sign.group.toUpperCase())}</text></svg></div>`;
+      return `<div class="zodiac__sign" data-sign="${index}" style="left:${left}%;top:${top}%"><svg viewBox="-100 -100 200 200"><path class="zodiac__lines" pathLength="1" d="${path}"></path>${starMarkup}<text class="zodiac__title" y="76" text-anchor="middle">${escapeHtml(sign.group)}</text><text class="zodiac__sub" y="91" text-anchor="middle">${constellationName(index)}</text></svg></div>`;
     })
     .join('');
