@@ -167,7 +167,7 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
             }
             {plateSparks.map((spark) => <path class="plate__spark" d="M0 -4.5L1 -1L4.5 0L1 1L0 4.5L-1 1L-4.5 0L-1 -1Z" transform={`translate(${spark.x} ${spark.y}) rotate(${spark.angle})`}></path>)}
           </svg>
-          {/* jarum benang emas di lapisan sendiri, jadi putaran dan kilaunya tidak menggambar ulang pelat */}
+          {/* jarum Sagitta, si anak panah: di lapisan sendiri, jadi putaran dan kilaunya tidak menggambar ulang pelat */}
           <div class="plate__needle" aria-hidden="true">
             <svg viewBox="0 0 480 480">
               <defs>
@@ -177,16 +177,28 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
                   <stop offset="0.5" stop-color="#fffaf0"></stop>
                   <stop offset="1" stop-color="#fffaf0" stop-opacity="0"></stop>
                 </linearGradient>
+                {/* benang meredup ke arah pusat dan paling terang di ujung, seperti cahaya yang mengalir ke sasaran */}
+                <linearGradient id="needle-thread" gradientUnits="userSpaceOnUse" x1="0" y1="140" x2="0" y2="72">
+                  <stop offset="0" stop-color="#7d6a4b"></stop>
+                  <stop offset="1" stop-color="#fff4de"></stop>
+                </linearGradient>
+                <linearGradient id="needle-tail" gradientUnits="userSpaceOnUse" x1="0" y1="340" x2="0" y2="369">
+                  <stop offset="0" stop-color="#7d6a4b"></stop>
+                  <stop offset="1" stop-color="#d9c29a"></stop>
+                </linearGradient>
               </defs>
-              {/* benang setipis rambut; mata panah dan bintang berfaset dua: sisi kiri tertimpa cahaya, kanan dalam bayangan */}
-              <path class="plate__facet" d="M239.45 140 L240.55 140 L240.35 72 L239.65 72 Z"></path>
+              {/* benang setipis rambut berbulu panah di pangkal; mata panah dan bintang berfaset dua: kiri tertimpa cahaya, kanan dalam bayangan */}
+              <path d="M239.45 140 L240.55 140 L240.35 72 L239.65 72 Z" fill="url(#needle-thread)"></path>
+              <path class="plate__fletch" d="M240 127 L236.6 133.5 M240 127 L243.4 133.5 M240 132.5 L236.6 139 M240 132.5 L243.4 139"></path>
               <path class="plate__facet" d="M240 54 L237.8 74 L240 70.6 Z"></path>
               <path class="plate__facet plate__facet--shade" d="M240 54 L242.2 74 L240 70.6 Z"></path>
-              <path class="plate__facet" d="M240 95 L239.1 99.1 L236.4 100 L239.1 100.9 L240 105 Z"></path>
-              <path class="plate__facet plate__facet--shade" d="M240 95 L240.9 99.1 L243.6 100 L240.9 100.9 L240 105 Z"></path>
-              <path class="plate__facet" d="M239.5 340 L240.5 340 L240.3 369 L239.7 369 Z"></path>
-              <path class="plate__facet" d="M240 370 L239.2 373.3 L237 374 L239.2 374.7 L240 378 Z"></path>
-              <path class="plate__facet plate__facet--shade" d="M240 370 L240.8 373.3 L243 374 L240.8 374.7 L240 378 Z"></path>
+              <g class="plate__twinkle">
+                <path class="plate__facet" d="M240 95 L239.1 99.1 L236.4 100 L239.1 100.9 L240 105 Z"></path>
+                <path class="plate__facet plate__facet--shade" d="M240 95 L240.9 99.1 L243.6 100 L240.9 100.9 L240 105 Z"></path>
+              </g>
+              {/* ekor berakhir di bulan sabit: bintang di depan, bulan di belakang */}
+              <path d="M239.5 340 L240.5 340 L240.3 369 L239.7 369 Z" fill="url(#needle-tail)"></path>
+              <path class="plate__facet" d="M240 369.5 A4.5 4.5 0 0 1 240 378.5 A2.3 4.5 0 0 0 240 369.5 Z"></path>
               <g clip-path="url(#needle-blade)"><rect class="plate__glint" x="234" y="124" width="12" height="20" fill="url(#needle-glint)"></rect></g>
             </svg>
           </div>
@@ -650,6 +662,32 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
 
   .plate__facet--shade {
     fill: #8a7350;
+  }
+
+  .plate__fletch {
+    fill: none;
+    stroke: #b39d76;
+    stroke-width: 0.6;
+    stroke-linecap: round;
+  }
+
+  /* bintang di tengah benang berkelip sesekali selama indeks terbuka */
+  .plate__twinkle {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .site-index.is-open .plate__twinkle {
+    animation-name: needle-twinkle;
+    animation-duration: 4.2s;
+    animation-delay: 0.9s;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+  }
+
+  @keyframes needle-twinkle {
+    0%, 14%, 100% { scale: 1; rotate: 0deg; }
+    7% { scale: 1.45; rotate: 45deg; }
   }
 
   /* kilau cahaya menyapu bilah dari pangkal ke ujung sesekali, hanya selama indeks terbuka */
