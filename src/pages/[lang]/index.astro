@@ -12,6 +12,7 @@ import {
   astroChart,
   astroLimb,
   bodyFor,
+  constellationName,
   moonPath,
   planetMarkup,
   planetStyle,
@@ -68,8 +69,8 @@ const signs: Sign[] = categories.map((category) => ({
   latin: latinNames[category],
   skills: skills.filter((skill) => skill.category === category).map((skill) => ({ id: `s${skill.id}`, name: skill.name })),
 }));
-// bacaan di kartus: urutan rasi dan sudut tempatnya di roda, mis. "II / IV · 090°"
-const signMarks = signs.map((_, index) => `${toRoman(index + 1)} / ${toRoman(signs.length)} · ${String(Math.round((index * 360) / signs.length)).padStart(3, '0')}°`);
+// bacaan di kartus: urutan rasi dan rasi zodiak yang dipinjam bentuknya, mis. "II / IV · SCORPIUS"
+const signMarks = signs.map((_, index) => `${toRoman(index + 1)} / ${toRoman(signs.length)} · ${constellationName(index)}`);
 
 /* Journey: dari yang terlama, bulan makin terang, ditutup purnama "bab berikutnya" */
 const timeline = [...experiences].sort((a, b) => a.started_on.localeCompare(b.started_on));

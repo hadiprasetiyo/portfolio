@@ -1009,6 +1009,24 @@
   stroke-width: 1.3;
 }
 
+/* celah 4° tepat di tiap batas rumah, tempat bintang bingkai duduk; lingkaran SVG mulai dari 090° jadi offset cukup separuh celah */
+.astro__fillet {
+  stroke-dasharray: 26 4;
+  stroke-dashoffset: -2;
+}
+
+.astro__beads {
+  fill: none;
+  stroke: rgba(217, 194, 154, 0.5);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-dasharray: 0 2;
+}
+
+.astro__spark {
+  fill: #ead8b4;
+}
+
 .astro__hair {
   fill: none;
   stroke: rgba(217, 194, 154, 0.12);

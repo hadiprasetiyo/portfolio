@@ -85,12 +85,16 @@ export const astroLimb = () => {
     '<defs><linearGradient id="astro-metal" gradientUnits="userSpaceOnUse" x1="70" y1="40" x2="530" y2="560"><stop offset="0" stop-color="#fff4de"></stop><stop offset="0.3" stop-color="#d9c29a"></stop><stop offset="0.55" stop-color="#7d6a4b"></stop><stop offset="0.78" stop-color="#cdb68d"></stop><stop offset="1" stop-color="#6b5a3f"></stop></linearGradient></defs>' +
     '<circle class="astro__hair" cx="300" cy="300" r="295"></circle><circle class="astro__metal" cx="300" cy="300" r="290"></circle><circle class="astro__ring" cx="300" cy="300" r="268"></circle>';
   // cincin zodiak: dua belas sektor 30° bernama Latin; separuh bawah ditulis berlawanan arah seperti inskripsi koin supaya tetap tegak
-  html += '<circle class="astro__metal" cx="300" cy="300" r="318"></circle><circle class="astro__hair" cx="300" cy="300" r="322"></circle>';
+  // bingkai luar: lis emas yang terputus di tiap batas rumah lalu diberi bintang (mata angin lebih besar), dan untaian manik seperti tepi koin
+  html += '<circle class="astro__metal astro__fillet" cx="300" cy="300" r="318" pathLength="360"></circle><circle class="astro__beads" cx="300" cy="300" r="324" pathLength="360"></circle>';
   zodiacNames.forEach((name, house) => {
     const from = house * 30;
     const [x1, y1] = dialPoint(290, from);
-    const [x2, y2] = dialPoint(318, from);
+    const [x2, y2] = dialPoint(311, from);
+    const [px, py] = dialPoint(318, from);
     html += `<line class="astro__tick astro__tick--major" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"></line>`;
+    const spark = from % 90 ? 'M0 -5L1.1 -1.1L5 0L1.1 1.1L0 5L-1.1 1.1L-5 0L-1.1 -1.1Z' : 'M0 -8L1.7 -1.7L5 0L1.7 1.7L0 8L-1.7 1.7L-5 0L-1.7 -1.7Z';
+    html += `<path class="astro__spark" d="${spark}" transform="translate(${px} ${py}) rotate(${from})"></path>`;
     const middle = from + 15;
     const lower = middle > 90 && middle < 270;
     const radius = lower ? 309 : 301;
@@ -156,39 +160,42 @@ export const astroChart = () => {
 export type SignSkill = { id: string; name: string };
 export type Sign = { group: string; latin: string; skills: SignSkill[] };
 
-type Pattern = { stars: [number, number][]; lines: [number, number][]; order: number[] };
+type Pattern = { name: string; stars: [number, number][]; lines: [number, number][]; order: number[] };
 
-// bentuk rasi yang dirancang sendiri-sendiri supaya tiap kelompok skill mudah dibedakan; order = bintang yang diberi nama, berurutan
+// rasi zodiak asli yang disederhanakan, kepala menghadap barat (kanan) seperti peta langit; order = bintang yang diberi nama, berurutan
 const patterns: Pattern[] = [
-  // huruf W seperti Cassiopeia
-  { stars: [[-60, -14], [-30, 18], [0, -6], [30, 20], [58, -18]], lines: [[0, 1], [1, 2], [2, 3], [3, 4]], order: [0, 2, 4, 1, 3] },
-  // gayung bertangkai seperti Biduk
+  // sabit Regulus sampai Rasalas, badan sampai ekor Denebola
   {
-    stars: [[-60, -26], [-38, -18], [-16, -8], [4, -2], [36, -8], [40, 24], [8, 26]],
-    lines: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 3]],
-    order: [0, 4, 6, 2, 5, 1, 3],
+    name: 'LEO',
+    stars: [[30, 22], [28, 6], [34, -8], [32, -22], [44, -32], [56, -22], [-22, -10], [-22, 12], [-56, 0]],
+    lines: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [2, 6], [6, 8], [8, 7], [7, 0]],
+    order: [0, 8, 4, 6, 7, 2, 5, 3, 1],
   },
-  // salib seperti Cygnus
+  // kepala tiga bintang, jantung Antares, ekor melengkung sampai sengat Shaula
   {
-    stars: [[0, -38], [-52, 8], [-26, 4], [0, 0], [24, -4], [50, -8], [0, 36]],
-    lines: [[0, 3], [3, 6], [1, 2], [2, 3], [3, 4], [4, 5]],
-    order: [0, 5, 6, 1, 3, 2, 4],
+    name: 'SCORPIUS',
+    stars: [[52, -34], [50, -20], [46, -6], [34, -18], [22, -12], [12, -4], [4, 10], [-2, 24], [-14, 34], [-30, 34], [-42, 24], [-48, 8], [-38, 0], [-28, 4]],
+    lines: [[0, 1], [1, 2], [1, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [8, 9], [9, 10], [10, 11], [11, 12], [12, 13]],
+    order: [4, 13, 0, 8, 10, 1, 6],
   },
-  // layang-layang berekor seperti Corvus
-  { stars: [[-28, -28], [26, -32], [36, 8], [-18, 14], [-54, 36]], lines: [[0, 1], [1, 2], [2, 3], [3, 0], [3, 4]], order: [1, 4, 0, 2, 3] },
-  // busur mahkota seperti Corona Borealis
+  // si kembar: kepala Castor dan Pollux, kaki Tejat dan Alhena
   {
-    stars: [[-58, 4], [-42, -20], [-15, -32], [15, -32], [42, -20], [58, 4]],
-    lines: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5]],
-    order: [0, 3, 5, 1, 4, 2],
+    name: 'GEMINI',
+    stars: [[-26, -34], [10, -40], [-22, -14], [-16, 8], [-12, 30], [-28, 36], [10, -16], [14, 4], [22, 18], [30, 36]],
+    lines: [[0, 2], [2, 3], [3, 4], [4, 5], [1, 6], [6, 7], [7, 8], [8, 9], [2, 6]],
+    order: [0, 1, 9, 4, 7, 3, 8, 2, 6, 5],
   },
-  // bahu, sabuk, dan kaki seperti Orion
+  // huruf V Hyades dengan mata Aldebaran, dua tanduk, dan gugus Pleiades di depannya
   {
-    stars: [[-34, -34], [30, -30], [-12, 0], [0, -2], [12, -4], [-32, 32], [30, 30]],
-    lines: [[0, 2], [1, 4], [2, 3], [3, 4], [2, 5], [4, 6]],
-    order: [0, 6, 3, 1, 5, 2, 4],
+    name: 'TAURUS',
+    stars: [[-6, 14], [-50, -34], [48, -26], [-50, 18], [18, 4], [-6, -8], [36, 22], [55, -21], [42, -20], [52, -33]],
+    lines: [[4, 5], [5, 1], [4, 0], [0, 3], [4, 6]],
+    order: [0, 1, 2, 3, 4, 6, 5],
   },
 ];
+
+// nama rasi asli untuk kartus; kelompok dengan skill lebih banyak dari bintang bernama tetap memakai nama ini walau bentuknya zig-zag
+export const constellationName = (index: number) => patterns[index % patterns.length].name;
 
 // kalau skill dalam satu kelompok lebih banyak dari bintang bernama di bentuknya, pakai pola zig-zag yang dibangkitkan
 const signPattern = (count: number, seed: number, index: number) => {
