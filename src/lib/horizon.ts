@@ -206,8 +206,8 @@ const patterns: Pattern[] = [
   },
 ];
 
-// nama rasi asli untuk kartus; kelompok dengan skill lebih banyak dari bintang bernama tetap memakai nama ini walau bentuknya zig-zag
-export const constellationName = (index: number) => patterns[index % patterns.length].name;
+// nama rasi asli di bawah judul rasi; kelompok dengan skill lebih banyak dari bintang bernama tetap memakai nama ini walau bentuknya zig-zag
+const constellationName = (index: number) => patterns[index % patterns.length].name;
 // rasi duduk di tengah rumahnya sendiri di cincin zodiak, mis. Leo di 135°
 export const signDegree = (index: number) => zodiacNames.indexOf(constellationName(index)) * 30 + 15;
 
