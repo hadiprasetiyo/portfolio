@@ -475,6 +475,10 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
     padding-block: calc(84px + env(safe-area-inset-top, 0px)) 32px;
     overflow-y: auto;
     background: var(--bg);
+    /* menu yang paling sering dipakai: teks redup dan garis dinaikkan satu tingkat dari palet yang sama */
+    --faint: #8a857a;
+    --muted: #b8b2a6;
+    --line: rgba(242, 238, 230, 0.18);
     clip-path: circle(0 at var(--ox, 100%) var(--oy, 0));
     visibility: hidden;
     transition: clip-path 1.1s var(--ease), visibility 0s linear 1.1s;
@@ -506,7 +510,7 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
     position: absolute;
     inset: 4%;
     border-radius: 50%;
-    background: radial-gradient(closest-side, rgba(217, 194, 154, 0.045), transparent);
+    background: radial-gradient(closest-side, rgba(217, 194, 154, 0.08), transparent);
   }
 
   .plate svg {
@@ -538,38 +542,38 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
 
   .plate__window {
     fill: var(--bg);
-    stroke: rgba(217, 194, 154, 0.16);
+    stroke: rgba(217, 194, 154, 0.3);
     stroke-width: 0.5;
   }
 
   .plate__ring {
     fill: none;
-    stroke: rgba(217, 194, 154, 0.2);
+    stroke: rgba(217, 194, 154, 0.34);
     stroke-width: 0.6;
   }
 
   .plate__ring--metal {
     stroke: url(#plate-metal);
-    stroke-width: 1.1;
+    stroke-width: 1.3;
   }
 
   .plate__ring--hair {
-    stroke: rgba(217, 194, 154, 0.12);
+    stroke: rgba(217, 194, 154, 0.24);
     stroke-width: 0.4;
   }
 
   .plate__scale line {
-    stroke: rgba(217, 194, 154, 0.16);
+    stroke: rgba(217, 194, 154, 0.3);
     stroke-width: 0.4;
   }
 
   .plate__scale .five {
-    stroke: rgba(217, 194, 154, 0.26);
+    stroke: rgba(217, 194, 154, 0.46);
     stroke-width: 0.5;
   }
 
   .plate__scale .mid {
-    stroke: rgba(217, 194, 154, 0.36);
+    stroke: rgba(217, 194, 154, 0.62);
     stroke-width: 0.6;
   }
 
@@ -581,7 +585,7 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
   /* titik-titik halus, satu tiap 5°, seperti guilloché pada pelat jam */
   .plate__dots {
     fill: none;
-    stroke: rgba(217, 194, 154, 0.3);
+    stroke: rgba(217, 194, 154, 0.5);
     stroke-width: 1.1;
     stroke-linecap: round;
     stroke-dasharray: 0 13.09;
@@ -611,7 +615,7 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
 
   .plate__beads {
     fill: none;
-    stroke: rgba(217, 194, 154, 0.42);
+    stroke: rgba(217, 194, 154, 0.62);
     stroke-width: 1.3;
     stroke-linecap: round;
     stroke-dasharray: 0 2;
@@ -620,7 +624,7 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
   }
 
   .plate__spark {
-    fill: rgba(217, 194, 154, 0.6);
+    fill: rgba(217, 194, 154, 0.85);
     stroke: var(--bg);
     stroke-width: 3;
     paint-order: stroke;
@@ -644,7 +648,7 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
   }
 
   .plate__marker {
-    fill: var(--faint);
+    fill: #a8946f;
     stroke: var(--bg);
     stroke-width: 3;
     paint-order: stroke;
