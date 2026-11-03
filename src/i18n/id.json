@@ -73,7 +73,7 @@
   "certification": {
     "title": "Kredensial, <em>bersegel</em>",
     "issuedBy": "Diterbitkan oleh",
-    "viewCredential": "Lihat kredensial"
+    "verify": "Verifikasi"
   },
   "cv": {
     "title": "Curriculum vitae",

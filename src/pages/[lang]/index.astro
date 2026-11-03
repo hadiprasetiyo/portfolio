@@ -377,31 +377,37 @@ const title = profile ? `${fullName} · ${headline}` : 'Portfolio';
             <p class="label">{dictionary.sections.certifications}</p>
             <h3 set:html={dictionary.certification.title} />
           </div>
-          {/* tiap sertifikat jadi piagam observatorium: bingkai ganda dan segel medali di pojok */}
+          {/* tiap sertifikat jadi piagam: judul di tengah, segel medali di antara dua garis tanda tangan seperti ijazah asli */}
           <ul class="diplomas" role="list">
             {certifications.map((certification, index) => {
               const seal = sealFor(index);
               return (
                 <li class="diploma" data-reveal>
-                  <svg class="diploma__seal" viewBox="0 0 64 64" aria-hidden="true">
-                    <circle class="diploma__rim" cx="32" cy="32" r="31" />
-                    <path class="diploma__ticks" d={seal.ticks} />
-                    <circle class="diploma__ring" cx="32" cy="32" r="24" />
-                    {seal.parts.map((part) => <path class:list={['diploma__glyph', { 'diploma__glyph--line': part.line }]} d={part.d} />)}
-                  </svg>
+                  <span class="diploma__flourish" aria-hidden="true">
+                    <svg viewBox="0 0 12 12"><path d="M6 0L7 5L12 6L7 7L6 12L5 7L0 6L5 5Z" /></svg>
+                  </span>
                   <h4>{certification.name}</h4>
                   <p class="diploma__issuer">
-                    <span class="label">{dictionary.certification.issuedBy}</span>
+                    <span>{dictionary.certification.issuedBy}</span>
                     {certification.issuer}
                   </p>
-                  <p class="diploma__foot label">
+                  <div class="diploma__foot label">
                     <span>{formatMonth(certification.issued_on, lang)}</span>
-                    {certification.credential_url && (
+                    {/* svg dibungkus span: memutar <svg> langsung tidak digambar ulang di Chromium */}
+                    <span class="diploma__seal" aria-hidden="true">
+                      <svg viewBox="0 0 64 64">
+                        <circle class="diploma__rim" cx="32" cy="32" r="31" />
+                        <path class="diploma__ticks" d={seal.ticks} />
+                        <circle class="diploma__ring" cx="32" cy="32" r="24" />
+                        {seal.parts.map((part) => <path class:list={['diploma__glyph', { 'diploma__glyph--line': part.line }]} d={part.d} />)}
+                      </svg>
+                    </span>
+                    {certification.credential_url ? (
                       <a href={certification.credential_url} rel="noopener noreferrer">
-                        {dictionary.certification.viewCredential} ↗<span class="visually-hidden">: {certification.name}</span>
+                        {dictionary.certification.verify} ↗<span class="visually-hidden">: {certification.name}</span>
                       </a>
-                    )}
-                  </p>
+                    ) : <span />}
+                  </div>
                 </li>
               );
             })}
