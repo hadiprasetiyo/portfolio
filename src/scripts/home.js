@@ -472,6 +472,16 @@ export function startHome() {
   // gelombang sinyal dan lampu konsol hanya berdenyut selama bagian kontak terlihat
   const contact = app.querySelector('.contact');
   new IntersectionObserver(([entry]) => contact.classList.toggle('is-live', entry.isIntersecting)).observe(contact);
+  // tiap ketikan memancarkan satu denyut dari piringan; dijeda supaya tidak terus-menerus memicu ulang
+  const ping = contact.querySelector('.dish__ping');
+  let lastPing = 0;
+  contact.addEventListener('input', () => {
+    if (reduce || performance.now() - lastPing < 350) return;
+    lastPing = performance.now();
+    ping.classList.remove('is-on');
+    void ping.offsetWidth;
+    ping.classList.add('is-on');
+  });
 
 
   /* ---------- scroll ---------- */

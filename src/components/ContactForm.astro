@@ -31,7 +31,10 @@ const messages = {
   </div>
   </div>
   <div class="field">
-    <label for="contact-message">{dictionary.message}</label>
+    <div class="field__head">
+      <label for="contact-message">{dictionary.message}</label>
+      <span class="field__count" aria-hidden="true">0 / 2000</span>
+    </div>
     <textarea id="contact-message" name="message" rows="6" maxlength="2000" required aria-describedby="contact-message-error"></textarea>
     <p class="field__error" id="contact-message-error" hidden>{dictionary.errors.message}</p>
   </div>
@@ -53,6 +56,10 @@ const messages = {
     const button = form.querySelector('[type="submit"]');
     const status = form.querySelector('.contact-form__status');
     const label = button.textContent;
+    const message = form.elements.message;
+    const count = form.querySelector('.field__count');
+    const updateCount = () => (count.textContent = `${message.value.length} / 2000`);
+    message.addEventListener('input', updateCount);
 
     // script Turnstile pihak ketiga baru dimuat saat form disentuh, supaya tidak membebani muat halaman
     form.addEventListener(
@@ -89,6 +96,7 @@ const messages = {
         const result = await response.json();
         if (response.ok) {
           form.reset();
+          updateCount();
           status.textContent = messages.sent;
           status.dataset.state = 'success';
         } else {
@@ -126,6 +134,19 @@ const messages = {
   .field {
     display: grid;
     gap: 8px;
+  }
+
+  .field__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+  }
+
+  .field__count {
+    color: var(--faint);
+    font: 400 11px/1.5 var(--font-mono);
+    font-variant-numeric: tabular-nums;
   }
 
   label {

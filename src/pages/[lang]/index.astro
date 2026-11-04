@@ -352,12 +352,24 @@ const title = profile ? `${fullName} · ${headline}` : 'Portfolio';
       {/* teleskop radio memancarkan sinyal ke bintang; gelombang dan cahaya bintang berupa elemen HTML supaya dianimasikan GPU */}
       <div class="dish" aria-hidden="true">
         <svg viewBox="0 0 400 300">
+          <defs>
+            <clipPath id="dish-shell"><path d="M116 140Q200 240 284 140A84 16 0 0 1 116 140Z"></path></clipPath>
+            <linearGradient id="dish-sheen" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#fff4de" stop-opacity="0.16"></stop>
+              <stop offset="0.6" stop-color="#d9c29a" stop-opacity="0.03"></stop>
+            </linearGradient>
+          </defs>
           <path class="dish__beam" d="M269.4 107.3L346.5 15.4"></path>
-          <path class="dish__ground" d="M24 286H376M64 286l-9 9M104 286l-9 9M144 286l-9 9M184 286l-9 9M224 286l-9 9M264 286l-9 9M304 286l-9 9M344 286l-9 9"></path>
-          <path class="dish__frame" d="M166 286L182 250H218L234 286ZM194 250V204H206V250M200 204L168 186M200 204L232 186"></path>
+          <text class="dish__label" x="352" y="40">α Hadiiyok</text>
+          <path class="dish__ground" d="M24 276H376M64 276l-9 9M104 276l-9 9M144 276l-9 9M184 276l-9 9M224 276l-9 9M264 276l-9 9M304 276l-9 9M344 276l-9 9"></path>
+          {/* menara rangka bersilang dan roda gigi elevasi, seperti teleskop radio sungguhan */}
+          <path class="dish__frame" d="M160 268H240V276H160ZM190 206L176 268M210 206L224 268M185.3 227H214.7M180.7 247H219.3M190 206L214.7 227M210 206L185.3 227M185.3 227L219.3 247M214.7 227L180.7 247M180.7 247L224 268M219.3 247L176 268M200 206L168 186M200 206L232 186"></path>
+          <path class="dish__gear" d="M178 190A22 22 0 0 0 222 190M220.7 197.5L224.4 198.9M219.1 201.0L222.5 203.0M216.9 204.1L219.9 206.7M214.1 206.9L216.7 209.9M211.0 209.1L213.0 212.5M207.5 210.7L208.9 214.4M203.8 211.7L204.5 215.6M200.0 212.0L200.0 216.0M196.2 211.7L195.5 215.6M192.5 210.7L191.1 214.4M189.0 209.1L187.0 212.5M185.9 206.9L183.3 209.9M183.1 204.1L180.1 206.7M180.9 201.0L177.5 203.0M179.3 197.5L175.6 198.9"></path>
           <g transform="rotate(40 200 190)">
             <path class="dish__bowl" d="M116 140Q200 240 284 140"></path>
+            <path class="dish__hatch" clip-path="url(#dish-shell)" d="M120 140V200M126 140V200M132 140V200M138 140V200M144 140V200M150 140V200M156 140V200M162 140V200M168 140V200M174 140V200M180 140V200M186 140V200M192 140V200M198 140V200M204 140V200M210 140V200M216 140V200M222 140V200M228 140V200M234 140V200M240 140V200M246 140V200M252 140V200M258 140V200M264 140V200M270 140V200M276 140V200"></path>
             <ellipse class="dish__face" cx="200" cy="140" rx="84" ry="16"></ellipse>
+            <ellipse cx="200" cy="140" rx="84" ry="16" fill="url(#dish-sheen)"></ellipse>
             <path class="dish__rings" d="M144 140a56 10.7 0 1 0 112 0a56 10.7 0 1 0-112 0M172 140a28 5.3 0 1 0 56 0a28 5.3 0 1 0-56 0M116 140H284M200 124V156M141 128.7L259 151.3M141 151.3L259 128.7"></path>
             <path class="dish__frame" d="M120 142L200 80M280 142L200 80M200 156L200 80M195 80H205L203 70H197Z"></path>
           </g>
@@ -365,6 +377,8 @@ const title = profile ? `${fullName} · ${headline}` : 'Portfolio';
         <span class="dish__wave"></span>
         <span class="dish__wave"></span>
         <span class="dish__wave"></span>
+        <span class="dish__ping"></span>
+        <span class="dish__bolt"><span></span></span>
         <span class="dish__glow"></span>
         <span class="dish__star"></span>
       </div>
@@ -373,7 +387,7 @@ const title = profile ? `${fullName} · ${headline}` : 'Portfolio';
       <div class="console" id="contact-form">
         <p class="console__head label">
           <span>{dictionary.contactSection.console}</span>
-          <span class="console__lamp">{dictionary.contactSection.ready}</span>
+          <span class="console__meter"><span aria-hidden="true"><i></i><i></i><i></i></span>{dictionary.contactSection.strength}</span>
         </p>
         <ContactForm lang={lang} />
       </div>

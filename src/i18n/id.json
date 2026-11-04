@@ -143,10 +143,10 @@
     "chapter": "Kontak",
     "title": "Kirim <em>sinyal</em>",
     "console": "Transmisi",
-    "ready": "Saluran terbuka",
     "frequency": "Frekuensi",
     "coordinates": "Koordinat",
-    "elsewhere": "Saluran lain"
+    "elsewhere": "Saluran lain",
+    "strength": "Kekuatan sinyal"
   },
   "sound": {
     "label": "Suara",

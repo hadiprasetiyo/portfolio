@@ -1286,7 +1286,7 @@
 
 .dish {
   position: relative;
-  width: min(100%, 520px);
+  width: min(100%, 580px);
   aspect-ratio: 4 / 3;
   margin-top: 36px;
 }
@@ -1322,6 +1322,22 @@
   stroke-width: 1.3;
 }
 
+.dish__hatch {
+  stroke: rgba(217, 194, 154, 0.3);
+  stroke-width: 0.6;
+}
+
+.dish__gear {
+  stroke: rgba(217, 194, 154, 0.55);
+  stroke-width: 0.8;
+}
+
+.dish__label {
+  fill: rgba(217, 194, 154, 0.8);
+  font: italic 400 13px var(--font-serif);
+  letter-spacing: 0.04em;
+}
+
 .dish__rings {
   stroke: rgba(217, 194, 154, 0.32);
   stroke-width: 0.7;
@@ -1353,6 +1369,68 @@
   scale: 0.12;
   opacity: 0;
   pointer-events: none;
+}
+
+/* denyut tambahan tiap kali pengunjung mengetik, dipicu ulang dari home.js */
+.dish__ping {
+  position: absolute;
+  top: 35.77%;
+  left: 67.35%;
+  width: 50%;
+  aspect-ratio: 1;
+  margin: -25% 0 0 -25%;
+  border: 2px solid transparent;
+  border-top-color: var(--sun);
+  border-radius: 50%;
+  rotate: 40deg;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.dish__ping.is-on {
+  animation: signal-wave 1.3s cubic-bezier(0.2, 0.6, 0.4, 1);
+}
+
+/* berkas cahaya yang melesat ke bintang selama pesan dikirim; wadahnya searah garis pancar (-50°) */
+.dish__bolt {
+  position: absolute;
+  top: 35.77%;
+  left: 67.35%;
+  width: 30%;
+  height: 0;
+  rotate: -50deg;
+  transform-origin: 0 0;
+  pointer-events: none;
+}
+
+.dish__bolt span {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  opacity: 0;
+}
+
+.dish__bolt span::before {
+  content: '';
+  position: absolute;
+  top: -1.5px;
+  left: -28px;
+  width: 28px;
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--sun));
+  box-shadow: 0 0 10px rgba(255, 236, 200, 0.8);
+}
+
+.contact:has([aria-busy='true']) .dish__bolt span {
+  animation: signal-bolt 0.9s cubic-bezier(0.5, 0, 0.7, 1) infinite;
+}
+
+@keyframes signal-bolt {
+  0% { translate: 0 0; opacity: 0; }
+  15%, 85% { opacity: 1; }
+  100% { translate: 100% 0; opacity: 0; }
 }
 
 .contact.is-live .dish__wave {
@@ -1425,10 +1503,14 @@
   gap: 28px;
 }
 
+/* grid tipis seperti kertas milimeter di panel instrumen */
 .console {
   padding: 24px clamp(16px, 4vw, 32px) 32px;
   border: 1px solid rgba(217, 194, 154, 0.24);
-  background: linear-gradient(180deg, rgba(217, 194, 154, 0.05), rgba(7, 7, 10, 0.8) 40%);
+  background:
+    linear-gradient(rgba(217, 194, 154, 0.035) 1px, transparent 1px) 0 0 / 100% 24px,
+    linear-gradient(90deg, rgba(217, 194, 154, 0.035) 1px, transparent 1px) 0 0 / 24px 100%,
+    linear-gradient(180deg, rgba(217, 194, 154, 0.05), rgba(7, 7, 10, 0.85) 40%);
 }
 
 .console__head {
@@ -1444,23 +1526,49 @@
   color: var(--gold);
 }
 
-.console__lamp {
+/* meter sinyal: satu batang menyala untuk tiap kolom yang sudah terisi benar */
+.console__meter {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  transition: color 0.4s var(--ease);
 }
 
-.console__lamp::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
+.console__meter span {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.console__meter i {
+  width: 3px;
+  height: 5px;
+  background: rgba(217, 194, 154, 0.22);
+  transition: background-color 0.4s var(--ease), box-shadow 0.4s var(--ease);
+}
+
+.console__meter i:nth-child(2) {
+  height: 8px;
+}
+
+.console__meter i:nth-child(3) {
+  height: 11px;
+}
+
+.contact:is(:has(#contact-name:valid), :has(#contact-email:valid), :has(#contact-message:valid)) .console__meter i:nth-child(1),
+.contact:is(:has(#contact-name:valid):has(#contact-email:valid), :has(#contact-name:valid):has(#contact-message:valid), :has(#contact-email:valid):has(#contact-message:valid)) .console__meter i:nth-child(2),
+.contact:has(#contact-name:valid):has(#contact-email:valid):has(#contact-message:valid) .console__meter i:nth-child(3) {
   background: var(--gold);
-  box-shadow: 0 0 8px rgba(255, 220, 170, 0.8);
+  box-shadow: 0 0 6px rgba(255, 220, 170, 0.6);
 }
 
-.contact.is-live .console__lamp::before {
-  animation: pulse 2.4s ease-in-out infinite;
+/* semua kolom siap: meter dan tombol kirim ikut menyala */
+.contact:has(#contact-name:valid):has(#contact-email:valid):has(#contact-message:valid) .console__meter {
+  color: var(--gold);
+}
+
+.contact:has(#contact-name:valid):has(#contact-email:valid):has(#contact-message:valid) .contact-form__send {
+  box-shadow: 0 0 22px rgba(255, 220, 170, 0.28);
 }
 
 .readout {

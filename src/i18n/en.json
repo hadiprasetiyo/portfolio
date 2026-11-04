@@ -143,10 +143,10 @@
     "chapter": "Contact",
     "title": "Send a <em>signal</em>",
     "console": "Transmission",
-    "ready": "Channel open",
     "frequency": "Frequency",
     "coordinates": "Coordinates",
-    "elsewhere": "Other channels"
+    "elsewhere": "Other channels",
+    "strength": "Signal strength"
   },
   "sound": {
     "label": "Sound",
