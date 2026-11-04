@@ -5,13 +5,17 @@ import signature from '../../components/horizon/signature.svg?raw';
 import ContactForm from '../../components/ContactForm.astro';
 import Base from '../../layouts/Base.astro';
 import { formatMonth, getDictionary, LOCALES, localized, type Locale } from '../../i18n';
-import { getCertifications, getExperiences, getProfile, getPublishedProjects, getSkills, type Skill } from '../../lib/db';
+import { getCertifications, getExperiences, getProfile, getPublishedProjects, getSkills } from '../../lib/db';
 import {
-  astroTicks,
+  ASTRO_VIEW,
+  astroBand,
+  astroChart,
+  astroLimb,
   bodyFor,
   moonPath,
   planetMarkup,
   planetStyle,
+  signDegree,
   SOLAR_PLANET_COUNT,
   toRoman,
   wordSpans,
@@ -57,14 +61,14 @@ const stats = [
 const planetCount = Math.max(SOLAR_PLANET_COUNT, projects.length);
 const numerals = projects.map((_, index) => toRoman(index + 1));
 
-/* Toolkit: tiap kategori skill jadi satu rasi bernama Latin */
-const latinNames: Record<Skill['category'], string> = { language: 'Lingua', framework: 'Fabrica', database: 'Thesaurus', tool: 'Instrumenta' };
+/* Toolkit: tiap kategori skill jadi satu rasi zodiak */
 const categories = [...new Set(skills.map((skill) => skill.category))];
 const signs: Sign[] = categories.map((category) => ({
   group: dictionary.skillCategories[category],
-  latin: latinNames[category],
   skills: skills.filter((skill) => skill.category === category).map((skill) => ({ id: `s${skill.id}`, name: skill.name })),
 }));
+// bacaan di kartus: urutan rasi, mis. "II / IV"
+const signMarks = signs.map((_, index) => `${toRoman(index + 1)} / ${toRoman(signs.length)}`);
 
 /* Journey: dari yang terlama, bulan makin terang, ditutup purnama "bab berikutnya" */
 const timeline = [...experiences].sort((a, b) => a.started_on.localeCompare(b.started_on));
@@ -97,7 +101,7 @@ const phases = [
   },
 ];
 
-const homeData = { projects: numerals.map((numeral) => ({ numeral })), signs: signs.map((sign) => ({ latin: sign.latin })) };
+const homeData = { projects: numerals.map((numeral) => ({ numeral })), signs: signs.map((sign, index) => ({ group: sign.group, mark: signMarks[index], degree: signDegree(index) })) };
 const title = profile ? `${fullName} · ${headline}` : 'Portfolio';
 ---
 
@@ -248,17 +252,23 @@ const title = profile ? `${fullName} · ${headline}` : 'Portfolio';
     signs.length > 0 && (
       <section class="wrap tools" id="skills" aria-labelledby="skills-heading">
         <div class="astro-wrap">
-          <p class="zodiac__caption label" aria-live="polite">
-            {dictionary.toolkit.charting} · <b>{signs[0].latin}</b>
+          {/* kartus seperti label rasi di planisfer antik; tidak diumumkan pembaca layar karena berganti sendiri tiap beberapa detik */}
+          <p class="zodiac__cartouche" aria-hidden="true">
+            <i></i><b>{signs[0].group}</b><i></i>
+            <small>{signMarks[0]}</small>
           </p>
-          <svg class="astro zodiac" viewBox="0 0 600 600" aria-hidden="true">
-            <g class="astro__outer" set:html={`${astroTicks()}<circle class="astro__ring" cx="300" cy="300" r="290"></circle>`} />
-            <circle class="astro__ring" cx="300" cy="300" r="250" />
-            <circle class="astro__ring astro__ring--dash" cx="300" cy="300" r="56" />
-            <g class="zodiac__wheel" set:html={zodiacSigns(signs)} />
-            <path class="zodiac__pointer" d="M300 22L293 10H307Z" />
-            <circle class="astro__core" cx="300" cy="300" r="5" />
-          </svg>
+          {/* lapisan HTML terpisah supaya pita dan roda berputar di GPU tanpa menggambar ulang SVG tiap frame */}
+          <div class="astro zodiac" aria-hidden="true">
+            <svg class="astro__limb" viewBox={ASTRO_VIEW} set:html={astroLimb()} />
+            <div class="astro__band"><svg viewBox={ASTRO_VIEW} set:html={astroBand()} /></div>
+            <div class="zodiac__wheel" set:html={astroChart() + zodiacSigns(signs)} />
+            <svg class="astro__top" viewBox={ASTRO_VIEW}>
+              <path class="zodiac__pointer" d="M300 31L305.5 9L300 13.5L294.5 9Z" />
+              <line class="zodiac__reading" x1="300" y1="33" x2="300" y2="62" />
+              <circle class="astro__pin" cx="300" cy="300" r="7" />
+              <circle class="astro__core" cx="300" cy="300" r="2.6" />
+            </svg>
+          </div>
         </div>
         <div class="tools__head">
           <p class="label chapter" data-reveal>
@@ -275,7 +285,7 @@ const title = profile ? `${fullName} · ${headline}` : 'Portfolio';
               <div class="drawn" data-reveal data-sign={index}>
                 <dt>
                   <button class="kit__group label" type="button">
-                    {sign.latin} · {sign.group}
+                    {sign.group}
                   </button>
                 </dt>
                 <dd>

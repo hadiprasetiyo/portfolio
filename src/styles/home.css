@@ -983,50 +983,180 @@
 }
 
 .astro {
-  display: block;
+  position: relative;
   width: 100%;
+  aspect-ratio: 1;
+}
+
+.astro svg,
+.astro__band,
+.zodiac__wheel {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   overflow: visible;
 }
 
+.astro__top {
+  pointer-events: none;
+}
+
+/* kilau logam di cincin luar, senada dengan pelat index */
+.astro__metal {
+  fill: none;
+  stroke: url(#astro-metal);
+  stroke-width: 1.3;
+}
+
+/* celah 4° tepat di tiap batas rumah, tempat bintang bingkai duduk; lingkaran SVG mulai dari 090° jadi offset cukup separuh celah */
+.astro__fillet {
+  stroke-dasharray: 26 4;
+  stroke-dashoffset: -2;
+}
+
+.astro__beads {
+  fill: none;
+  stroke: rgba(217, 194, 154, 0.5);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-dasharray: 0 2;
+}
+
+.astro__spark {
+  fill: #ead8b4;
+}
+
+.astro__hair {
+  fill: none;
+  stroke: rgba(217, 194, 154, 0.12);
+  stroke-width: 0.5;
+}
 
 .astro__ring {
   fill: none;
-  stroke: var(--line);
-}
-
-.astro__ring--dash {
-  stroke-dasharray: 2 6;
+  stroke: rgba(217, 194, 154, 0.2);
+  stroke-width: 0.7;
 }
 
 .astro__tick {
-  stroke: rgba(242, 238, 230, 0.22);
+  stroke: rgba(217, 194, 154, 0.16);
+  stroke-width: 0.5;
 }
 
-/* cincin luar berputar pelan; tiap angka diputar balik sama cepat supaya tetap tegak terbaca */
+.astro__tick--five {
+  stroke: rgba(217, 194, 154, 0.28);
+  stroke-width: 0.6;
+}
+
+.astro__tick--mid {
+  stroke: rgba(217, 194, 154, 0.4);
+  stroke-width: 0.7;
+}
+
+.astro__tick--major {
+  stroke: url(#astro-metal);
+  stroke-width: 1.1;
+}
+
+/* nama zodiak di cincin luar, terukir seperti inskripsi pada logam */
+.astro__sign {
+  fill: rgba(217, 194, 154, 0.6);
+  font: 400 8px var(--font-mono);
+  letter-spacing: 0.32em;
+}
+
+.astro__sign [data-lower],
+.astro__sign.is-flipped text:not([data-lower]) {
+  display: none;
+}
+
+.astro__sign.is-flipped [data-lower] {
+  display: inline;
+}
+
 .astro__deg {
   fill: var(--faint);
-  font: 400 10px var(--font-mono);
+  font: 400 9px var(--font-mono);
   letter-spacing: 0.08em;
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: spin 260s linear infinite reverse;
 }
 
-.astro__outer {
-  transform-origin: 300px 300px;
-  animation: spin 260s linear infinite;
+/* pita ekliptika berputar sendiri seperti langit; berisi titik tanpa teks supaya tidak pernah tampil terbalik */
+.astro__band {
+  animation: spin 240s linear infinite;
 }
 
-.astro__inner {
-  transform-origin: 300px 300px;
-  animation: spin 90s linear infinite reverse;
+.astro__band-ring {
+  fill: none;
+  stroke: rgba(217, 194, 154, 0.14);
+  stroke-width: 0.6;
+}
+
+.astro__dots {
+  fill: none;
+  stroke: rgba(217, 194, 154, 0.32);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  stroke-dasharray: 0 7.959;
+}
+
+.astro__house {
+  fill: rgba(217, 194, 154, 0.55);
 }
 
 /* planisfer: tiap kelompok skill satu rasi; roda berputar membawa rasi terpilih ke bawah penunjuk emas di atas */
+.zodiac__wheel {
+  --turn: 0deg;
+  rotate: var(--turn);
+  transition: rotate 2.2s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* peta langit di roda: semuanya samar supaya rasi yang aktif tetap paling menonjol */
+.zodiac__chart {
+  pointer-events: none;
+}
+
+.zodiac__field {
+  fill: var(--fg);
+}
+
+.zodiac__grid,
+.zodiac__spokes {
+  fill: none;
+  stroke: rgba(242, 238, 230, 0.06);
+  stroke-width: 0.7;
+}
+
+.zodiac__ecliptic {
+  fill: none;
+  stroke: rgba(217, 194, 154, 0.3);
+  stroke-width: 0.8;
+  stroke-dasharray: 5 6;
+}
+
+/* kutub langit: cincin 24 titik, satu tiap jam */
+.zodiac__pole {
+  fill: none;
+  stroke: rgba(217, 194, 154, 0.45);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-dasharray: 0 13.614;
+}
+
+/* diputar balik dengan transisi yang sama persis dengan roda, jadi nama rasi tetap tegak sepanjang putaran */
 .zodiac__sign {
+  position: absolute;
+  /* 200 satuan dari viewBox 652 (lihat ASTRO_VIEW di horizon.ts) */
+  width: 30.675%;
+  aspect-ratio: 1;
   cursor: pointer;
   opacity: 0.38;
-  transition: opacity 1s var(--ease);
+  rotate: calc(var(--turn) * -1);
+  transition: rotate 2.2s cubic-bezier(0.65, 0, 0.35, 1), opacity 1s var(--ease);
+}
+
+.zodiac__sign svg {
+  position: static;
 }
 
 .zodiac__sign:hover {
@@ -1037,17 +1167,14 @@
   opacity: 1;
 }
 
-.zodiac__hit {
-  fill: transparent;
-}
-
 .zodiac__lines {
   fill: none;
   stroke: rgba(217, 194, 154, 0.6);
   stroke-width: 1;
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
-  transition: stroke-dashoffset 1.8s cubic-bezier(0.45, 0, 0.25, 1) 0.5s;
+  /* mulai tergambar saat roda hampir berhenti, jadi rasi dilukis tepat di bawah penunjuk */
+  transition: stroke-dashoffset 1.8s cubic-bezier(0.45, 0, 0.25, 1) 1.5s;
 }
 
 .zodiac__sign.is-active .zodiac__lines {
@@ -1079,11 +1206,12 @@
   fill: var(--fg);
   font: 400 17px var(--font-serif);
   opacity: 0;
-  transition: opacity 0.8s var(--ease) 1s, fill 0.4s;
+  transition: opacity 0.4s, fill 0.4s;
 }
 
 .zodiac__sign.is-active .zodiac__name {
   opacity: 1;
+  transition: opacity 0.8s var(--ease) 2s, fill 0.4s;
 }
 
 .zodiac__name.is-hot {
@@ -1102,17 +1230,67 @@
 }
 
 .zodiac__pointer {
-  fill: var(--gold);
-  filter: drop-shadow(0 0 6px rgba(217, 194, 154, 0.8));
+  fill: url(#astro-metal);
+  filter: drop-shadow(0 0 5px rgba(255, 236, 200, 0.45));
 }
 
-.zodiac__caption {
+.zodiac__reading {
+  stroke: rgba(217, 194, 154, 0.45);
+  stroke-width: 0.7;
+}
+
+/* kartus di atas penunjuk: nama Latin diapit garis emas, bacaan urutan dan sudut di bawahnya */
+.zodiac__cartouche {
   position: absolute;
-  top: -6px;
+  bottom: 100%;
   left: 50%;
-  color: var(--gold);
+  display: grid;
+  grid-template-columns: 44px auto 44px;
+  align-items: center;
+  justify-items: center;
+  gap: 4px 14px;
+  margin: 0;
+  padding-bottom: 10px;
   white-space: nowrap;
-  transform: translate(-50%, -100%);
+  translate: -50% 0;
+}
+
+.zodiac__cartouche i {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(217, 194, 154, 0.7));
+  transition: scale 0.9s var(--ease) 0.1s;
+}
+
+.zodiac__cartouche i:last-of-type {
+  rotate: 180deg;
+}
+
+.zodiac__cartouche b {
+  color: var(--gold);
+  font: italic 400 26px/1 var(--font-serif);
+}
+
+.zodiac__cartouche small {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font: 400 9px/1 var(--font-mono);
+  letter-spacing: 0.24em;
+}
+
+.zodiac__cartouche :is(b, small) {
+  transition: opacity 0.45s var(--ease), translate 0.45s var(--ease);
+}
+
+.zodiac__cartouche.is-swapping :is(b, small) {
+  opacity: 0;
+  translate: 0 5px;
+}
+
+.zodiac__cartouche.is-swapping i {
+  scale: 0.2 1;
+  transition-duration: 0.45s;
+  transition-delay: 0s;
 }
 
 .kit .kit__group {
@@ -1130,9 +1308,15 @@
   transform: none;
 }
 
+.astro__pin {
+  fill: var(--bg);
+  stroke: url(#astro-metal);
+  stroke-width: 1.2;
+}
+
 .astro__core {
   fill: var(--sun);
-  filter: drop-shadow(0 0 10px rgba(255, 236, 200, 0.9));
+  filter: drop-shadow(0 0 6px rgba(255, 236, 200, 0.9));
 }
 
 .tools__head h2,
