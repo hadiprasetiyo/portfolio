@@ -18,18 +18,20 @@ const messages = {
 
 <form class="contact-form" method="post" action="/api/contact" data-contact-form data-messages={JSON.stringify(messages)} novalidate>
   <input type="hidden" name="locale" value={lang} />
+  <div class="contact-form__row">
   <div class="field">
-    <label for="contact-name">{dictionary.name}</label>
+    <label for="contact-name"><span aria-hidden="true">I</span>{dictionary.name}</label>
     <input id="contact-name" name="name" type="text" autocomplete="name" maxlength="100" required aria-describedby="contact-name-error" />
     <p class="field__error" id="contact-name-error" hidden>{dictionary.errors.name}</p>
   </div>
   <div class="field">
-    <label for="contact-email">{dictionary.email}</label>
+    <label for="contact-email"><span aria-hidden="true">II</span>{dictionary.email}</label>
     <input id="contact-email" name="email" type="email" autocomplete="email" maxlength="254" required aria-describedby="contact-email-error" />
     <p class="field__error" id="contact-email-error" hidden>{dictionary.errors.email}</p>
   </div>
+  </div>
   <div class="field">
-    <label for="contact-message">{dictionary.message}</label>
+    <label for="contact-message"><span aria-hidden="true">III</span>{dictionary.message}</label>
     <textarea id="contact-message" name="message" rows="6" maxlength="2000" required aria-describedby="contact-message-error"></textarea>
     <p class="field__error" id="contact-message-error" hidden>{dictionary.errors.message}</p>
   </div>
@@ -37,11 +39,11 @@ const messages = {
     <label for="contact-website">Website</label>
     <input id="contact-website" name={HONEYPOT_FIELD} type="text" tabindex="-1" autocomplete="off" />
   </div>
-  <div class="cf-turnstile" data-sitekey={env.TURNSTILE_SITE_KEY} data-language={lang}></div>
   <div class="contact-form__footer">
-    <Button type="submit">{dictionary.send}</Button>
-    <p class="contact-form__status" role="status" aria-live="polite"></p>
+    <div class="cf-turnstile" data-sitekey={env.TURNSTILE_SITE_KEY} data-language={lang} data-theme="dark"></div>
+    <Button type="submit" variant="secondary" class="contact-form__send">{dictionary.send}</Button>
   </div>
+  <p class="contact-form__status" role="status" aria-live="polite"></p>
 </form>
 
 <script is:inline>
@@ -56,6 +58,8 @@ const messages = {
     form.addEventListener(
       'focusin',
       () => {
+        // widget normal selebar 300px tidak muat di lembar surat pada HP sempit
+        if (form.querySelector('.contact-form__footer').clientWidth < 300) form.querySelector('.cf-turnstile').dataset.size = 'compact';
         const script = document.createElement('script');
         script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
         script.async = true;
@@ -110,43 +114,78 @@ const messages = {
 <style>
   .contact-form {
     display: grid;
-    gap: var(--space-6);
-    max-width: 36rem;
+    gap: 40px;
+  }
+
+  .contact-form__row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+    gap: 40px 32px;
   }
 
   .field {
     display: grid;
-    gap: var(--space-2);
+    gap: 6px;
   }
 
   label {
-    font-size: var(--text-sm);
-    font-weight: 600;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    color: var(--muted);
+    font: 400 11px/1.5 var(--font-mono);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    transition: color 0.5s var(--ease);
+  }
+
+  label span {
+    color: var(--gold);
+  }
+
+  .field:focus-within label {
+    color: var(--fg);
   }
 
   input,
   textarea {
     width: 100%;
-    min-height: 2.75rem;
-    padding: var(--space-3) var(--space-4);
-    background: var(--color-bg);
-    border: 1px solid color-mix(in oklab, var(--color-text) 30%, var(--color-bg));
-    border-radius: var(--radius-sm);
-    transition: border-color var(--duration) var(--ease-out);
+    padding: 6px 0 12px;
+    border: 0;
+    border-bottom: 1px solid rgba(217, 194, 154, 0.28);
+    border-radius: 0;
+    /* garis tulis emas yang memanjang dari tengah saat kolom diisi */
+    background: linear-gradient(var(--gold), var(--gold)) 50% 100% / 0 1px no-repeat;
+    background-origin: border-box;
+    color: var(--fg);
+    font: 400 22px/1.35 var(--font-serif);
+    caret-color: var(--gold);
+    transition: border-color 0.5s var(--ease), background-size 0.7s var(--ease);
+  }
+
+  /* garis emas yang memanjang sudah jadi penanda fokus */
+  input:focus,
+  textarea:focus {
+    outline: none;
+    background-size: 100% 1px;
+  }
+
+  /* isian otomatis browser tidak boleh memberi latar biru atau kuning di lembar gelap */
+  input:-webkit-autofill {
+    -webkit-text-fill-color: var(--fg);
+    transition: background-color 600000s;
   }
 
   textarea {
+    min-height: 8.5rem;
     resize: vertical;
+    font-size: 20px;
+    line-height: 1.5;
   }
 
   input:hover,
   textarea:hover {
-    border-color: color-mix(in oklab, var(--color-text) 55%, var(--color-bg));
-  }
-
-  input:focus-visible,
-  textarea:focus-visible {
-    border-color: var(--color-accent);
+    border-color: rgba(217, 194, 154, 0.5);
   }
 
   [aria-invalid='true'] {
@@ -176,11 +215,37 @@ const messages = {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: var(--space-4);
+    justify-content: space-between;
+    gap: 20px 24px;
+  }
+
+  .contact-form :global(.contact-form__send) {
+    min-height: 3rem;
+    padding-inline: 32px;
+    border-color: rgba(217, 194, 154, 0.6);
+    color: var(--gold);
+  }
+
+  @media (hover: hover) {
+    .contact-form :global(.contact-form__send:hover) {
+      border-color: var(--sun);
+      background: rgba(217, 194, 154, 0.08);
+      color: var(--sun);
+    }
   }
 
   .contact-form__status {
+    margin-top: -16px;
     font-size: var(--text-sm);
+    color: var(--muted);
+  }
+
+  .contact-form__status:empty {
+    display: none;
+  }
+
+  .contact-form__status[data-state='success'] {
+    color: var(--gold);
   }
 
   .contact-form__status[data-state='error'] {
