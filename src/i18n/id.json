@@ -83,12 +83,12 @@
     "empty": "CV sedang diperbarui. Silakan cek lagi nanti, atau hubungi saya untuk salinannya."
   },
   "contact": {
-    "intro": "Punya lowongan atau proyek? Kirim pesan, saya akan membalas lewat email.",
+    "intro": "Punya lowongan atau proyek? Pancarkan pesan dari sini, saya akan membalas lewat email.",
     "name": "Nama",
     "email": "Email",
     "message": "Pesan",
-    "send": "Kirim pesan",
-    "sending": "Mengirim",
+    "send": "Pancarkan pesan",
+    "sending": "Memancarkan",
     "sent": "Pesan terkirim. Biasanya saya membalas dalam dua hari.",
     "failed": "Pesan belum terkirim. Periksa koneksi lalu coba lagi.",
     "invalid": "Periksa kembali kolom yang ditandai.",
@@ -141,9 +141,12 @@
   },
   "contactSection": {
     "chapter": "Kontak",
-    "title": "Mari <em>bicara</em>",
-    "cta": "Kirim<br>pesan",
-    "elsewhere": "Tautan lain"
+    "title": "Kirim <em>sinyal</em>",
+    "console": "Transmisi",
+    "ready": "Saluran terbuka",
+    "frequency": "Frekuensi",
+    "coordinates": "Koordinat",
+    "elsewhere": "Saluran lain"
   },
   "sound": {
     "label": "Suara",

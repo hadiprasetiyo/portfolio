@@ -20,18 +20,18 @@ const messages = {
   <input type="hidden" name="locale" value={lang} />
   <div class="contact-form__row">
   <div class="field">
-    <label for="contact-name"><span aria-hidden="true">I</span>{dictionary.name}</label>
+    <label for="contact-name">{dictionary.name}</label>
     <input id="contact-name" name="name" type="text" autocomplete="name" maxlength="100" required aria-describedby="contact-name-error" />
     <p class="field__error" id="contact-name-error" hidden>{dictionary.errors.name}</p>
   </div>
   <div class="field">
-    <label for="contact-email"><span aria-hidden="true">II</span>{dictionary.email}</label>
+    <label for="contact-email">{dictionary.email}</label>
     <input id="contact-email" name="email" type="email" autocomplete="email" maxlength="254" required aria-describedby="contact-email-error" />
     <p class="field__error" id="contact-email-error" hidden>{dictionary.errors.email}</p>
   </div>
   </div>
   <div class="field">
-    <label for="contact-message"><span aria-hidden="true">III</span>{dictionary.message}</label>
+    <label for="contact-message">{dictionary.message}</label>
     <textarea id="contact-message" name="message" rows="6" maxlength="2000" required aria-describedby="contact-message-error"></textarea>
     <p class="field__error" id="contact-message-error" hidden>{dictionary.errors.message}</p>
   </div>
@@ -114,78 +114,67 @@ const messages = {
 <style>
   .contact-form {
     display: grid;
-    gap: 40px;
+    gap: 22px;
   }
 
   .contact-form__row {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
-    gap: 40px 32px;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+    gap: 22px 18px;
   }
 
   .field {
     display: grid;
-    gap: 6px;
+    gap: 8px;
   }
 
   label {
-    display: flex;
-    align-items: baseline;
-    gap: 12px;
     color: var(--muted);
     font: 400 11px/1.5 var(--font-mono);
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    transition: color 0.5s var(--ease);
-  }
-
-  label span {
-    color: var(--gold);
+    transition: color 0.4s var(--ease);
   }
 
   .field:focus-within label {
-    color: var(--fg);
+    color: var(--gold);
   }
 
   input,
   textarea {
     width: 100%;
-    padding: 6px 0 12px;
-    border: 0;
-    border-bottom: 1px solid rgba(217, 194, 154, 0.28);
+    padding: 12px 14px;
+    background: rgba(242, 238, 230, 0.03);
+    border: 1px solid rgba(217, 194, 154, 0.2);
     border-radius: 0;
-    /* garis tulis emas yang memanjang dari tengah saat kolom diisi */
-    background: linear-gradient(var(--gold), var(--gold)) 50% 100% / 0 1px no-repeat;
-    background-origin: border-box;
     color: var(--fg);
-    font: 400 22px/1.35 var(--font-serif);
+    font: 400 16px/1.5 var(--font-sans);
     caret-color: var(--gold);
-    transition: border-color 0.5s var(--ease), background-size 0.7s var(--ease);
-  }
-
-  /* garis emas yang memanjang sudah jadi penanda fokus */
-  input:focus,
-  textarea:focus {
-    outline: none;
-    background-size: 100% 1px;
-  }
-
-  /* isian otomatis browser tidak boleh memberi latar biru atau kuning di lembar gelap */
-  input:-webkit-autofill {
-    -webkit-text-fill-color: var(--fg);
-    transition: background-color 600000s;
+    transition: border-color 0.4s var(--ease), box-shadow 0.4s var(--ease);
   }
 
   textarea {
-    min-height: 8.5rem;
+    min-height: 9rem;
     resize: vertical;
-    font-size: 20px;
-    line-height: 1.5;
   }
 
   input:hover,
   textarea:hover {
-    border-color: rgba(217, 194, 154, 0.5);
+    border-color: rgba(217, 194, 154, 0.4);
+  }
+
+  /* bingkai emas dengan pendar tipis sudah jadi penanda fokus */
+  input:focus,
+  textarea:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(217, 194, 154, 0.12);
+  }
+
+  /* isian otomatis browser tidak boleh memberi latar biru atau kuning di konsol gelap */
+  input:-webkit-autofill {
+    -webkit-text-fill-color: var(--fg);
+    transition: background-color 600000s;
   }
 
   [aria-invalid='true'] {
@@ -216,26 +205,34 @@ const messages = {
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 20px 24px;
+    gap: 16px 24px;
   }
 
   .contact-form :global(.contact-form__send) {
     min-height: 3rem;
-    padding-inline: 32px;
-    border-color: rgba(217, 194, 154, 0.6);
+    padding-inline: 28px;
+    border-color: var(--gold);
     color: var(--gold);
+  }
+
+  .contact-form :global(.contact-form__send)::after {
+    content: '→';
+    display: inline-block;
+    transition: translate 0.4s var(--ease);
   }
 
   @media (hover: hover) {
     .contact-form :global(.contact-form__send:hover) {
-      border-color: var(--sun);
-      background: rgba(217, 194, 154, 0.08);
-      color: var(--sun);
+      background: var(--gold);
+      color: var(--bg);
+    }
+
+    .contact-form :global(.contact-form__send:hover)::after {
+      translate: 4px 0;
     }
   }
 
   .contact-form__status {
-    margin-top: -16px;
     font-size: var(--text-sm);
     color: var(--muted);
   }

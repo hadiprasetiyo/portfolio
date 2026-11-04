@@ -468,22 +468,10 @@ export function startHome() {
 
 
 
-  /* ---------- rasi bintang di kontak ---------- */
-  const constellationMap = app.querySelector('.constellation');
-  // seluruh rasi selalu muat tanpa terpotong; di layar sempit ditaruh di atas supaya tidak menimpa tombol
-  const fitConstellation = () => constellationMap.setAttribute('preserveAspectRatio', stacked.matches ? 'xMidYMin meet' : 'xMidYMid meet');
-  fitConstellation();
-  stacked.addEventListener('change', fitConstellation);
-  if (reduce || !('IntersectionObserver' in window)) {
-    constellationMap.classList.add('is-drawn');
-  } else {
-    const constellationObserver = new IntersectionObserver(([entry]) => {
-      if (!entry.isIntersecting) return;
-      constellationMap.classList.add('is-drawn');
-      constellationObserver.disconnect();
-    }, { threshold: 0.35 });
-    constellationObserver.observe(constellationMap);
-  }
+  /* ---------- kontak ---------- */
+  // gelombang sinyal dan lampu konsol hanya berdenyut selama bagian kontak terlihat
+  const contact = app.querySelector('.contact');
+  new IntersectionObserver(([entry]) => contact.classList.toggle('is-live', entry.isIntersecting)).observe(contact);
 
 
   /* ---------- scroll ---------- */
@@ -573,42 +561,16 @@ export function startHome() {
   drawWheel();
   if (reduce) return;
 
-  // tombol kontak berbentuk planet sedikit tertarik ke kursor yang mendekat
-  const cta = app.querySelector('.cta');
-  const pull = { x: 0, y: 0 };
-  const mouse = { x: 0, y: 0, seen: false };
-  addEventListener('pointermove', (event) => {
-    mouse.x = event.clientX;
-    mouse.y = event.clientY;
-    mouse.seen = true;
-  });
   // animasi tiap section hanya jalan saat section itu terlihat; dicek lewat observer, bukan mengukur layout tiap frame
   const visible = new Set();
   const watcher = new IntersectionObserver((entries) => entries.forEach((entry) => (entry.isIntersecting ? visible.add(entry.target) : visible.delete(entry.target))));
-  [works, zodiac, cta].forEach((element) => element && watcher.observe(element));
+  [works, zodiac].forEach((element) => element && watcher.observe(element));
   let previousFrame = null;
   requestAnimationFrame(function frame(now) {
     const stepSeconds = previousFrame === null ? 1 / 60 : Math.min(0.05, (now - previousFrame) / 1000);
     previousFrame = now;
     if (visible.has(works)) placeOrrery(stepSeconds);
     if (visible.has(zodiac)) turnZodiac(now, stepSeconds);
-    if (cta && visible.has(cta)) {
-      let goalX = 0;
-      let goalY = 0;
-      if (mouse.seen) {
-        const box = cta.getBoundingClientRect();
-        const dx = mouse.x - (box.left + box.width / 2);
-        const dy = mouse.y - (box.top + box.height / 2);
-        if (Math.hypot(dx, dy) < 170) {
-          goalX = dx * 0.3;
-          goalY = dy * 0.3;
-        }
-      }
-      pull.x += (goalX - pull.x) * 0.1;
-      pull.y += (goalY - pull.y) * 0.1;
-      cta.style.setProperty('--tx', `${pull.x.toFixed(1)}px`);
-      cta.style.setProperty('--ty', `${pull.y.toFixed(1)}px`);
-    }
     requestAnimationFrame(frame);
   });
 }

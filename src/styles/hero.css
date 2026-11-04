@@ -232,18 +232,6 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* tombol kontak: lubang hitam mini dengan piringan tipis */
-.cta::before {
-  content: "";
-  position: absolute;
-  inset: 42% -30%;
-  border: 1px solid rgba(217, 194, 154, 0.55);
-  border-radius: 50%;
-  box-shadow: 0 0 14px rgba(255, 200, 140, 0.3);
-  transform: rotate(-12deg);
-  pointer-events: none;
-}
-
 .frame {
   position: absolute;
   top: calc(14px + env(safe-area-inset-top, 0px));

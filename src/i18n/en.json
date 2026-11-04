@@ -83,12 +83,12 @@
     "empty": "The CV is being updated. Please check back soon, or get in touch for a copy."
   },
   "contact": {
-    "intro": "Have a role or a project in mind? Send a message and I will reply by email.",
+    "intro": "Have a role or a project in mind? Transmit a message from here and I will reply by email.",
     "name": "Name",
     "email": "Email",
     "message": "Message",
-    "send": "Send message",
-    "sending": "Sending",
+    "send": "Transmit message",
+    "sending": "Transmitting",
     "sent": "Message sent. I usually reply within two days.",
     "failed": "Message not sent. Check your connection and try again.",
     "invalid": "Please check the highlighted fields.",
@@ -141,9 +141,12 @@
   },
   "contactSection": {
     "chapter": "Contact",
-    "title": "Let's <em>talk</em>",
-    "cta": "Write<br>to me",
-    "elsewhere": "Elsewhere"
+    "title": "Send a <em>signal</em>",
+    "console": "Transmission",
+    "ready": "Channel open",
+    "frequency": "Frequency",
+    "coordinates": "Coordinates",
+    "elsewhere": "Other channels"
   },
   "sound": {
     "label": "Sound",

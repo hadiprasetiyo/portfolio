@@ -1,6 +1,5 @@
 ---
 import portrait from '../../assets/portrait.webp';
-import constellation from '../../components/horizon/constellation.svg?raw';
 import signature from '../../components/horizon/signature.svg?raw';
 import ContactForm from '../../components/ContactForm.astro';
 import Base from '../../layouts/Base.astro';
@@ -346,24 +345,59 @@ const title = profile ? `${fullName} · ${headline}` : 'Portfolio';
   </section>
 
   <section class="wrap contact" id="contact" aria-labelledby="contact-heading">
-    <Fragment set:html={constellation} />
-    <svg class="contact__orbit" viewBox="0 0 1000 320" aria-hidden="true">
-      <ellipse cx="500" cy="160" rx="480" ry="120"></ellipse>
-      <circle r="4"><animateMotion dur="18s" repeatCount="indefinite" path="M20 160a480 120 0 1 0 960 0a480 120 0 1 0-960 0"></animateMotion></circle>
-    </svg>
-    <p class="label chapter" data-reveal><span>No. 05</span><i aria-hidden="true"></i>{dictionary.contactSection.chapter}</p>
-    <h2 id="contact-heading" data-split style="margin-top:26px" set:html={dictionary.contactSection.title} />
-    {profile?.public_email && <a class="contact__email" href={`mailto:${profile.public_email}`} data-reveal>{profile.public_email}</a>}
-    <a class="cta" href="#contact-form"><span set:html={dictionary.contactSection.cta} /></a>
-    <div class="contact__form" id="contact-form">
-      <p class="contact__intro">{dictionary.contact.intro}</p>
-      <ContactForm lang={lang} />
+    <div class="contact__signal">
+      <p class="label chapter" data-reveal><span>No. 05</span><i aria-hidden="true"></i>{dictionary.contactSection.chapter}</p>
+      <h2 class="section-title" id="contact-heading" data-split style="margin-top:18px" set:html={dictionary.contactSection.title} />
+      <p class="contact__intro" data-reveal>{dictionary.contact.intro}</p>
+      {/* teleskop radio memancarkan sinyal ke bintang; gelombang dan cahaya bintang berupa elemen HTML supaya dianimasikan GPU */}
+      <div class="dish" aria-hidden="true">
+        <svg viewBox="0 0 400 300">
+          <path class="dish__beam" d="M269.4 107.3L346.5 15.4"></path>
+          <path class="dish__ground" d="M24 286H376M64 286l-9 9M104 286l-9 9M144 286l-9 9M184 286l-9 9M224 286l-9 9M264 286l-9 9M304 286l-9 9M344 286l-9 9"></path>
+          <path class="dish__frame" d="M166 286L182 250H218L234 286ZM194 250V204H206V250M200 204L168 186M200 204L232 186"></path>
+          <g transform="rotate(40 200 190)">
+            <path class="dish__bowl" d="M116 140Q200 240 284 140"></path>
+            <ellipse class="dish__face" cx="200" cy="140" rx="84" ry="16"></ellipse>
+            <path class="dish__rings" d="M144 140a56 10.7 0 1 0 112 0a56 10.7 0 1 0-112 0M172 140a28 5.3 0 1 0 56 0a28 5.3 0 1 0-56 0M116 140H284M200 124V156M141 128.7L259 151.3M141 151.3L259 128.7"></path>
+            <path class="dish__frame" d="M120 142L200 80M280 142L200 80M200 156L200 80M195 80H205L203 70H197Z"></path>
+          </g>
+        </svg>
+        <span class="dish__wave"></span>
+        <span class="dish__wave"></span>
+        <span class="dish__wave"></span>
+        <span class="dish__glow"></span>
+        <span class="dish__star"></span>
+      </div>
     </div>
-    <nav class="contact__links" aria-label={dictionary.contactSection.elsewhere}>
-      {profile?.github_url && <a href={profile.github_url} rel="noopener noreferrer">GitHub</a>}
-      {profile?.linkedin_url && <a href={profile.linkedin_url} rel="noopener noreferrer">LinkedIn</a>}
-      <a href={`/${lang}/cv`}>{dictionary.nav.cv}</a>
-    </nav>
+    <div class="contact__desk">
+      <div class="console" id="contact-form">
+        <p class="console__head label">
+          <span>{dictionary.contactSection.console}</span>
+          <span class="console__lamp">{dictionary.contactSection.ready}</span>
+        </p>
+        <ContactForm lang={lang} />
+      </div>
+      <dl class="readout">
+        {profile?.public_email && (
+          <div>
+            <dt class="label">{dictionary.contactSection.frequency}</dt>
+            <dd><a href={`mailto:${profile.public_email}`}>{profile.public_email}</a></dd>
+          </div>
+        )}
+        <div>
+          <dt class="label">{dictionary.contactSection.coordinates}</dt>
+          <dd>Jakarta · 6°12′ S, 106°49′ E · UTC+7</dd>
+        </div>
+        <div>
+          <dt class="label">{dictionary.contactSection.elsewhere}</dt>
+          <dd class="readout__links">
+            {profile?.github_url && <a href={profile.github_url} rel="noopener noreferrer">GitHub</a>}
+            {profile?.linkedin_url && <a href={profile.linkedin_url} rel="noopener noreferrer">LinkedIn</a>}
+            <a href={`/${lang}/cv`}>{dictionary.nav.cv}</a>
+          </dd>
+        </div>
+      </dl>
+    </div>
   </section>
 
   <script type="application/json" id="home-data" set:html={JSON.stringify(homeData).replace(/</g, '\u003c')} />
@@ -404,87 +438,6 @@ const title = profile ? `${fullName} · ${headline}` : 'Portfolio';
     line-height: 1.12;
   }
 
-  /* form jadi lembar surat berbingkai ganda, sekeluarga dengan piagam sertifikat */
-  .contact__form {
-    position: relative;
-    width: min(100%, 46rem);
-    margin-top: 72px;
-    padding: clamp(32px, 6vw, 56px) clamp(16px, 6vw, 56px) clamp(28px, 5vw, 44px);
-    border: 1px solid rgba(217, 194, 154, 0.26);
-    background:
-      radial-gradient(ellipse 70% 40% at 50% 0%, rgba(217, 194, 154, 0.07), transparent),
-      rgba(7, 7, 10, 0.72);
-    text-align: left;
-  }
-
-  .contact__form::before,
-  .contact__form::after {
-    content: '';
-    position: absolute;
-    inset: 6px;
-    pointer-events: none;
-  }
-
-  .contact__form::before {
-    border: 1px solid rgba(217, 194, 154, 0.1);
-  }
-
-  /* siku emas di sudut bingkai dalam */
-  .contact__form::after {
-    --corner: linear-gradient(var(--gold), var(--gold));
-    background:
-      var(--corner) top left / 16px 1px, var(--corner) top left / 1px 16px,
-      var(--corner) top right / 16px 1px, var(--corner) top right / 1px 16px,
-      var(--corner) bottom left / 16px 1px, var(--corner) bottom left / 1px 16px,
-      var(--corner) bottom right / 16px 1px, var(--corner) bottom right / 1px 16px;
-    background-repeat: no-repeat;
-    opacity: 0.6;
-  }
-
-  .contact__intro {
-    max-width: 30ch;
-    margin: 0 auto 44px;
-    color: var(--muted);
-    font: italic 400 clamp(20px, 2.2vw, 24px)/1.4 var(--font-serif);
-    text-align: center;
-    text-wrap: balance;
-  }
-
-  .contact__links {
-    position: relative;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    gap: 12px 22px;
-    margin-top: 56px;
-  }
-
-  .contact__links a {
-    color: var(--muted);
-    font: 400 11px/1.5 var(--font-mono);
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    text-decoration: none;
-    transition: color 0.4s var(--ease);
-  }
-
-  .contact__links a:hover {
-    color: var(--gold);
-  }
-
-  /* bintang empat ujung kecil sebagai pemisah tautan */
-  .contact__links a + a::before {
-    content: '';
-    display: inline-block;
-    width: 7px;
-    height: 7px;
-    margin-right: 22px;
-    background: var(--gold);
-    clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
-    vertical-align: 1px;
-    opacity: 0.7;
-  }
 
   @media (max-width: 900px) {
     .certification {
