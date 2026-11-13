@@ -69,28 +69,161 @@ export const toRoman = (value: number) => {
 };
 
 /* ---------- planisfer zodiak ---------- */
-export const astroTicks = () =>
-  Array.from({ length: 72 }, (_, index) => {
-    const degree = index * 5;
-    // 0° di puncak dan bertambah searah jarum jam, seperti dial astronomi dan navbar
-    const angle = (degree * Math.PI) / 180;
-    const length = degree % 30 === 0 ? 14 : 6;
-    const x1 = 300 + Math.sin(angle) * 288;
-    const y1 = 300 - Math.cos(angle) * 288;
-    const x2 = 300 + Math.sin(angle) * (288 - length);
-    const y2 = 300 - Math.cos(angle) * (288 - length);
-    const label =
-      degree % 30 === 0
-        ? `<text class="astro__deg" x="${(300 + Math.sin(angle) * 258).toFixed(1)}" y="${(300 - Math.cos(angle) * 258 + 3).toFixed(1)}" text-anchor="middle">${String(degree).padStart(3, '0')}°</text>`
-        : '';
-    return `<line class="astro__tick" x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}"></line>${label}`;
+// roda 600 satuan ditambah 26 di tiap sisi untuk cincin zodiak di luar skala derajat; semua lapisan memakai viewBox yang sama
+const ASTRO_PAD = 26;
+export const ASTRO_VIEW = `${-ASTRO_PAD} ${-ASTRO_PAD} ${600 + ASTRO_PAD * 2} ${600 + ASTRO_PAD * 2}`;
+const zodiacNames = ['ARIES', 'TAURUS', 'GEMINI', 'CANCER', 'LEO', 'VIRGO', 'LIBRA', 'SCORPIUS', 'SAGITTARIUS', 'CAPRICORNUS', 'AQUARIUS', 'PISCES'];
+// 0° di puncak dan bertambah searah jarum jam, seperti dial astronomi dan navbar
+const dialPoint = (radius: number, degree: number) => {
+  const angle = (degree * Math.PI) / 180;
+  return [300 + Math.sin(angle) * radius, 300 - Math.cos(angle) * radius].map((value) => value.toFixed(1));
+};
+
+// pinggiran tetap: skala tiap 1° bertingkat dan angka derajat yang selalu tegak
+export const astroLimb = () => {
+  let html =
+    '<defs><linearGradient id="astro-metal" gradientUnits="userSpaceOnUse" x1="70" y1="40" x2="530" y2="560"><stop offset="0" stop-color="#fff4de"></stop><stop offset="0.3" stop-color="#d9c29a"></stop><stop offset="0.55" stop-color="#7d6a4b"></stop><stop offset="0.78" stop-color="#cdb68d"></stop><stop offset="1" stop-color="#6b5a3f"></stop></linearGradient></defs>' +
+    '<circle class="astro__hair" cx="300" cy="300" r="295"></circle><circle class="astro__metal" cx="300" cy="300" r="290"></circle><circle class="astro__ring" cx="300" cy="300" r="268"></circle>';
+  for (let degree = 0; degree < 360; degree++) {
+    const tier = degree % 30 === 0 ? 'major' : degree % 10 === 0 ? 'mid' : degree % 5 === 0 ? 'five' : 'one';
+    const [x1, y1] = dialPoint({ major: 268, mid: 277, five: 280.5, one: 284 }[tier], degree);
+    const [x2, y2] = dialPoint(290, degree);
+    html += `<line class="astro__tick astro__tick--${tier}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"></line>`;
+    if (tier !== 'major') continue;
+    const [x, y] = dialPoint(253, degree);
+    html += `<text class="astro__deg" x="${x}" y="${(Number(y) + 3).toFixed(1)}" text-anchor="middle">${String(degree).padStart(3, '0')}°</text>`;
+  }
+  return html;
+};
+
+// pita zodiak yang berputar pelan sendiri: titik tiap 2° dan tanda belah ketupat di tengah tiap rumah zodiak
+export const astroBand = () => {
+  let html = '<circle class="astro__band-ring" cx="300" cy="300" r="236"></circle><circle class="astro__dots" cx="300" cy="300" r="228"></circle>';
+  for (let house = 0; house < 12; house++) {
+    const degree = house * 30 + 15;
+    const [x, y] = dialPoint(236, degree);
+    html += `<path class="astro__house" d="M0 -4L2.2 0L0 4L-2.2 0Z" transform="translate(${x} ${y}) rotate(${degree})"></path>`;
+  }
+  return html;
+};
+
+// cincin zodiak ikut berputar bersama roda seperti cakram bintang planisfer, jadi rasi terpilih selalu tiba di bawah namanya sendiri
+const zodiacRing = () => {
+  // bingkai luar: lis emas yang terputus di tiap batas rumah lalu diberi bintang (titik ekuinoks dan titik balik lebih besar), dan untaian manik seperti tepi koin
+  let html =
+    '<circle class="astro__metal astro__fillet" cx="300" cy="300" r="318" pathLength="360"></circle><circle class="astro__beads" cx="300" cy="300" r="324" pathLength="360"></circle>';
+  zodiacNames.forEach((name, house) => {
+    const from = house * 30;
+    const [x1, y1] = dialPoint(290, from);
+    const [x2, y2] = dialPoint(311, from);
+    const [px, py] = dialPoint(318, from);
+    html += `<line class="astro__tick astro__tick--major" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"></line>`;
+    const spark = from % 90 ? 'M0 -5L1.1 -1.1L5 0L1.1 1.1L0 5L-1.1 1.1L-5 0L-1.1 -1.1Z' : 'M0 -8L1.7 -1.7L5 0L1.7 1.7L0 8L-1.7 1.7L-5 0L-1.7 -1.7Z';
+    html += `<path class="astro__spark" d="${spark}" transform="translate(${px} ${py}) rotate(${from})"></path>`;
+    // tiap nama ditulis dua arah; yang di separuh bawah memakai versi berlawanan arah seperti inskripsi koin, dipilih skrip setelah roda berputar
+    const middle = from + 15;
+    html += `<g class="astro__sign${middle > 90 && middle < 270 ? ' is-flipped' : ''}">`;
+    for (const lower of [false, true]) {
+      const radius = lower ? 309 : 301;
+      const [sx, sy] = dialPoint(radius, lower ? from + 28 : from + 2);
+      const [ex, ey] = dialPoint(radius, lower ? from + 2 : from + 28);
+      const id = `zodiac-arc-${house}${lower ? '-low' : ''}`;
+      html += `<path id="${id}" d="M${sx} ${sy}A${radius} ${radius} 0 0 ${lower ? 0 : 1} ${ex} ${ey}" fill="none"></path>`;
+      html += `<text${lower ? ' data-lower' : ''}><textPath href="#${id}" startOffset="50%" text-anchor="middle">${name}</textPath></text>`;
+    }
+    html += '</g>';
+  });
+  return html;
+};
+
+// peta langit di roda, ikut berputar bersama rasi: bintang latar, kisi jam dan deklinasi, ekliptika, dan kutub langit di pusat
+export const astroChart = () => {
+  let state = 2026;
+  const random = () => {
+    state = (state * 16807) % 2147483647;
+    return state / 2147483647;
+  };
+  const spokes = Array.from({ length: 12 }, (_, hour) => {
+    const [x1, y1] = dialPoint(64, hour * 30);
+    const [x2, y2] = dialPoint(214, hour * 30);
+    return `M${x1} ${y1}L${x2} ${y2}`;
   }).join('');
+  // sebaran merata di cincin antara pusat dan pita: akar acak supaya tidak menumpuk di tengah
+  const stars = Array.from({ length: 120 }, () => {
+    const radius = Math.sqrt(64 * 64 + random() * (216 * 216 - 64 * 64));
+    const [x, y] = dialPoint(radius, random() * 360);
+    const bright = random() ** 4;
+    return `<circle cx="${x}" cy="${y}" r="${(0.5 + bright * 1.3).toFixed(2)}" opacity="${(0.18 + bright * 0.55).toFixed(2)}"></circle>`;
+  }).join('');
+  return (
+    `<svg class="zodiac__chart" viewBox="${ASTRO_VIEW}">` +
+    `<g class="zodiac__field">${stars}</g>` +
+    '<circle class="zodiac__grid" cx="300" cy="300" r="112"></circle><circle class="zodiac__grid" cx="300" cy="300" r="176"></circle>' +
+    `<path class="zodiac__spokes" d="${spokes}"></path>` +
+    // ekliptika dibuat sepusat dengan kutub; versi bergeser yang akurat terbaca seperti lingkaran yang meleset
+    '<circle class="zodiac__ecliptic" cx="300" cy="300" r="144"></circle>' +
+    '<circle class="zodiac__pole" cx="300" cy="300" r="52"></circle>' +
+    zodiacRing() +
+    '</svg>'
+  );
+};
 
 export type SignSkill = { id: string; name: string };
-export type Sign = { group: string; latin: string; skills: SignSkill[] };
+export type Sign = { group: string; skills: SignSkill[] };
 
-// pola rasi dibuat dari jumlah skill: bintang bernama di jalur zig-zag, ditambah satu atau dua bintang pembentuk pola
-const signPattern = (count: number, seed: number) => {
+type Pattern = { name: string; stars: [number, number][]; lines: [number, number][]; order: number[] };
+
+// empat zodiak tetap yang rumahnya berjarak tepat 90°; bentuknya disederhanakan, kepala menghadap barat (kanan) seperti peta langit
+// order = bintang yang diberi nama, berurutan
+const patterns: Pattern[] = [
+  // huruf V Hyades dengan mata Aldebaran, dua tanduk, dan gugus Pleiades di depannya
+  {
+    name: 'TAURUS',
+    stars: [[-6, 14], [-50, -34], [48, -26], [-50, 18], [18, 4], [-6, -8], [36, 22], [55, -21], [42, -20], [52, -33]],
+    lines: [[4, 5], [5, 1], [4, 0], [0, 3], [4, 6]],
+    order: [0, 1, 2, 3, 4, 6, 5],
+  },
+  // sabit Regulus sampai Rasalas, badan sampai ekor Denebola
+  {
+    name: 'LEO',
+    stars: [[30, 22], [28, 6], [34, -8], [32, -22], [44, -32], [56, -22], [-22, -10], [-22, 12], [-56, 0]],
+    lines: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [2, 6], [6, 8], [8, 7], [7, 0]],
+    order: [0, 8, 4, 6, 7, 2, 5, 3, 1],
+  },
+  // kepala tiga bintang, jantung Antares, ekor melengkung sampai sengat Shaula
+  {
+    name: 'SCORPIUS',
+    stars: [[52, -34], [50, -20], [46, -6], [34, -18], [22, -12], [12, -4], [4, 10], [-2, 24], [-14, 34], [-30, 34], [-42, 24], [-48, 8], [-38, 0], [-28, 4]],
+    lines: [[0, 1], [1, 2], [1, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [8, 9], [9, 10], [10, 11], [11, 12], [12, 13]],
+    order: [4, 13, 0, 8, 10, 1, 6],
+  },
+  // bahu Albali sampai Sadalmelik, kendi air bercabang, dan aliran air yang turun ke kiri
+  {
+    name: 'AQUARIUS',
+    stars: [[56, -12], [32, -22], [6, -34], [-10, -28], [-22, -32], [-34, -38], [-26, -18], [2, -6], [-18, 8], [16, 30], [-34, 20], [-46, 34]],
+    lines: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [4, 6], [2, 7], [7, 8], [7, 9], [8, 10], [10, 11]],
+    order: [2, 0, 11, 9, 5, 1, 8],
+  },
+];
+
+// nama rasi asli di bawah judul rasi; kelompok dengan skill lebih banyak dari bintang bernama tetap memakai nama ini walau bentuknya zig-zag
+const constellationName = (index: number) => patterns[index % patterns.length].name;
+// rasi duduk di tengah rumahnya sendiri di cincin zodiak, mis. Leo di 135°
+export const signDegree = (index: number) => zodiacNames.indexOf(constellationName(index)) * 30 + 15;
+
+// kalau skill dalam satu kelompok lebih banyak dari bintang bernama di bentuknya, pakai pola zig-zag yang dibangkitkan
+const signPattern = (count: number, seed: number, index: number) => {
+  const pattern = patterns[index % patterns.length];
+  if (count <= pattern.order.length) {
+    const named = new Map<number, number>();
+    pattern.order.slice(0, count).forEach((star, skill) => named.set(star, skill));
+    return { stars: pattern.stars, lines: pattern.lines, named };
+  }
+  return generatedPattern(count, seed);
+};
+
+// pola cadangan dibuat dari jumlah skill: bintang bernama di jalur zig-zag, ditambah satu atau dua bintang pembentuk pola
+const generatedPattern = (count: number, seed: number) => {
   let state = seed;
   const random = () => {
     state = (state * 16807) % 2147483647;
@@ -110,26 +243,34 @@ const signPattern = (count: number, seed: number) => {
   return { stars, lines, named };
 };
 
+// nama skill menjauhi pusat rasi: bintang di kiri bernama di kirinya, di kanan di kanannya, di tengah di atasnya
+const nameAt = (x: number, y: number) => {
+  if (x < -25) return `x="${(x - 9).toFixed(1)}" y="${(y - 8).toFixed(1)}" text-anchor="end"`;
+  if (x > 25) return `x="${(x + 9).toFixed(1)}" y="${(y - 8).toFixed(1)}"`;
+  return `x="${x.toFixed(1)}" y="${(y - 13).toFixed(1)}" text-anchor="middle"`;
+};
+
+// tiap rasi elemen HTML sendiri di atas roda: roda dan rasi diputar berlawanan lewat CSS supaya dikerjakan GPU dan nama tetap tegak
 export const zodiacSigns = (signs: Sign[]) =>
   signs
     .map((sign, index) => {
-      const angle = ((index * (360 / signs.length) - 90) * Math.PI) / 180;
-      const cx = 300 + Math.cos(angle) * 140;
-      const cy = 300 + Math.sin(angle) * 140;
-      const { stars, lines, named } = signPattern(sign.skills.length, 97 + index * 131);
-      const at = (star: [number, number]) => [cx + star[0], cy + star[1]];
-      const path = lines.map(([from, to]) => `M${at(stars[from]).map((v) => v.toFixed(1)).join(' ')}L${at(stars[to]).map((v) => v.toFixed(1)).join(' ')}`).join('');
+      const [cx, cy] = dialPoint(140, signDegree(index)).map(Number);
+      const { stars, lines, named } = signPattern(sign.skills.length, 97 + index * 131, index);
+      const path = lines.map(([from, to]) => `M${stars[from].map((v) => v.toFixed(1)).join(' ')}L${stars[to].map((v) => v.toFixed(1)).join(' ')}`).join('');
       const starMarkup = stars
-        .map((star, starIndex) => {
-          const [x, y] = at(star);
+        .map(([x, y], starIndex) => {
           const skillIndex = named.get(starIndex);
           const skill = skillIndex === undefined ? undefined : sign.skills[skillIndex];
           return (
             `<circle class="zodiac__star"${skill ? ` data-skill="${skill.id}"` : ''} cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${skill ? 3.6 : 1.8}"></circle>` +
-            (skill ? `<text class="zodiac__name" data-skill="${skill.id}" x="${(x + 9).toFixed(1)}" y="${(y - 8).toFixed(1)}">${escapeHtml(skill.name)}</text>` : '')
+            (skill ? `<text class="zodiac__name" data-skill="${skill.id}" ${nameAt(x, y)}>${escapeHtml(skill.name)}</text>` : '')
           );
         })
         .join('');
-      return `<g class="zodiac__sign" data-sign="${index}"><g class="zodiac__body" data-cx="${cx.toFixed(1)}" data-cy="${cy.toFixed(1)}"><circle class="zodiac__hit" cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="74"></circle><path class="zodiac__lines" pathLength="1" d="${path}"></path>${starMarkup}<text class="zodiac__title" x="${cx.toFixed(1)}" y="${(cy + 76).toFixed(1)}" text-anchor="middle">${sign.latin}</text><text class="zodiac__sub" x="${cx.toFixed(1)}" y="${(cy + 91).toFixed(1)}" text-anchor="middle">${escapeHtml(sign.group.toUpperCase())}</text></g></g>`;
+      // kotak rasi 200 satuan di dalam viewBox yang diperlebar cincin zodiak; lebarnya di CSS (.zodiac__sign) harus sama
+      const span = 600 + ASTRO_PAD * 2;
+      const left = (((cx - 100 + ASTRO_PAD) / span) * 100).toFixed(3);
+      const top = (((cy - 100 + ASTRO_PAD) / span) * 100).toFixed(3);
+      return `<div class="zodiac__sign" data-sign="${index}" style="left:${left}%;top:${top}%"><svg viewBox="-100 -100 200 200"><path class="zodiac__lines" pathLength="1" d="${path}"></path>${starMarkup}<text class="zodiac__title" y="76" text-anchor="middle">${escapeHtml(sign.group)}</text><text class="zodiac__sub" y="91" text-anchor="middle">${constellationName(index)}</text></svg></div>`;
     })
     .join('');
