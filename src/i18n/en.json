@@ -97,7 +97,13 @@
       "email": "Enter a valid email address.",
       "message": "Write a message (up to 2000 characters).",
       "captcha": "Complete the verification and try again."
-    }
+    },
+    "greeting": "Hi Hadi, my name is",
+    "reach": ", you can reply to",
+    "about": "I would like to talk about…",
+    "namePlaceholder": "your name",
+    "emailPlaceholder": "you@email.com",
+    "messagePlaceholder": "a role, a project, or just saying hello"
   },
   "footer": {
     "builtWith": "Built with Astro and Cloudflare Workers."
@@ -141,9 +147,6 @@
   "contactSection": {
     "chapter": "Contact",
     "title": "Let's <em>talk</em>",
-    "to": "To",
-    "email": "Email",
-    "elsewhere": "Other channels",
     "corona": "Corona",
     "coronaNote": "1,000,000 K · visible only in totality",
     "ring": "Diamond ring",

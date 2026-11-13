@@ -18,24 +18,28 @@ const messages = {
 
 <form class="contact-form" method="post" action="/api/contact" data-contact-form data-messages={JSON.stringify(messages)} novalidate>
   <input type="hidden" name="locale" value={lang} />
-  <div class="contact-form__row">
-  <div class="field">
-    <label for="contact-name">{dictionary.name}</label>
-    <input id="contact-name" name="name" type="text" autocomplete="name" maxlength="100" required aria-describedby="contact-name-error" />
-    <p class="field__error" id="contact-name-error" hidden>{dictionary.errors.name}</p>
-  </div>
-  <div class="field">
-    <label for="contact-email">{dictionary.email}</label>
-    <input id="contact-email" name="email" type="email" autocomplete="email" maxlength="254" required aria-describedby="contact-email-error" />
-    <p class="field__error" id="contact-email-error" hidden>{dictionary.errors.email}</p>
-  </div>
+  {/* form dibaca sebagai kalimat surat; label tetap ada untuk pembaca layar */}
+  <div class="letter-line">
+    {dictionary.greeting}{' '}
+    <span class="blank">
+      <label class="visually-hidden" for="contact-name">{dictionary.name}</label>
+      <input id="contact-name" name="name" type="text" autocomplete="name" maxlength="100" required placeholder={dictionary.namePlaceholder} aria-describedby="contact-name-error" />
+    </span>{dictionary.reach}{' '}
+    <span class="blank">
+      <label class="visually-hidden" for="contact-email">{dictionary.email}</label>
+      <input id="contact-email" name="email" type="email" autocomplete="email" maxlength="254" required placeholder={dictionary.emailPlaceholder} aria-describedby="contact-email-error" />
+    </span>.
   </div>
   <div class="field">
     <div class="field__head">
-      <label for="contact-message">{dictionary.message}</label>
+      <label for="contact-message">{dictionary.about}</label>
       <span class="field__count" aria-hidden="true">0 / 2000</span>
     </div>
-    <textarea id="contact-message" name="message" rows="6" maxlength="2000" required aria-describedby="contact-message-error"></textarea>
+    <textarea id="contact-message" name="message" rows="3" maxlength="2000" required placeholder={dictionary.messagePlaceholder} aria-describedby="contact-message-error"></textarea>
+  </div>
+  <div class="contact-form__errors">
+    <p class="field__error" id="contact-name-error" hidden>{dictionary.errors.name}</p>
+    <p class="field__error" id="contact-email-error" hidden>{dictionary.errors.email}</p>
     <p class="field__error" id="contact-message-error" hidden>{dictionary.errors.message}</p>
   </div>
   <div class="honeypot" aria-hidden="true">
@@ -122,18 +126,57 @@ const messages = {
 <style>
   .contact-form {
     display: grid;
-    gap: 22px;
+    gap: 36px;
   }
 
-  .contact-form__row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
-    gap: 22px 18px;
+  .letter-line,
+  .field__head label {
+    color: var(--muted);
+    font: 400 clamp(24px, 2.6vw, 36px)/1.7 var(--font-serif);
+  }
+
+  .blank {
+    display: inline-block;
+    max-width: 100%;
+  }
+
+  /* isian tanpa kotak, cuma garis bawah seperti titik-titik di surat */
+  input,
+  textarea {
+    padding: 0 2px;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid rgba(217, 194, 154, 0.4);
+    border-radius: 0;
+    color: var(--fg);
+    font: inherit;
+    caret-color: var(--gold);
+    transition: border-color 0.4s var(--ease), box-shadow 0.4s var(--ease);
+  }
+
+  /* kolom memanjang mengikuti isinya; browser lama dapat lebar tetap */
+  input {
+    width: 9em;
+    max-width: 100%;
+  }
+
+  @supports (field-sizing: content) {
+    input {
+      field-sizing: content;
+      width: auto;
+      min-width: 3em;
+    }
+  }
+
+  ::placeholder {
+    color: var(--faint);
+    font-style: italic;
+    opacity: 1;
   }
 
   .field {
     display: grid;
-    gap: 8px;
+    gap: 6px;
   }
 
   .field__head {
@@ -149,45 +192,19 @@ const messages = {
     font-variant-numeric: tabular-nums;
   }
 
-  label {
-    color: var(--muted);
-    font: 400 11px/1.5 var(--font-mono);
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    transition: color 0.4s var(--ease);
-  }
-
-  .field:focus-within label {
-    color: var(--gold);
-  }
-
-  /* isian ditulis seperti di atas kertas surat: tanpa kotak, cuma garis bawah */
-  input,
+  /* kertas bergaris; garisnya ikut bergulir bersama teks */
   textarea {
     width: 100%;
-    padding: 6px 0;
-    background: transparent;
-    border: 0;
-    border-bottom: 1px solid rgba(217, 194, 154, 0.28);
-    border-radius: 0;
-    color: var(--fg);
-    font: 400 21px/1.5 var(--font-serif);
-    caret-color: var(--gold);
-    transition: border-color 0.4s var(--ease), box-shadow 0.4s var(--ease);
-  }
-
-  /* kertas bergaris; ikut bergulir bersama teksnya */
-  textarea {
-    min-height: calc(4 * 1.6em);
+    min-height: calc(3 * 1.6em);
     padding: 0;
-    line-height: 1.6;
-    background: repeating-linear-gradient(transparent 0 calc(1.6em - 1px), rgba(217, 194, 154, 0.14) calc(1.6em - 1px) 1.6em) local;
+    font: 400 clamp(20px, 2vw, 26px)/1.6 var(--font-serif);
+    background: repeating-linear-gradient(transparent 0 calc(1.6em - 1px), rgba(217, 194, 154, 0.16) calc(1.6em - 1px) 1.6em) local;
     resize: vertical;
   }
 
   input:hover,
   textarea:hover {
-    border-color: rgba(217, 194, 154, 0.5);
+    border-color: rgba(217, 194, 154, 0.65);
   }
 
   /* garis bawah menebal jadi emas sebagai penanda fokus */
@@ -198,7 +215,7 @@ const messages = {
     box-shadow: 0 1px 0 var(--gold);
   }
 
-  /* isian otomatis browser tidak boleh memberi latar biru atau kuning di konsol gelap */
+  /* isian otomatis browser tidak boleh memberi latar biru atau kuning */
   input:-webkit-autofill {
     -webkit-text-fill-color: var(--fg);
     transition: background-color 600000s;
@@ -206,6 +223,15 @@ const messages = {
 
   [aria-invalid='true'] {
     border-color: var(--color-danger);
+  }
+
+  .contact-form__errors {
+    display: grid;
+    gap: 4px;
+  }
+
+  .contact-form__errors:not(:has(:not([hidden]))) {
+    display: none;
   }
 
   .field__error {

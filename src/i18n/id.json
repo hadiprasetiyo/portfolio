@@ -97,7 +97,13 @@
       "email": "Isi alamat email yang valid.",
       "message": "Tulis pesan (maksimal 2000 karakter).",
       "captcha": "Selesaikan verifikasi lalu coba lagi."
-    }
+    },
+    "greeting": "Halo Hadi, nama saya",
+    "reach": ", bisa dibalas lewat",
+    "about": "Saya ingin bicara tentang…",
+    "namePlaceholder": "nama kamu",
+    "emailPlaceholder": "email@kamu.com",
+    "messagePlaceholder": "lowongan, proyek, atau sekadar menyapa"
   },
   "footer": {
     "builtWith": "Dibangun dengan Astro dan Cloudflare Workers."
@@ -141,9 +147,6 @@
   "contactSection": {
     "chapter": "Kontak",
     "title": "Mari <em>bicara</em>",
-    "to": "Kepada",
-    "email": "Email",
-    "elsewhere": "Saluran lain",
     "corona": "Korona",
     "coronaNote": "1.000.000 K · hanya tampak saat totalitas",
     "ring": "Cincin berlian",

@@ -354,50 +354,36 @@ const title = profile ? `${fullName} · ${headline}` : 'Portfolio';
     }
   </section>
 
-  <section class="wrap contact" id="contact" aria-labelledby="contact-heading">
-    {/* gerhana total: bulan menutup matahari dan judul tinggal di bayangannya; tiap lapisan elemen HTML supaya dianimasikan GPU */}
-    <div class="totality">
-      <span class="totality__corona" aria-hidden="true"></span>
-      <span class="totality__rays" aria-hidden="true"></span>
-      <span class="totality__moon" aria-hidden="true"></span>
-      <span class="totality__bead" aria-hidden="true"></span>
-      <svg class="totality__leaders" viewBox="0 0 100 100" aria-hidden="true">
-        <path d="M69.1 30.9L79 13H100M27.4 72.6L15 87H0"></path>
-        <circle cx="27.4" cy="72.6" r="0.7"></circle>
-      </svg>
-      <p class="totality__note totality__note--ring" aria-hidden="true"><b>{dictionary.contactSection.ring}</b>{dictionary.contactSection.ringNote}</p>
-      <p class="totality__note totality__note--corona" aria-hidden="true"><b>{dictionary.contactSection.corona}</b>{dictionary.contactSection.coronaNote}</p>
-      <div class="totality__title">
+  <section class="contact" id="contact" aria-labelledby="contact-heading">
+    {/* gerhana total memenuhi layar: bulan menutup matahari saat digulir, korona baru tampak ketika totalitas */}
+    <div class="contact__scene">
+      <div class="totality" aria-hidden="true">
+        <span class="totality__glow"><canvas class="totality__corona"></canvas></span>
+        <span class="totality__sun"></span>
+        <span class="totality__track"><span class="totality__moon"></span></span>
+        <span class="totality__bead"></span>
+        <svg class="totality__leaders" viewBox="0 0 100 100">
+          <path d="M61.8 38.2L67 31H77M26.5 58.6L22 66H12"></path>
+          <circle cx="61.8" cy="38.2" r="0.35"></circle>
+          <circle cx="26.5" cy="58.6" r="0.35"></circle>
+        </svg>
+        <p class="totality__note totality__note--ring"><b>{dictionary.contactSection.ring}</b>{dictionary.contactSection.ringNote}</p>
+        <p class="totality__note totality__note--corona"><b>{dictionary.contactSection.corona}</b>{dictionary.contactSection.coronaNote}</p>
+      </div>
+      <div class="contact__heading">
         <p class="label chapter" data-reveal><span>No. 05</span><i aria-hidden="true"></i>{dictionary.contactSection.chapter}</p>
         <h2 class="section-title" id="contact-heading" data-split set:html={dictionary.contactSection.title} />
       </div>
     </div>
-    <div class="contact__desk">
-      <div class="letter" id="contact-form">
-        <p class="letter__head">
-          <span class="label">{dictionary.contactSection.to}</span>
-          <span class="letter__to">{fullName}</span>
-          <span class="label letter__place">{city} · UTC+7</span>
-        </p>
-        <p class="letter__intro">{dictionary.contact.intro}</p>
-        <ContactForm lang={lang} />
-      </div>
-      <dl class="readout">
-        {profile?.public_email && (
-          <div>
-            <dt class="label">{dictionary.contactSection.email}</dt>
-            <dd><a href={`mailto:${profile.public_email}`}>{profile.public_email}</a></dd>
-          </div>
-        )}
-        <div>
-          <dt class="label">{dictionary.contactSection.elsewhere}</dt>
-          <dd class="readout__links">
-            {profile?.github_url && <a href={profile.github_url} rel="noopener noreferrer">GitHub</a>}
-            {profile?.linkedin_url && <a href={profile.linkedin_url} rel="noopener noreferrer">LinkedIn</a>}
-            <a href={`/${lang}/cv`}>{dictionary.nav.cv}</a>
-          </dd>
-        </div>
-      </dl>
+    <div class="wrap contact__body" id="contact-form">
+      <p class="contact__intro" data-reveal>{dictionary.contact.intro}</p>
+      <ContactForm lang={lang} />
+      <ul class="contact__channels" role="list">
+        {profile?.public_email && <li><a href={`mailto:${profile.public_email}`}>{profile.public_email}</a></li>}
+        {profile?.github_url && <li><a href={profile.github_url} rel="noopener noreferrer">GitHub</a></li>}
+        {profile?.linkedin_url && <li><a href={profile.linkedin_url} rel="noopener noreferrer">LinkedIn</a></li>}
+        <li><a href={`/${lang}/cv`}>{dictionary.nav.cv}</a></li>
+      </ul>
     </div>
   </section>
 
