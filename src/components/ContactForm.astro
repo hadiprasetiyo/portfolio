@@ -161,35 +161,41 @@ const messages = {
     color: var(--gold);
   }
 
+  /* isian ditulis seperti di atas kertas surat: tanpa kotak, cuma garis bawah */
   input,
   textarea {
     width: 100%;
-    padding: 12px 14px;
-    background: rgba(242, 238, 230, 0.03);
-    border: 1px solid rgba(217, 194, 154, 0.2);
+    padding: 6px 0;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid rgba(217, 194, 154, 0.28);
     border-radius: 0;
     color: var(--fg);
-    font: 400 16px/1.5 var(--font-sans);
+    font: 400 21px/1.5 var(--font-serif);
     caret-color: var(--gold);
     transition: border-color 0.4s var(--ease), box-shadow 0.4s var(--ease);
   }
 
+  /* kertas bergaris; ikut bergulir bersama teksnya */
   textarea {
-    min-height: 9rem;
+    min-height: calc(4 * 1.6em);
+    padding: 0;
+    line-height: 1.6;
+    background: repeating-linear-gradient(transparent 0 calc(1.6em - 1px), rgba(217, 194, 154, 0.14) calc(1.6em - 1px) 1.6em) local;
     resize: vertical;
   }
 
   input:hover,
   textarea:hover {
-    border-color: rgba(217, 194, 154, 0.4);
+    border-color: rgba(217, 194, 154, 0.5);
   }
 
-  /* bingkai emas dengan pendar tipis sudah jadi penanda fokus */
+  /* garis bawah menebal jadi emas sebagai penanda fokus */
   input:focus,
   textarea:focus {
     outline: none;
     border-color: var(--gold);
-    box-shadow: 0 0 0 3px rgba(217, 194, 154, 0.12);
+    box-shadow: 0 1px 0 var(--gold);
   }
 
   /* isian otomatis browser tidak boleh memberi latar biru atau kuning di konsol gelap */
