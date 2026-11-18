@@ -368,24 +368,27 @@ const messages = {
     padding-block: 10px;
   }
 
-  /* pas foto bersudut tegas dengan bingkai emas tipis; fotonya diperbesar supaya bingkai hanya berisi wajah dan bahu */
+  /* pas foto 4:5 seperti di bagian Tentang, dengan latar langit gelap yang sama */
   .mail__photo {
     flex: none;
-    width: 42px;
-    height: 52px;
+    width: 48px;
+    height: 60px;
     margin: 3px;
     overflow: hidden;
     outline: 1px solid rgba(217, 194, 154, 0.55);
     outline-offset: 2px;
-    background: linear-gradient(180deg, #3a3226, #15120d);
+    background:
+      radial-gradient(46% 34% at 50% 30%, rgba(217, 194, 154, 0.12), transparent 72%),
+      radial-gradient(120% 85% at 50% 8%, #131317, #0b0b0e 58%, #07070a);
   }
 
+  /* sedikit diperbesar dari atas supaya wajah terbaca di ukuran kecil, bahu tetap terlihat */
   .mail__photo img {
     display: block;
-    width: 84px;
+    width: 135%;
     max-width: none;
     height: auto;
-    margin: -3px 0 0 -21px;
+    margin: -2px 0 0 -17.5%;
   }
 
   .mail__to-text {
