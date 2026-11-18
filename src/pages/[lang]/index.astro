@@ -370,7 +370,7 @@ const title = profile ? `${fullName} · ${headline}` : 'Portfolio';
       </ul>
     </div>
     <div class="contact__desk" id="contact-form">
-      <ContactForm lang={lang} to={profile?.public_email ?? fullName} />
+      <ContactForm lang={lang} name={fullName} email={profile?.public_email ?? ''} city={city} />
     </div>
   </section>
 

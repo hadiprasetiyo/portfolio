@@ -1,11 +1,12 @@
 ---
 import { env } from 'cloudflare:workers';
 import { getDictionary, type Locale } from '../i18n';
+import portrait from '../assets/portrait.webp';
 import { HONEYPOT_FIELD } from '../lib/contact';
 import Button from './Button.astro';
 
-type Props = { lang: Locale; to: string };
-const { lang, to } = Astro.props;
+type Props = { lang: Locale; name: string; email: string; city: string };
+const { lang, name, email, city } = Astro.props;
 const dictionary = getDictionary(lang).contact;
 const messages = {
   sending: dictionary.sending,
@@ -30,13 +31,21 @@ const messages = {
     <span class="mail__stamp" aria-hidden="true">
       <span class="mail__stamp-face">
         <svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="7"></circle><ellipse cx="20" cy="20" rx="15" ry="4.5" transform="rotate(-18 20 20)"></ellipse></svg>
-        <b>JKT</b>
+        {/* kota asal surat, diambil dari lokasi di profil */}
+        {city && <b>{city}</b>}
       </span>
       <svg class="mail__postmark" viewBox="0 0 120 60"><circle cx="30" cy="30" r="22"></circle><path d="M56 18q8-6 16 0t16 0t16 0M56 30q8-6 16 0t16 0t16 0M56 42q8-6 16 0t16 0t16 0"></path></svg>
     </span>
-    <div class="mail__row">
+    <div class="mail__row mail__row--to">
       <span class="mail__key">{dictionary.to}</span>
-      <span class="mail__to">{to}</span>
+      {/* kartu penerima seperti di aplikasi email; fotonya sama dengan di bagian Tentang, jadi sudah ada di cache */}
+      <span class="mail__to">
+        <span class="mail__avatar"><img src={portrait.src} alt="" width={portrait.width} height={portrait.height} loading="lazy" decoding="async" /></span>
+        <span class="mail__to-text">
+          <strong>{name}</strong>
+          {email && <small>{email}</small>}
+        </span>
+      </span>
     </div>
     <div class="mail__row">
       <label class="mail__key" for="contact-name">{dictionary.name}</label>
@@ -259,9 +268,11 @@ const messages = {
       grid-template-columns: 4.6rem minmax(0, 1fr);
     }
 
-    .mail__to {
-      padding: 3px 10px;
-      font-size: 15px;
+    /* label Kepada naik ke atas kartu supaya alamat email muat utuh */
+    .mail__row.mail__row--to {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 8px;
+      padding-block: 12px;
     }
   }
 
@@ -305,9 +316,13 @@ const messages = {
   }
 
   .mail__stamp-face b {
+    max-width: 100%;
+    overflow: hidden;
     color: #0b0a09;
-    font: 600 9px/1 var(--font-mono);
-    letter-spacing: 0.2em;
+    font: 600 8px/1 var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
   }
 
   .mail__postmark {
@@ -334,7 +349,7 @@ const messages = {
     grid-template-columns: 5.5rem minmax(0, 1fr);
     align-items: center;
     gap: 12px;
-    min-height: 56px;
+    min-height: 60px;
     border-bottom: 1px solid rgba(217, 194, 154, 0.16);
   }
 
@@ -346,12 +361,53 @@ const messages = {
   }
 
   .mail__to {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
     justify-self: start;
-    padding: 4px 12px;
+    max-width: 100%;
+    padding: 4px 16px 4px 4px;
     border: 1px solid rgba(217, 194, 154, 0.35);
     border-radius: 999px;
+    background: linear-gradient(90deg, rgba(217, 194, 154, 0.12), rgba(217, 194, 154, 0.02));
+  }
+
+  /* potongan foto tanpa latar diberi latar emas gelap dan cincin tipis; fotonya diperbesar supaya lingkaran hanya berisi wajah */
+  .mail__avatar {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    overflow: hidden;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 30%, #3a3226, #15120d);
+    box-shadow: 0 0 0 1px var(--gold), 0 0 0 3px rgba(217, 194, 154, 0.15);
+  }
+
+  .mail__avatar img {
+    display: block;
+    width: 78px;
+    max-width: none;
+    height: auto;
+    margin: -7px 0 0 -21px;
+  }
+
+  .mail__to-text {
+    display: grid;
+    min-width: 0;
+  }
+
+  .mail__to strong {
+    color: var(--fg);
+    font: italic 400 18px/1.15 var(--font-serif);
+  }
+
+  .mail__to small {
+    overflow: hidden;
     color: var(--gold);
-    overflow-wrap: anywhere;
+    font: 400 11px/1.4 var(--font-mono);
+    letter-spacing: 0.04em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   /* centang emas di ujung baris begitu isinya valid */
