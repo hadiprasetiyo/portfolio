@@ -1704,9 +1704,11 @@
   }
 
 
+  /* roda zodiak yang diputar menjorok keluar layar sempit dan membuat halaman bisa digeser ke samping */
   .tools {
     grid-template-columns: minmax(0, 1fr);
     padding-top: 100px;
+    overflow-x: clip;
   }
 
   .phase {
