@@ -241,7 +241,7 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
               <span class="ledger__cv-text">{dictionary.nav.cvTitle}</span>
               {/* segel emas seperti pada piagam sertifikat: dokumen resmi yang ditandatangani */}
               <span class="ledger__cv-seal" aria-hidden="true">
-                <svg viewBox="-20 -20 40 40"><circle class="ledger__cv-rim" r="17"></circle><path class="ledger__cv-ticks" d="M0.00 -13.50L0.00 -15.50M3.49 -13.04L4.01 -14.97M6.75 -11.69L7.75 -13.42M9.55 -9.55L10.96 -10.96M11.69 -6.75L13.42 -7.75M13.04 -3.49L14.97 -4.01M13.50 -0.00L15.50 -0.00M13.04 3.49L14.97 4.01M11.69 6.75L13.42 7.75M9.55 9.55L10.96 10.96M6.75 11.69L7.75 13.42M3.49 13.04L4.01 14.97M0.00 13.50L0.00 15.50M-3.49 13.04L-4.01 14.97M-6.75 11.69L-7.75 13.42M-9.55 9.55L-10.96 10.96M-11.69 6.75L-13.42 7.75M-13.04 3.49L-14.97 4.01M-13.50 0.00L-15.50 0.00M-13.04 -3.49L-14.97 -4.01M-11.69 -6.75L-13.42 -7.75M-9.55 -9.55L-10.96 -10.96M-6.75 -11.69L-7.75 -13.42M-3.49 -13.04L-4.01 -14.97"></path><circle class="ledger__cv-ring" r="11"></circle><path class="ledger__cv-star" d="M0 -8L1.8 -1.8L8 0L1.8 1.8L0 8L-1.8 1.8L-8 0L-1.8 -1.8Z"></path></svg>
+                <span class="ledger__cv-spin"><svg viewBox="-20 -20 40 40"><circle class="ledger__cv-rim" r="17"></circle><path class="ledger__cv-ticks" d="M0.00 -13.50L0.00 -15.50M3.49 -13.04L4.01 -14.97M6.75 -11.69L7.75 -13.42M9.55 -9.55L10.96 -10.96M11.69 -6.75L13.42 -7.75M13.04 -3.49L14.97 -4.01M13.50 -0.00L15.50 -0.00M13.04 3.49L14.97 4.01M11.69 6.75L13.42 7.75M9.55 9.55L10.96 10.96M6.75 11.69L7.75 13.42M3.49 13.04L4.01 14.97M0.00 13.50L0.00 15.50M-3.49 13.04L-4.01 14.97M-6.75 11.69L-7.75 13.42M-9.55 9.55L-10.96 10.96M-11.69 6.75L-13.42 7.75M-13.04 3.49L-14.97 4.01M-13.50 0.00L-15.50 0.00M-13.04 -3.49L-14.97 -4.01M-11.69 -6.75L-13.42 -7.75M-9.55 -9.55L-10.96 -10.96M-6.75 -11.69L-7.75 -13.42M-3.49 -13.04L-4.01 -14.97"></path><circle class="ledger__cv-ring" r="11"></circle><path class="ledger__cv-star" d="M0 -8L1.8 -1.8L8 0L1.8 1.8L0 8L-1.8 1.8L-8 0L-1.8 -1.8Z"></path></svg></span>
               </span>
             </a>
             <button class="sound ledger__sound" type="button" aria-pressed="false" aria-label={dictionary.sound.play} data-play={dictionary.sound.play} data-pause={dictionary.sound.pause}
@@ -1003,6 +1003,23 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
     margin-left: 10px;
     will-change: rotate;
     transition: rotate 1.4s cubic-bezier(0.45, 0, 0.2, 1), filter 1.4s cubic-bezier(0.45, 0, 0.2, 1);
+  }
+
+  /* putaran pelan terus selama indeks terbuka, di lapisan dalam supaya tidak bentrok dengan putaran saat disorot */
+  .ledger__cv-spin {
+    display: block;
+    width: 100%;
+    height: 100%;
+    will-change: rotate;
+    animation: seal-turn 60s linear infinite paused;
+  }
+
+  .site-index.is-open .ledger__cv-spin {
+    animation-play-state: running;
+  }
+
+  @keyframes seal-turn {
+    to { rotate: 1turn; }
   }
 
   .ledger__cv-seal svg {
