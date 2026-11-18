@@ -995,13 +995,14 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
     text-transform: none;
   }
 
-  /* segel diputar lewat pembungkusnya; memutar svg langsung tidak digambar ulang di Chromium */
+  /* segel diputar lewat pembungkusnya di lapisan GPU sendiri, jadi svg-nya tidak digambar ulang tiap frame */
   .ledger__cv-seal {
     display: block;
     width: 36px;
     height: 36px;
     margin-left: 10px;
-    transition: rotate 1.2s var(--ease);
+    will-change: rotate;
+    transition: rotate 1.4s cubic-bezier(0.45, 0, 0.2, 1), filter 1.4s cubic-bezier(0.45, 0, 0.2, 1);
   }
 
   .ledger__cv-seal svg {
@@ -1029,7 +1030,6 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
 
   .ledger__cv-star {
     fill: var(--gold);
-    transition: fill 0.5s var(--ease);
   }
 
   .ledger__cv:is(:hover, :focus-visible, [aria-current='page']) {
@@ -1045,12 +1045,10 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
   }
 
   /* segel berputar pelan seperti dial saat disorot, sama seperti segel sertifikat */
+  /* menyala lewat brightness, bukan ganti warna isi, supaya tetap dikerjakan GPU selama berputar */
   .ledger__cv:is(:hover, :focus-visible) .ledger__cv-seal {
     rotate: 45deg;
-  }
-
-  .ledger__cv:is(:hover, :focus-visible) .ledger__cv-star {
-    fill: var(--sun);
+    filter: brightness(1.35);
   }
 
   .ledger__sound {
