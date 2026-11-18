@@ -190,6 +190,7 @@ const messages = {
     gap: 10px;
     min-height: 64px;
     padding-right: 80px;
+    border-bottom: 1px solid rgba(217, 194, 154, 0.16);
     color: var(--gold);
     font: 400 11px/1.5 var(--font-mono);
     letter-spacing: 0.16em;
@@ -266,7 +267,7 @@ const messages = {
     align-items: center;
     gap: 12px;
     min-height: 56px;
-    border-top: 1px solid rgba(217, 194, 154, 0.16);
+    border-bottom: 1px solid rgba(217, 194, 154, 0.16);
   }
 
   .mail__key {
@@ -312,7 +313,7 @@ const messages = {
 
   .mail__body {
     position: relative;
-    border-top: 1px solid rgba(217, 194, 154, 0.16);
+    border-bottom: 1px solid rgba(217, 194, 154, 0.16);
   }
 
   textarea {
@@ -332,10 +333,11 @@ const messages = {
     outline: none;
   }
 
-  /* fokus ditandai di barisnya: garis atas jadi emas */
+  /* garis di bawah kolom yang sedang diisi menyala emas, seperti garis tempat menulis */
   .mail__row:focus-within,
   .mail__body:focus-within {
-    border-top-color: var(--gold);
+    border-bottom-color: var(--gold);
+    box-shadow: 0 1px 0 var(--gold);
   }
 
   .mail__row:focus-within .mail__key {
@@ -357,8 +359,9 @@ const messages = {
     font-variant-numeric: tabular-nums;
   }
 
-  .mail__row:has([aria-invalid='true']) {
-    border-top-color: var(--color-danger);
+  .mail__row:has([aria-invalid='true']),
+  .mail__body:has([aria-invalid='true']) {
+    border-bottom-color: var(--color-danger);
   }
 
   .mail__errors {
@@ -397,7 +400,6 @@ const messages = {
     justify-content: space-between;
     gap: 16px 24px;
     padding-top: 20px;
-    border-top: 1px solid rgba(217, 194, 154, 0.16);
   }
 
   .mail :global(.mail__send) {
