@@ -29,7 +29,7 @@ const messages = {
         <span class="mail__cover-to"><small>{dictionary.to}</small>{name}</span>
       </span>
       <span class="mail__cover-flap"><span></span></span>
-      <span class="mail__cover-seal">H</span>
+      <svg class="mail__cover-star" viewBox="-10 -10 20 20"><path d="M0 -10Q0.22 -0.22 5 0Q0.22 0.22 0 10Q-0.22 0.22 -5 0Q-0.22 -0.22 0 -10Z"></path></svg>
     </span>
     <span class="mail__cover-cta">{dictionary.open}</span>
   </button>
@@ -138,7 +138,13 @@ const messages = {
       if (form.dataset.sealed) return;
       form.dataset.sealed = 'opening';
       await wait(1300);
-      delete form.dataset.sealed;
+      const reveal = () => delete form.dataset.sealed;
+      // surat di amplop dan surat penuh diberi nama transisi sama, browser yang memekarkan satu jadi yang lain
+      if (document.startViewTransition && !calm) {
+        form.dataset.unfolding = '';
+        await document.startViewTransition(reveal).finished;
+        delete form.dataset.unfolding;
+      } else reveal();
       form.elements.name.focus({ preventScroll: true });
     });
     form.querySelector('[data-mail-again]').addEventListener('click', () => {
@@ -222,6 +228,7 @@ const messages = {
 
 <style>
   .mail {
+    --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 .94 0 0 0 0 .82 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     position: relative;
     display: grid;
     gap: 16px;
@@ -237,7 +244,7 @@ const messages = {
     overflow: clip;
     border: 1px solid rgba(217, 194, 154, 0.3);
     background:
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 .94 0 0 0 0 .82 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+      var(--grain),
       radial-gradient(ellipse 80% 40% at 50% 0%, rgba(217, 194, 154, 0.1), transparent),
       linear-gradient(180deg, #17140f, #0d0c0a 60%);
     transition: opacity 0.5s var(--ease), scale 0.8s var(--ease);
@@ -287,12 +294,9 @@ const messages = {
       grid-template-columns: 4.6rem minmax(0, 1fr);
     }
 
-    /* amplop lebih pendek di HP: segel dikecilkan supaya tidak menimpa nama penerima */
-    .mail .mail__cover-seal {
-      width: 38px;
-      height: 38px;
-      margin: -19px 0 0 -19px;
-      font-size: 19px;
+    /* amplop lebih pendek di HP: bintang dikecilkan supaya tidak menimpa nama penerima */
+    .mail .mail__cover-star {
+      width: 22px;
     }
 
     .mail .mail__cover-to {
@@ -614,7 +618,6 @@ const messages = {
 
   /* tiap tahap muncul naik pelan, cukup opacity dan translate */
   .mail__cover,
-  .mail__paper,
   .mail__thanks {
     animation: mail-rise 0.7s var(--ease);
   }
@@ -640,13 +643,28 @@ const messages = {
     outline: none;
   }
 
+  /* isolate supaya latar amplop (::before) bisa di belakang tutup yang sudah terbalik */
   .mail__cover-env {
     position: relative;
+    isolation: isolate;
     width: 100%;
     aspect-ratio: 1.6;
-    border: 1px solid rgba(217, 194, 154, 0.35);
-    background: linear-gradient(180deg, #14120e, #0b0a09);
-    perspective: 1200px;
+    perspective: 1400px;
+  }
+
+  /* bagian dalam amplop berlapis peta bintang, baru terlihat saat tutupnya terbuka */
+  .mail__cover-env::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border: 1px solid rgba(217, 194, 154, 0.4);
+    background:
+      radial-gradient(rgba(242, 213, 160, 0.55) 0.6px, transparent 1.2px) 0 0 / 23px 23px,
+      radial-gradient(rgba(242, 213, 160, 0.3) 0.6px, transparent 1.2px) 11px 7px / 37px 41px,
+      linear-gradient(180deg, #0f0d0a, #080807);
+    box-shadow: 0 40px 60px -36px rgba(0, 0, 0, 0.9);
+    transition: opacity 0.35s var(--ease);
   }
 
   .mail__cover-letter {
@@ -656,7 +674,8 @@ const messages = {
     border: 1px solid rgba(217, 194, 154, 0.3);
     background:
       repeating-linear-gradient(transparent 0 23px, rgba(217, 194, 154, 0.12) 23px 24px) 0 48px / 100% 100% no-repeat,
-      linear-gradient(180deg, #1d1a14, #12100c);
+      var(--grain),
+      linear-gradient(180deg, #17140f, #0d0c0a 60%);
     transition: translate 0.6s var(--ease);
   }
 
@@ -664,8 +683,12 @@ const messages = {
     position: absolute;
     inset: 0;
     z-index: 2;
-    background: linear-gradient(180deg, #1c1912, #13110d);
+    background:
+      var(--grain),
+      radial-gradient(ellipse 60% 50% at 50% 100%, rgba(217, 194, 154, 0.06), transparent),
+      linear-gradient(180deg, #1c1913, #12100d);
     clip-path: polygon(0 0, 50% 52%, 100% 0, 100% 100%, 0 100%);
+    transition: opacity 0.35s var(--ease);
   }
 
   .mail__cover-pocket svg {
@@ -674,7 +697,7 @@ const messages = {
     width: 100%;
     height: 100%;
     fill: none;
-    stroke: rgba(217, 194, 154, 0.35);
+    stroke: rgba(217, 194, 154, 0.3);
   }
 
   .mail__cover-pocket path {
@@ -685,7 +708,8 @@ const messages = {
     position: absolute;
     inset: auto 0 12%;
     display: grid;
-    gap: 6px;
+    justify-items: center;
+    gap: 8px;
     color: var(--fg);
     font: italic 400 clamp(20px, 3vw, 26px)/1.1 var(--font-serif);
   }
@@ -693,44 +717,49 @@ const messages = {
   .mail__cover-to small {
     color: var(--muted);
     font: normal 400 10px/1 var(--font-mono);
-    letter-spacing: 0.2em;
+    letter-spacing: 0.24em;
     text-transform: uppercase;
   }
 
-  /* tutup amplop dengan tepi emas; berputar 3D ke atas saat dibuka */
+  .mail__cover-to::after {
+    content: '';
+    width: 40px;
+    height: 1px;
+    margin-top: 4px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+
+  /* tutup amplop bertepi emas, ujungnya lebih terang seolah tersinari bintang */
   .mail__cover-flap {
     position: absolute;
     inset: 0 0 auto;
     z-index: 3;
     height: 56%;
     transform-origin: top;
-    filter: drop-shadow(0 1px 0 rgba(217, 194, 154, 0.6));
-    transition: rotate 0.6s var(--ease);
+    filter: drop-shadow(0 1px 0 rgba(217, 194, 154, 0.55)) drop-shadow(0 6px 10px rgba(0, 0, 0, 0.45));
+    transition: rotate 0.7s cubic-bezier(0.45, 0, 0.2, 1), opacity 0.35s var(--ease);
   }
 
   .mail__cover-flap span {
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, #24201a, #18150f);
+    background:
+      var(--grain),
+      radial-gradient(ellipse 40% 60% at 50% 100%, rgba(217, 194, 154, 0.1), transparent),
+      linear-gradient(180deg, #1a1712, #25201a);
     clip-path: polygon(0 0, 100% 0, 50% 100%);
   }
 
-  .mail__cover-seal {
+  .mail__cover-star {
     position: absolute;
     top: 56%;
     left: 50%;
     z-index: 4;
-    display: grid;
-    place-items: center;
-    width: 48px;
-    height: 48px;
-    margin: -24px 0 0 -24px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 35% 30%, var(--sun), var(--gold) 55%, #a8895a);
-    box-shadow: 0 3px 14px rgba(0, 0, 0, 0.6), inset 0 0 0 3px rgba(42, 34, 22, 0.25);
-    color: #2a2216;
-    font: italic 400 24px/1 var(--font-serif);
-    transition: scale 0.4s var(--ease), opacity 0.3s var(--ease);
+    width: 30px;
+    translate: -50% -50%;
+    fill: var(--gold);
+    filter: drop-shadow(0 0 6px rgba(242, 213, 160, 0.55));
+    transition: scale 0.5s var(--ease), rotate 0.5s var(--ease), opacity 0.4s var(--ease);
   }
 
   /* tombol yang jelas tertulis, supaya orang awam tahu amplop ini dibuka untuk menulis pesan */
@@ -745,7 +774,7 @@ const messages = {
     font: 400 11px/1 var(--font-mono);
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    transition: background-color 0.4s var(--ease), color 0.4s var(--ease);
+    transition: background-color 0.4s var(--ease), color 0.4s var(--ease), opacity 0.3s var(--ease);
   }
 
   .mail__cover-cta::after {
@@ -760,11 +789,16 @@ const messages = {
   /* disorot: tutup sedikit terangkat dan surat mengintip, mengisyaratkan amplop bisa dibuka */
   @media (hover: hover) {
     .mail__cover:hover .mail__cover-flap {
-      rotate: x 26deg;
+      rotate: x 22deg;
     }
 
     .mail__cover:hover .mail__cover-letter {
-      translate: 0 -5%;
+      translate: 0 -6%;
+    }
+
+    .mail__cover:hover .mail__cover-star {
+      scale: 1.15;
+      rotate: 45deg;
     }
 
     .mail__cover:hover .mail__cover-cta {
@@ -773,12 +807,14 @@ const messages = {
     }
   }
 
+  /* urutan buka: bintang lepas, tutup terbuka, surat naik, lalu amplop memudar meninggalkan suratnya */
   .mail[data-sealed='opening'] .mail__cover {
     pointer-events: none;
   }
 
-  .mail[data-sealed='opening'] .mail__cover-seal {
-    scale: 1.4;
+  .mail[data-sealed='opening'] .mail__cover-star {
+    scale: 0.3;
+    rotate: 135deg;
     opacity: 0;
   }
 
@@ -786,12 +822,42 @@ const messages = {
   .mail[data-sealed='opening'] .mail__cover-flap {
     z-index: 0;
     rotate: x 180deg;
-    transition: rotate 0.6s cubic-bezier(0.6, 0, 0.3, 1) 0.15s, z-index 0s 0.45s;
+    opacity: 0;
+    transition: rotate 0.7s cubic-bezier(0.45, 0, 0.2, 1) 0.05s, z-index 0s 0.4s, opacity 0.35s var(--ease) 0.95s;
   }
 
   .mail[data-sealed='opening'] .mail__cover-letter {
-    translate: 0 -58%;
-    transition: translate 0.7s var(--ease) 0.6s;
+    translate: 0 -48%;
+    transition: translate 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.45s;
+  }
+
+  .mail[data-sealed='opening'] .mail__cover-env::before,
+  .mail[data-sealed='opening'] .mail__cover-pocket {
+    opacity: 0;
+    transition-delay: 0.95s;
+  }
+
+  .mail[data-sealed='opening'] .mail__cover-cta {
+    opacity: 0;
+  }
+
+  .mail[data-unfolding] .mail__cover-letter,
+  .mail[data-unfolding] .mail__paper {
+    view-transition-name: mail-sheet;
+  }
+
+  :global(::view-transition-group(mail-sheet)) {
+    animation-duration: 0.6s;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* surat kecil dan surat penuh beda rasio: isi diisi dari atas, bukan direntang */
+  :global(::view-transition-old(mail-sheet)),
+  :global(::view-transition-new(mail-sheet)) {
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+    animation-duration: 0.6s;
   }
 
   /* ---------- setelah terkirim: kartu terima kasih dengan bintang ---------- */
