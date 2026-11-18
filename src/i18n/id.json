@@ -18,7 +18,10 @@
       "skills": "Keahlian sebagai rasi bintang",
       "experience": "Pengalaman menurut fase bulan",
       "contact": "Kirim pesan"
-    }
+    },
+    "motto": "MELALUI KESULITAN MENUJU BINTANG",
+    "cvTitle": "Curriculum Vitae",
+    "cvHint": "Lihat riwayat lengkap"
   },
   "hero": {
     "viewCv": "Lihat CV",

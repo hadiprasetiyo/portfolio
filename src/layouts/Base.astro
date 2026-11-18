@@ -167,7 +167,7 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
               <defs>
                 <path id="plate-inscription" d="M240 122 A118 118 0 1 1 239.99 122"></path>
               </defs>
-              <text class="plate__inscription"><textPath href="#plate-inscription" textLength={circleLength(118) - 6} lengthAdjust="spacing">{'HADIIYOK · ASTROLABIUM · JAKARTA · MMXXVI · VI°S · CVI°E · '.repeat(2)}</textPath></text>
+              <text class="plate__inscription"><textPath href="#plate-inscription" textLength={circleLength(118) - 6} lengthAdjust="spacing">{`HADIIYOK · ${dictionary.nav.motto} · MMXXVI · VI°S · CVI°E · `.repeat(2)}</textPath></text>
             </svg>
           </div>
           {/* jarum Sagitta, si anak panah: di lapisan sendiri, jadi putaran dan kilaunya tidak menggambar ulang pelat */}
@@ -235,7 +235,12 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
             }
           </ol>
           <div class="ledger__foot">
-            <a class="ledger__cv" href={`/${lang}/cv`} aria-current={path === '/cv' ? 'page' : undefined}>{dictionary.nav.cv} ↗</a>
+            {/* tombol CV berupa lembar dokumen kecil supaya jelas isinya riwayat lengkap, bukan sekadar tautan */}
+            <a class="ledger__cv" href={`/${lang}/cv`} aria-current={path === '/cv' ? 'page' : undefined}>
+              <svg class="ledger__cv-page" viewBox="0 0 24 30" aria-hidden="true"><path d="M3 1H15L21 7V29H3ZM15 1V7H21"></path><path class="ledger__cv-lines" d="M7 13H17M7 17H17M7 21H13"></path></svg>
+              <span class="ledger__cv-text"><strong>{dictionary.nav.cvTitle}</strong><small>{dictionary.nav.cvHint}</small></span>
+              <span class="ledger__cv-arrow" aria-hidden="true">↗</span>
+            </a>
             <button class="sound ledger__sound" type="button" aria-pressed="false" aria-label={dictionary.sound.play} data-play={dictionary.sound.play} data-pause={dictionary.sound.pause}
               ><span class="sound__bars" aria-hidden="true"><i></i><i></i><i></i></span><span class="sound__label">{dictionary.sound.label}</span></button
             >
@@ -927,22 +932,107 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
   }
 
   .ledger__cv {
-    display: inline-grid;
-    place-items: center;
-    min-height: 2.75rem;
-    padding-inline: 18px;
-    border: 1px solid rgba(217, 194, 154, 0.32);
-    border-radius: 999px;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 12px 10px 16px;
+    border: 1px solid rgba(217, 194, 154, 0.35);
+    background: linear-gradient(180deg, rgba(217, 194, 154, 0.08), rgba(217, 194, 154, 0.02));
     color: var(--fg);
-    font: 400 11px/1 var(--font-mono);
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
     text-decoration: none;
-    transition: border-color 0.5s var(--ease), color 0.5s var(--ease);
+    overflow: hidden;
+    transition: border-color 0.5s var(--ease);
   }
 
-  .ledger__cv:hover {
+  /* kilau tipis menyapu lembar saat disorot, cukup digeser lewat GPU */
+  .ledger__cv::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(105deg, transparent 35%, rgba(255, 236, 200, 0.16) 50%, transparent 65%);
+    translate: -100% 0;
+    transition: translate 0.9s var(--ease);
+  }
+
+  /* siku emas di sudut, sekeluarga dengan piagam sertifikat */
+  .ledger__cv::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    --corner: linear-gradient(var(--gold), var(--gold));
+    background:
+      var(--corner) top left / 8px 1px, var(--corner) top left / 1px 8px,
+      var(--corner) top right / 8px 1px, var(--corner) top right / 1px 8px,
+      var(--corner) bottom left / 8px 1px, var(--corner) bottom left / 1px 8px,
+      var(--corner) bottom right / 8px 1px, var(--corner) bottom right / 1px 8px;
+    background-repeat: no-repeat;
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  .ledger__cv-page {
+    flex: none;
+    width: 22px;
+    height: 28px;
+    fill: none;
+    stroke: var(--gold);
+    stroke-width: 1.2;
+    transition: translate 0.5s var(--ease);
+  }
+
+  .ledger__cv-lines {
+    stroke: rgba(217, 194, 154, 0.55);
+  }
+
+  .ledger__cv-text {
+    display: grid;
+    gap: 4px;
+  }
+
+  .ledger__cv-text strong {
+    color: var(--fg);
+    font: italic 400 20px/1 var(--font-serif);
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .ledger__cv-text small {
+    color: var(--muted);
+    font: 400 10px/1.3 var(--font-mono);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .ledger__cv-arrow {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    margin-left: 6px;
+    border: 1px solid rgba(217, 194, 154, 0.4);
+    border-radius: 50%;
+    color: var(--gold);
+    font: 400 16px/1 var(--font-sans);
+    transition: translate 0.5s var(--ease), background-color 0.5s var(--ease), color 0.5s var(--ease);
+  }
+
+  .ledger__cv:is(:hover, :focus-visible, [aria-current='page']) {
     border-color: var(--gold);
+  }
+
+  .ledger__cv:is(:hover, :focus-visible)::before {
+    translate: 100% 0;
+  }
+
+  .ledger__cv:is(:hover, :focus-visible) .ledger__cv-page {
+    translate: 0 -2px;
+  }
+
+  .ledger__cv:is(:hover, :focus-visible) .ledger__cv-arrow {
+    background: var(--gold);
+    color: var(--bg);
+    translate: 2px -2px;
   }
 
   .ledger__sound {

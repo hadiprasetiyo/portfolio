@@ -18,7 +18,10 @@
       "skills": "Skills as constellations",
       "experience": "Experience by moon phase",
       "contact": "Write to me"
-    }
+    },
+    "motto": "THROUGH HARDSHIP TO THE STARS",
+    "cvTitle": "Curriculum Vitae",
+    "cvHint": "See the full record"
   },
   "hero": {
     "viewCv": "View CV",
