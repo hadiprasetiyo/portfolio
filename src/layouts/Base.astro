@@ -239,10 +239,8 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
             <a class="ledger__cv" href={`/${lang}/cv`} aria-current={path === '/cv' ? 'page' : undefined}>
               <svg class="ledger__cv-page" viewBox="0 0 24 30" aria-hidden="true"><path d="M3 1H15L21 7V29H3ZM15 1V7H21"></path><path class="ledger__cv-lines" d="M7 13H17M7 17H17M7 21H13"></path></svg>
               <span class="ledger__cv-text">{dictionary.nav.cvTitle}</span>
-              {/* segel emas seperti pada piagam sertifikat: dokumen resmi yang ditandatangani */}
-              <span class="ledger__cv-seal" aria-hidden="true">
-                <span class="ledger__cv-spin"><svg viewBox="-20 -20 40 40"><circle class="ledger__cv-rim" r="17"></circle><path class="ledger__cv-ticks" d="M0.00 -13.50L0.00 -15.50M3.49 -13.04L4.01 -14.97M6.75 -11.69L7.75 -13.42M9.55 -9.55L10.96 -10.96M11.69 -6.75L13.42 -7.75M13.04 -3.49L14.97 -4.01M13.50 -0.00L15.50 -0.00M13.04 3.49L14.97 4.01M11.69 6.75L13.42 7.75M9.55 9.55L10.96 10.96M6.75 11.69L7.75 13.42M3.49 13.04L4.01 14.97M0.00 13.50L0.00 15.50M-3.49 13.04L-4.01 14.97M-6.75 11.69L-7.75 13.42M-9.55 9.55L-10.96 10.96M-11.69 6.75L-13.42 7.75M-13.04 3.49L-14.97 4.01M-13.50 0.00L-15.50 0.00M-13.04 -3.49L-14.97 -4.01M-11.69 -6.75L-13.42 -7.75M-9.55 -9.55L-10.96 -10.96M-6.75 -11.69L-7.75 -13.42M-3.49 -13.04L-4.01 -14.97"></path><circle class="ledger__cv-ring" r="11"></circle><path class="ledger__cv-star" d="M0 -8L1.8 -1.8L8 0L1.8 1.8L0 8L-1.8 1.8L-8 0L-1.8 -1.8Z"></path></svg></span>
-              </span>
+              {/* tanda tangan pemilik: CV adalah dokumen yang ditandatangani, tertulis ulang saat disorot */}
+              <span class="ledger__cv-sign" aria-hidden="true">Hadi</span>
             </a>
             <button class="sound ledger__sound" type="button" aria-pressed="false" aria-label={dictionary.sound.play} data-play={dictionary.sound.play} data-pause={dictionary.sound.pause}
               ><span class="sound__bars" aria-hidden="true"><i></i><i></i><i></i></span><span class="sound__label">{dictionary.sound.label}</span></button
@@ -995,58 +993,26 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
     text-transform: none;
   }
 
-  /* segel diputar lewat pembungkusnya di lapisan GPU sendiri, jadi svg-nya tidak digambar ulang tiap frame */
-  .ledger__cv-seal {
-    display: block;
-    width: 36px;
-    height: 36px;
-    margin-left: 10px;
-    will-change: rotate;
-    transition: rotate 1.4s cubic-bezier(0.45, 0, 0.2, 1), filter 1.4s cubic-bezier(0.45, 0, 0.2, 1);
+  .ledger__cv .ledger__cv-sign {
+    position: relative;
+    margin: 6px 6px 0 14px;
+    padding: 0 6px 8px 2px;
+    color: var(--gold);
+    font: 400 30px/1 var(--font-script);
+    letter-spacing: 0;
+    text-transform: none;
+    rotate: -6deg;
   }
 
-  /* putaran pelan terus selama indeks terbuka, di lapisan dalam supaya tidak bentrok dengan putaran saat disorot */
-  .ledger__cv-spin {
-    display: block;
-    width: 100%;
-    height: 100%;
-    will-change: rotate;
-    animation: seal-turn 60s linear infinite paused;
-  }
-
-  .site-index.is-open .ledger__cv-spin {
-    animation-play-state: running;
-  }
-
-  @keyframes seal-turn {
-    to { rotate: 1turn; }
-  }
-
-  .ledger__cv-seal svg {
-    display: block;
-    width: 100%;
-    height: 100%;
-  }
-
-  .ledger__cv-rim {
-    fill: rgba(217, 194, 154, 0.08);
-    stroke: var(--gold);
-    stroke-width: 1;
-  }
-
-  .ledger__cv-ticks {
-    stroke: rgba(217, 194, 154, 0.7);
-    stroke-width: 0.8;
-  }
-
-  .ledger__cv-ring {
-    fill: none;
-    stroke: rgba(217, 194, 154, 0.35);
-    stroke-width: 0.6;
-  }
-
-  .ledger__cv-star {
-    fill: var(--gold);
+  .ledger__cv-sign::after {
+    content: '';
+    position: absolute;
+    right: -4px;
+    bottom: 6px;
+    left: 0;
+    height: 1px;
+    background: linear-gradient(90deg, var(--gold), transparent);
+    transform-origin: left;
   }
 
   .ledger__cv:is(:hover, :focus-visible, [aria-current='page']) {
@@ -1061,11 +1027,23 @@ const circleLength = (radius: number) => Math.ceil(2 * Math.PI * radius);
     translate: 0 -2px;
   }
 
-  /* segel berputar pelan seperti dial saat disorot, sama seperti segel sertifikat */
-  /* menyala lewat brightness, bukan ganti warna isi, supaya tetap dikerjakan GPU selama berputar */
-  .ledger__cv:is(:hover, :focus-visible) .ledger__cv-seal {
-    rotate: 45deg;
-    filter: brightness(1.35);
+  /* pena menulis ulang tanda tangan dari kiri ke kanan, lalu garis bawahnya ditarik */
+  .ledger__cv:is(:hover, :focus-visible) .ledger__cv-sign {
+    animation: sign-write 0.9s cubic-bezier(0.4, 0, 0.3, 1) both;
+  }
+
+  .ledger__cv:is(:hover, :focus-visible) .ledger__cv-sign::after {
+    animation: sign-line 0.5s cubic-bezier(0.4, 0, 0.3, 1) 0.6s both;
+  }
+
+  @keyframes sign-write {
+    from { clip-path: inset(-40% 100% -40% -10%); }
+    to { clip-path: inset(-40% -10% -40% -10%); }
+  }
+
+  @keyframes sign-line {
+    from { scale: 0 1; }
+    to { scale: 1 1; }
   }
 
   .ledger__sound {
