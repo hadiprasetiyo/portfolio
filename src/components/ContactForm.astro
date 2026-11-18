@@ -13,12 +13,26 @@ const messages = {
   failed: dictionary.failed,
   invalid: dictionary.invalid,
   errors: dictionary.errors,
+  sentBody: dictionary.sentBody,
 };
 ---
 
 {/* dibuat mirip jendela tulis email supaya orang awam langsung paham fungsinya */}
 <form class="mail" method="post" action="/api/contact" data-contact-form data-messages={JSON.stringify(messages)} novalidate>
   <input type="hidden" name="locale" value={lang} />
+  {/* amplop tertutup: pengunjung membukanya dulu, baru suratnya keluar; tanpa JS tidak tampil dan surat langsung terbuka */}
+  <button type="button" class="mail__cover" data-mail-open>
+    <span class="mail__cover-env" aria-hidden="true">
+      <span class="mail__cover-letter"></span>
+      <span class="mail__cover-pocket">
+        <svg viewBox="0 0 160 100" preserveAspectRatio="none"><path d="M0 0L80 52L160 0M0 100L62 62M160 100L98 62"></path></svg>
+        <span class="mail__cover-to"><small>{dictionary.to}</small>{name}</span>
+      </span>
+      <span class="mail__cover-flap"><span></span></span>
+      <span class="mail__cover-seal">H</span>
+    </span>
+    <span class="mail__cover-cta">{dictionary.open}</span>
+  </button>
   <div class="mail__paper">
     <svg class="mail__watermark" viewBox="-50 -50 100 100" aria-hidden="true"><circle r="46"></circle><circle r="40"></circle><path d="M0.0 -40.0L0.0 -44.0M6.9 -39.4L7.6 -43.3M13.7 -37.6L15.0 -41.3M20.0 -34.6L22.0 -38.1M25.7 -30.6L28.3 -33.7M30.6 -25.7L33.7 -28.3M34.6 -20.0L38.1 -22.0M37.6 -13.7L41.3 -15.0M39.4 -6.9L43.3 -7.6M40.0 -0.0L44.0 -0.0M39.4 6.9L43.3 7.6M37.6 13.7L41.3 15.0M34.6 20.0L38.1 22.0M30.6 25.7L33.7 28.3M25.7 30.6L28.3 33.7M20.0 34.6L22.0 38.1M13.7 37.6L15.0 41.3M6.9 39.4L7.6 43.3M0.0 40.0L0.0 44.0M-6.9 39.4L-7.6 43.3M-13.7 37.6L-15.0 41.3M-20.0 34.6L-22.0 38.1M-25.7 30.6L-28.3 33.7M-30.6 25.7L-33.7 28.3M-34.6 20.0L-38.1 22.0M-37.6 13.7L-41.3 15.0M-39.4 6.9L-43.3 7.6M-40.0 0.0L-44.0 0.0M-39.4 -6.9L-43.3 -7.6M-37.6 -13.7L-41.3 -15.0M-34.6 -20.0L-38.1 -22.0M-30.6 -25.7L-33.7 -28.3M-25.7 -30.6L-28.3 -33.7M-20.0 -34.6L-22.0 -38.1M-13.7 -37.6L-15.0 -41.3M-6.9 -39.4L-7.6 -43.3"></path><path class="mail__watermark-star" d="M0 -30Q0.7 -0.7 15 0Q0.7 0.7 0 30Q-0.7 0.7 -15 0Q-0.7 -0.7 0 -30Z"></path></svg>
     <div class="mail__head">
@@ -84,6 +98,14 @@ const messages = {
     <span class="mail__flap"><span></span></span>
     <span class="mail__seal">H</span>
   </div>
+  {/* kartu penutup setelah surat terbang, supaya pengirim tahu pesannya benar-benar sampai */}
+  <div class="mail__thanks" tabindex="-1">
+    <svg class="mail__thanks-star" viewBox="-10 -10 20 20" aria-hidden="true"><path d="M0 -10Q0.22 -0.22 5 0Q0.22 0.22 0 10Q-0.22 0.22 -5 0Q-0.22 -0.22 0 -10Z"></path></svg>
+    <p class="mail__thanks-label">{dictionary.sentLabel} · <span data-thanks-date></span></p>
+    <p class="mail__thanks-title">{dictionary.sentTitle}</p>
+    <p class="mail__thanks-text" data-thanks-text></p>
+    <button type="button" class="mail__again" data-mail-again>{dictionary.again}</button>
+  </div>
   <p class="mail__status" role="status" aria-live="polite"></p>
 </form>
 
@@ -101,13 +123,32 @@ const messages = {
     const sign = form.querySelector('[data-mail-sign]');
     const updateSign = () => (sign.textContent = form.elements.name.value.trim());
     form.elements.name.addEventListener('input', updateSign);
-    // tanggal hari ini di pojok surat, ditulis di browser karena halaman ini dibangun sekali saat build
-    form.querySelector('[data-mail-date]').textContent = new Intl.DateTimeFormat(document.documentElement.lang, { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
+    // tanggal hari ini di surat, ditulis di browser karena halaman ini dibangun sekali saat build
+    const today = new Intl.DateTimeFormat(document.documentElement.lang, { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
+    form.querySelector('[data-mail-date]').textContent = today;
+    form.querySelector('[data-thanks-date]').textContent = today;
     const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
     const wait = (ms) => new Promise((resolve) => setTimeout(resolve, calm ? 0 : ms));
+    const paper = form.querySelector('.mail__paper');
+    const thanks = form.querySelector('.mail__thanks');
+    const cover = form.querySelector('[data-mail-open]');
 
-    // script Turnstile pihak ketiga baru dimuat saat form disentuh, supaya tidak membebani muat halaman
-    form.addEventListener(
+    form.dataset.sealed = '';
+    cover.addEventListener('click', async () => {
+      if (form.dataset.sealed) return;
+      form.dataset.sealed = 'opening';
+      await wait(1300);
+      delete form.dataset.sealed;
+      form.elements.name.focus({ preventScroll: true });
+    });
+    form.querySelector('[data-mail-again]').addEventListener('click', () => {
+      delete form.dataset.sent;
+      form.dataset.sealed = '';
+      cover.focus();
+    });
+
+    // script Turnstile pihak ketiga baru dimuat saat surat disentuh, supaya tidak membebani muat halaman
+    paper.addEventListener(
       'focusin',
       () => {
         // widget normal selebar 300px tidak muat di HP sempit
@@ -152,11 +193,12 @@ const messages = {
         if (response.ok) {
           form.dataset.mail = 'flying';
           await wait(1300);
+          form.querySelector('[data-thanks-text]').textContent = messages.sentBody.replace('{name}', form.elements.name.value.trim()).replace('{email}', form.elements.email.value.trim());
           form.reset();
           updateCount();
           updateSign();
-          status.textContent = messages.sent;
-          status.dataset.state = 'success';
+          form.dataset.sent = '';
+          thanks.focus();
         } else {
           const fields = result.fields ?? [];
           showErrors(fields);
@@ -243,6 +285,18 @@ const messages = {
   @media (max-width: 480px) {
     .mail__row {
       grid-template-columns: 4.6rem minmax(0, 1fr);
+    }
+
+    /* amplop lebih pendek di HP: segel dikecilkan supaya tidak menimpa nama penerima */
+    .mail .mail__cover-seal {
+      width: 38px;
+      height: 38px;
+      margin: -19px 0 0 -19px;
+      font-size: 19px;
+    }
+
+    .mail .mail__cover-to {
+      bottom: 8%;
     }
 
     /* label Kepada naik ke atas kartu supaya alamat email muat utuh */
@@ -543,6 +597,268 @@ const messages = {
     .mail :global(.mail__send:hover)::after {
       translate: 4px 0;
     }
+  }
+
+  /* ---------- amplop tertutup di awal: segel lepas, tutup terbuka, surat naik keluar ---------- */
+  .mail__cover,
+  .mail__thanks,
+  .mail[data-sealed] .mail__paper,
+  .mail[data-sent] .mail__paper {
+    display: none;
+  }
+
+  .mail[data-sealed] .mail__cover,
+  .mail[data-sent] .mail__thanks {
+    display: grid;
+  }
+
+  /* tiap tahap muncul naik pelan, cukup opacity dan translate */
+  .mail__cover,
+  .mail__paper,
+  .mail__thanks {
+    animation: mail-rise 0.7s var(--ease);
+  }
+
+  @keyframes mail-rise {
+    from {
+      opacity: 0;
+      translate: 0 24px;
+    }
+  }
+
+  .mail__cover {
+    justify-items: center;
+    gap: 28px;
+    width: 100%;
+    padding: 40px 0 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  .mail__cover:focus-visible {
+    outline: none;
+  }
+
+  .mail__cover-env {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1.6;
+    border: 1px solid rgba(217, 194, 154, 0.35);
+    background: linear-gradient(180deg, #14120e, #0b0a09);
+    perspective: 1200px;
+  }
+
+  .mail__cover-letter {
+    position: absolute;
+    inset: 7% 6% 10%;
+    z-index: 1;
+    border: 1px solid rgba(217, 194, 154, 0.3);
+    background:
+      repeating-linear-gradient(transparent 0 23px, rgba(217, 194, 154, 0.12) 23px 24px) 0 48px / 100% 100% no-repeat,
+      linear-gradient(180deg, #1d1a14, #12100c);
+    transition: translate 0.6s var(--ease);
+  }
+
+  .mail__cover-pocket {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background: linear-gradient(180deg, #1c1912, #13110d);
+    clip-path: polygon(0 0, 50% 52%, 100% 0, 100% 100%, 0 100%);
+  }
+
+  .mail__cover-pocket svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: rgba(217, 194, 154, 0.35);
+  }
+
+  .mail__cover-pocket path {
+    vector-effect: non-scaling-stroke;
+  }
+
+  .mail__cover-to {
+    position: absolute;
+    inset: auto 0 12%;
+    display: grid;
+    gap: 6px;
+    color: var(--fg);
+    font: italic 400 clamp(20px, 3vw, 26px)/1.1 var(--font-serif);
+  }
+
+  .mail__cover-to small {
+    color: var(--muted);
+    font: normal 400 10px/1 var(--font-mono);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  /* tutup amplop dengan tepi emas; berputar 3D ke atas saat dibuka */
+  .mail__cover-flap {
+    position: absolute;
+    inset: 0 0 auto;
+    z-index: 3;
+    height: 56%;
+    transform-origin: top;
+    filter: drop-shadow(0 1px 0 rgba(217, 194, 154, 0.6));
+    transition: rotate 0.6s var(--ease);
+  }
+
+  .mail__cover-flap span {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, #24201a, #18150f);
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+  }
+
+  .mail__cover-seal {
+    position: absolute;
+    top: 56%;
+    left: 50%;
+    z-index: 4;
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    margin: -24px 0 0 -24px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, var(--sun), var(--gold) 55%, #a8895a);
+    box-shadow: 0 3px 14px rgba(0, 0, 0, 0.6), inset 0 0 0 3px rgba(42, 34, 22, 0.25);
+    color: #2a2216;
+    font: italic 400 24px/1 var(--font-serif);
+    transition: scale 0.4s var(--ease), opacity 0.3s var(--ease);
+  }
+
+  /* tombol yang jelas tertulis, supaya orang awam tahu amplop ini dibuka untuk menulis pesan */
+  .mail__cover-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 3rem;
+    padding-inline: 28px;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    font: 400 11px/1 var(--font-mono);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    transition: background-color 0.4s var(--ease), color 0.4s var(--ease);
+  }
+
+  .mail__cover-cta::after {
+    content: '↑';
+  }
+
+  .mail__cover:focus-visible .mail__cover-cta {
+    outline: 1px solid var(--gold);
+    outline-offset: 4px;
+  }
+
+  /* disorot: tutup sedikit terangkat dan surat mengintip, mengisyaratkan amplop bisa dibuka */
+  @media (hover: hover) {
+    .mail__cover:hover .mail__cover-flap {
+      rotate: x 26deg;
+    }
+
+    .mail__cover:hover .mail__cover-letter {
+      translate: 0 -5%;
+    }
+
+    .mail__cover:hover .mail__cover-cta {
+      background: var(--gold);
+      color: var(--bg);
+    }
+  }
+
+  .mail[data-sealed='opening'] .mail__cover {
+    pointer-events: none;
+  }
+
+  .mail[data-sealed='opening'] .mail__cover-seal {
+    scale: 1.4;
+    opacity: 0;
+  }
+
+  /* tutup pindah ke belakang surat begitu melewati tegak, supaya surat naik di depannya */
+  .mail[data-sealed='opening'] .mail__cover-flap {
+    z-index: 0;
+    rotate: x 180deg;
+    transition: rotate 0.6s cubic-bezier(0.6, 0, 0.3, 1) 0.15s, z-index 0s 0.45s;
+  }
+
+  .mail[data-sealed='opening'] .mail__cover-letter {
+    translate: 0 -58%;
+    transition: translate 0.7s var(--ease) 0.6s;
+  }
+
+  /* ---------- setelah terkirim: kartu terima kasih dengan bintang ---------- */
+  .mail__thanks {
+    justify-items: center;
+    gap: 14px;
+    padding: 64px clamp(20px, 4vw, 48px) 56px;
+    border: 1px solid rgba(217, 194, 154, 0.3);
+    background:
+      radial-gradient(ellipse 70% 50% at 50% 0%, rgba(217, 194, 154, 0.12), transparent),
+      linear-gradient(180deg, #17140f, #0d0c0a 70%);
+    text-align: center;
+  }
+
+  .mail__thanks:focus {
+    outline: none;
+  }
+
+  .mail__thanks-star {
+    width: 36px;
+    margin-bottom: 8px;
+    fill: var(--gold);
+    filter: drop-shadow(0 0 6px rgba(255, 236, 200, 0.5));
+    animation: thanks-star 1s var(--ease) 0.2s backwards;
+  }
+
+  @keyframes thanks-star {
+    from {
+      opacity: 0;
+      scale: 0.2;
+      rotate: -90deg;
+    }
+  }
+
+  .mail__thanks-label {
+    color: var(--gold);
+    font: 400 11px/1.5 var(--font-mono);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .mail__thanks-title {
+    color: var(--fg);
+    font: italic 400 clamp(28px, 4vw, 36px)/1.1 var(--font-serif);
+  }
+
+  .mail__thanks-text {
+    max-width: 26rem;
+    color: var(--muted);
+  }
+
+  .mail__again {
+    margin-top: 14px;
+    padding: 8px 0;
+    border: 0;
+    border-bottom: 1px solid rgba(217, 194, 154, 0.4);
+    background: none;
+    color: var(--gold);
+    font: 400 11px/1.5 var(--font-mono);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: border-color 0.4s var(--ease);
+  }
+
+  .mail__again:hover {
+    border-bottom-color: var(--gold);
   }
 
   /* ---------- kirim: surat terlipat masuk amplop, disegel, lalu melesat ---------- */

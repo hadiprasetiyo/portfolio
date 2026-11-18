@@ -1457,7 +1457,8 @@
 .contact {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 36rem);
-  align-items: center;
+  /* rata atas supaya teks kiri tidak melompat saat amplop berubah jadi surat yang lebih tinggi */
+  align-items: start;
   gap: 56px clamp(40px, 6vw, 96px);
   padding-block: 160px 40px;
 }

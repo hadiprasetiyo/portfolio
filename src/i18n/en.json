@@ -83,7 +83,7 @@
     "empty": "The CV is being updated. Please check back soon, or get in touch for a copy."
   },
   "contact": {
-    "intro": "Have a role or a project in mind? Write it in this form and I will reply to your email.",
+    "intro": "Have a role or a project in mind? Open the envelope, write your message, and I will reply to your email.",
     "name": "Name",
     "email": "Email",
     "message": "Message",
@@ -104,7 +104,12 @@
     "newMessage": "New message",
     "to": "To",
     "greeting": "Hi Hadi,",
-    "closing": "Warm regards,"
+    "closing": "Warm regards,",
+    "open": "Open & write a message",
+    "sentLabel": "Sent",
+    "sentTitle": "Your letter is on its way",
+    "sentBody": "Thank you, {name}. I will reply to {email}, usually within two days.",
+    "again": "Write another letter"
   },
   "footer": {
     "builtWith": "Built with Astro and Cloudflare Workers."
@@ -149,7 +154,7 @@
     "chapter": "Contact",
     "title": "Send an <em>email</em>",
     "steps": [
-      "Write your message in this form",
+      "Open the envelope and write your message",
       "Hit send and it reaches me right away",
       "I reply to your email, usually within two days"
     ]

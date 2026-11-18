@@ -83,7 +83,7 @@
     "empty": "CV sedang diperbarui. Silakan cek lagi nanti, atau hubungi saya untuk salinannya."
   },
   "contact": {
-    "intro": "Punya lowongan atau proyek? Tulis lewat form ini, saya akan membalas ke email kamu.",
+    "intro": "Punya lowongan atau proyek? Buka amplopnya, tulis pesanmu, dan saya akan membalas ke email kamu.",
     "name": "Nama",
     "email": "Email",
     "message": "Pesan",
@@ -104,7 +104,12 @@
     "newMessage": "Pesan baru",
     "to": "Kepada",
     "greeting": "Halo Hadi,",
-    "closing": "Salam hangat,"
+    "closing": "Salam hangat,",
+    "open": "Buka amplop & tulis pesan",
+    "sentLabel": "Terkirim",
+    "sentTitle": "Suratmu sedang terbang",
+    "sentBody": "Terima kasih, {name}. Saya akan membalas ke {email}, biasanya dalam dua hari.",
+    "again": "Tulis surat lain"
   },
   "footer": {
     "builtWith": "Dibangun dengan Astro dan Cloudflare Workers."
@@ -149,7 +154,7 @@
     "chapter": "Kontak",
     "title": "Kirim <em>email</em>",
     "steps": [
-      "Tulis pesanmu di form ini",
+      "Buka amplop, lalu tulis pesanmu",
       "Klik kirim, pesanmu langsung sampai ke saya",
       "Saya balas ke email kamu, biasanya dalam dua hari"
     ]
