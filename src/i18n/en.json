@@ -100,9 +100,11 @@
     },
     "namePlaceholder": "Your name",
     "emailPlaceholder": "you@email.com",
-    "messagePlaceholder": "Hi Hadi, I would like to talk about…",
+    "messagePlaceholder": "I would like to talk about…",
     "newMessage": "New message",
-    "to": "To"
+    "to": "To",
+    "greeting": "Hi Hadi,",
+    "closing": "Warm regards,"
   },
   "footer": {
     "builtWith": "Built with Astro and Cloudflare Workers."

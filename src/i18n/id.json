@@ -100,9 +100,11 @@
     },
     "namePlaceholder": "Nama kamu",
     "emailPlaceholder": "email@kamu.com",
-    "messagePlaceholder": "Halo Hadi, saya ingin bicara tentang…",
+    "messagePlaceholder": "Saya ingin bicara tentang…",
     "newMessage": "Pesan baru",
-    "to": "Kepada"
+    "to": "Kepada",
+    "greeting": "Halo Hadi,",
+    "closing": "Salam hangat,"
   },
   "footer": {
     "builtWith": "Dibangun dengan Astro dan Cloudflare Workers."

@@ -20,9 +20,11 @@ const messages = {
 <form class="mail" method="post" action="/api/contact" data-contact-form data-messages={JSON.stringify(messages)} novalidate>
   <input type="hidden" name="locale" value={lang} />
   <div class="mail__paper">
+    <svg class="mail__watermark" viewBox="-50 -50 100 100" aria-hidden="true"><circle r="46"></circle><circle r="40"></circle><path d="M0.0 -40.0L0.0 -44.0M6.9 -39.4L7.6 -43.3M13.7 -37.6L15.0 -41.3M20.0 -34.6L22.0 -38.1M25.7 -30.6L28.3 -33.7M30.6 -25.7L33.7 -28.3M34.6 -20.0L38.1 -22.0M37.6 -13.7L41.3 -15.0M39.4 -6.9L43.3 -7.6M40.0 -0.0L44.0 -0.0M39.4 6.9L43.3 7.6M37.6 13.7L41.3 15.0M34.6 20.0L38.1 22.0M30.6 25.7L33.7 28.3M25.7 30.6L28.3 33.7M20.0 34.6L22.0 38.1M13.7 37.6L15.0 41.3M6.9 39.4L7.6 43.3M0.0 40.0L0.0 44.0M-6.9 39.4L-7.6 43.3M-13.7 37.6L-15.0 41.3M-20.0 34.6L-22.0 38.1M-25.7 30.6L-28.3 33.7M-30.6 25.7L-33.7 28.3M-34.6 20.0L-38.1 22.0M-37.6 13.7L-41.3 15.0M-39.4 6.9L-43.3 7.6M-40.0 0.0L-44.0 0.0M-39.4 -6.9L-43.3 -7.6M-37.6 -13.7L-41.3 -15.0M-34.6 -20.0L-38.1 -22.0M-30.6 -25.7L-33.7 -28.3M-25.7 -30.6L-28.3 -33.7M-20.0 -34.6L-22.0 -38.1M-13.7 -37.6L-15.0 -41.3M-6.9 -39.4L-7.6 -43.3"></path><path class="mail__watermark-star" d="M0 -30Q0.7 -0.7 15 0Q0.7 0.7 0 30Q-0.7 0.7 -15 0Q-0.7 -0.7 0 -30Z"></path></svg>
     <div class="mail__head">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v12H3zM3 6l9 7 9-7"></path></svg>
       <span>{dictionary.newMessage}</span>
+      <time class="mail__date" data-mail-date></time>
     </div>
     {/* perangko dapat cap pos begitu semua kolom terisi benar, tanda pesan siap dikirim */}
     <span class="mail__stamp" aria-hidden="true">
@@ -46,8 +48,14 @@ const messages = {
     </div>
     <div class="mail__body">
       <label class="visually-hidden" for="contact-message">{dictionary.message}</label>
+      <p class="mail__greeting" aria-hidden="true">{dictionary.greeting}</p>
       <textarea id="contact-message" name="message" rows="6" maxlength="2000" required placeholder={dictionary.messagePlaceholder} aria-describedby="contact-message-error"></textarea>
       <span class="mail__count" aria-hidden="true">0 / 2000</span>
+    </div>
+    {/* penutup surat: nama yang diketik pengunjung langsung jadi tanda tangannya */}
+    <div class="mail__closing" aria-hidden="true">
+      <span>{dictionary.closing}</span>
+      <span class="mail__sign" data-mail-sign></span>
     </div>
     <div class="mail__errors">
       <p class="mail__error" id="contact-name-error" hidden>{dictionary.errors.name}</p>
@@ -83,6 +91,11 @@ const messages = {
     const count = form.querySelector('.mail__count');
     const updateCount = () => (count.textContent = `${message.value.length} / 2000`);
     message.addEventListener('input', updateCount);
+    const sign = form.querySelector('[data-mail-sign]');
+    const updateSign = () => (sign.textContent = form.elements.name.value.trim());
+    form.elements.name.addEventListener('input', updateSign);
+    // tanggal hari ini di pojok surat, ditulis di browser karena halaman ini dibangun sekali saat build
+    form.querySelector('[data-mail-date]').textContent = new Intl.DateTimeFormat(document.documentElement.lang, { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
     const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
     const wait = (ms) => new Promise((resolve) => setTimeout(resolve, calm ? 0 : ms));
 
@@ -134,6 +147,7 @@ const messages = {
           await wait(1300);
           form.reset();
           updateCount();
+          updateSign();
           status.textContent = messages.sent;
           status.dataset.state = 'success';
         } else {
@@ -165,14 +179,18 @@ const messages = {
   }
 
   /* kertas surat berbingkai ganda dengan siku emas, sekeluarga dengan piagam sertifikat */
+  /* butiran kertas halus digambar sekali sebagai latar; isolate supaya cap air bisa di belakang isi surat */
   .mail__paper {
     position: relative;
+    isolation: isolate;
     display: grid;
     padding: clamp(20px, 3vw, 32px);
+    overflow: clip;
     border: 1px solid rgba(217, 194, 154, 0.3);
     background:
-      radial-gradient(ellipse 80% 40% at 50% 0%, rgba(217, 194, 154, 0.08), transparent),
-      linear-gradient(180deg, #14120e, #0b0a09 55%);
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 .94 0 0 0 0 .82 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+      radial-gradient(ellipse 80% 40% at 50% 0%, rgba(217, 194, 154, 0.1), transparent),
+      linear-gradient(180deg, #17140f, #0d0c0a 60%);
     transition: opacity 0.5s var(--ease), scale 0.8s var(--ease);
   }
 
@@ -189,12 +207,62 @@ const messages = {
     align-items: center;
     gap: 10px;
     min-height: 64px;
-    padding-right: 80px;
+    /* ruang untuk perangko dan cap posnya supaya tidak menimpa tanggal */
+    padding-right: 124px;
     border-bottom: 1px solid rgba(217, 194, 154, 0.16);
     color: var(--gold);
     font: 400 11px/1.5 var(--font-mono);
     letter-spacing: 0.16em;
     text-transform: uppercase;
+  }
+
+  /* cap air samar di sudut kertas, seperti kertas surat berlogo */
+  .mail__watermark {
+    position: absolute;
+    right: -70px;
+    bottom: -70px;
+    z-index: -1;
+    width: 300px;
+    fill: none;
+    stroke: var(--gold);
+    stroke-width: 0.4;
+    opacity: 0.07;
+    pointer-events: none;
+  }
+
+  .mail__watermark-star {
+    fill: var(--gold);
+    stroke: none;
+  }
+
+  .mail__date {
+    margin-left: auto;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+  }
+
+  /* layar sempit: tanggal turun ke baris sendiri di bawah judul, perangko tetap di pojok */
+  @media (max-width: 480px) {
+    .mail__head {
+      flex-wrap: wrap;
+      gap: 4px 10px;
+      padding-right: 76px;
+      white-space: nowrap;
+    }
+
+    .mail__date {
+      flex-basis: 100%;
+      margin-left: 28px;
+    }
+
+    .mail__row {
+      grid-template-columns: 4.6rem minmax(0, 1fr);
+    }
+
+    .mail__to {
+      padding: 3px 10px;
+      font-size: 15px;
+    }
   }
 
   .mail__head svg {
@@ -316,11 +384,39 @@ const messages = {
     border-bottom: 1px solid rgba(217, 194, 154, 0.16);
   }
 
+  .mail__greeting {
+    margin: 20px 0 4px;
+    color: var(--fg);
+    font: italic 400 24px/1.2 var(--font-serif);
+  }
+
+  /* kertas bergaris dengan huruf serif, terasa menulis surat; garisnya ikut bergulir bersama teks */
   textarea {
     display: block;
-    min-height: 10rem;
-    padding: 16px 0 28px;
+    min-height: calc(5 * 1.7em + 30px);
+    padding: 2px 0 28px;
+    font: 400 19px/1.7 var(--font-serif);
+    background: repeating-linear-gradient(transparent 0 calc(1.7em - 1px), rgba(217, 194, 154, 0.13) calc(1.7em - 1px) 1.7em) 0 2px / 100% 1.7em local;
     resize: vertical;
+  }
+
+  .mail__closing {
+    display: grid;
+    justify-items: end;
+    gap: 2px;
+    padding: 18px 0 6px;
+    color: var(--muted);
+    font: italic 400 17px/1.2 var(--font-serif);
+  }
+
+  .mail__sign {
+    min-width: 10rem;
+    min-height: 48px;
+    padding: 0 4px 2px;
+    border-bottom: 1px solid rgba(217, 194, 154, 0.3);
+    color: var(--gold);
+    font: 400 40px/1.25 var(--font-script);
+    text-align: right;
   }
 
   ::placeholder {
