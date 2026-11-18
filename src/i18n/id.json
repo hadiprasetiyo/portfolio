@@ -83,11 +83,11 @@
     "empty": "CV sedang diperbarui. Silakan cek lagi nanti, atau hubungi saya untuk salinannya."
   },
   "contact": {
-    "intro": "Punya lowongan atau proyek? Tulis di sini, saya akan membalas lewat email.",
+    "intro": "Punya lowongan atau proyek? Tulis lewat form ini, saya akan membalas ke email kamu.",
     "name": "Nama",
     "email": "Email",
     "message": "Pesan",
-    "send": "Kirim pesan",
+    "send": "Kirim email",
     "sending": "Mengirim",
     "sent": "Pesan terkirim. Biasanya saya membalas dalam dua hari.",
     "failed": "Pesan belum terkirim. Periksa koneksi lalu coba lagi.",
@@ -98,12 +98,11 @@
       "message": "Tulis pesan (maksimal 2000 karakter).",
       "captcha": "Selesaikan verifikasi lalu coba lagi."
     },
-    "greeting": "Halo Hadi, nama saya",
-    "reach": ", bisa dibalas lewat",
-    "about": "Saya ingin bicara tentang…",
-    "namePlaceholder": "nama kamu",
+    "namePlaceholder": "Nama kamu",
     "emailPlaceholder": "email@kamu.com",
-    "messagePlaceholder": "lowongan, proyek, atau sekadar menyapa"
+    "messagePlaceholder": "Halo Hadi, saya ingin bicara tentang…",
+    "newMessage": "Pesan baru",
+    "to": "Kepada"
   },
   "footer": {
     "builtWith": "Dibangun dengan Astro dan Cloudflare Workers."
@@ -146,11 +145,12 @@
   },
   "contactSection": {
     "chapter": "Kontak",
-    "title": "Mari <em>bicara</em>",
-    "corona": "Korona",
-    "coronaNote": "1.000.000 K · hanya tampak saat totalitas",
-    "ring": "Cincin berlian",
-    "ringNote": "menyala saat pesanmu terkirim"
+    "title": "Kirim <em>email</em>",
+    "steps": [
+      "Tulis pesanmu di form ini",
+      "Klik kirim, pesanmu langsung sampai ke saya",
+      "Saya balas ke email kamu, biasanya dalam dua hari"
+    ]
   },
   "sound": {
     "label": "Suara",

@@ -83,11 +83,11 @@
     "empty": "The CV is being updated. Please check back soon, or get in touch for a copy."
   },
   "contact": {
-    "intro": "Have a role or a project in mind? Write it here and I will reply by email.",
+    "intro": "Have a role or a project in mind? Write it in this form and I will reply to your email.",
     "name": "Name",
     "email": "Email",
     "message": "Message",
-    "send": "Send message",
+    "send": "Send email",
     "sending": "Sending",
     "sent": "Message sent. I usually reply within two days.",
     "failed": "Message not sent. Check your connection and try again.",
@@ -98,12 +98,11 @@
       "message": "Write a message (up to 2000 characters).",
       "captcha": "Complete the verification and try again."
     },
-    "greeting": "Hi Hadi, my name is",
-    "reach": ", you can reply to",
-    "about": "I would like to talk about…",
-    "namePlaceholder": "your name",
+    "namePlaceholder": "Your name",
     "emailPlaceholder": "you@email.com",
-    "messagePlaceholder": "a role, a project, or just saying hello"
+    "messagePlaceholder": "Hi Hadi, I would like to talk about…",
+    "newMessage": "New message",
+    "to": "To"
   },
   "footer": {
     "builtWith": "Built with Astro and Cloudflare Workers."
@@ -146,11 +145,12 @@
   },
   "contactSection": {
     "chapter": "Contact",
-    "title": "Let's <em>talk</em>",
-    "corona": "Corona",
-    "coronaNote": "1,000,000 K · visible only in totality",
-    "ring": "Diamond ring",
-    "ringNote": "flares when your message lands"
+    "title": "Send an <em>email</em>",
+    "steps": [
+      "Write your message in this form",
+      "Hit send and it reaches me right away",
+      "I reply to your email, usually within two days"
+    ]
   },
   "sound": {
     "label": "Sound",

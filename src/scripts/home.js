@@ -472,17 +472,6 @@ export function startHome() {
     button.addEventListener('blur', () => highlight(null));
   });
 
-  /* ---------- kontak ---------- */
-  // korona hanya berputar selama bagian kontak terlihat
-  const contact = app.querySelector('.contact');
-  new IntersectionObserver(([entry]) => contact.classList.toggle('is-live', entry.isIntersecting)).observe(contact);
-  // korona digambar sekali saat kontak sudah dekat, bukan saat halaman dimuat
-  const coronaObserver = new IntersectionObserver(([entry]) => {
-    if (!entry.isIntersecting) return;
-    coronaObserver.disconnect();
-    paintCorona(contact.querySelector('.totality__corona'));
-  }, { rootMargin: '100% 0px' });
-  coronaObserver.observe(contact);
 
 
   /* ---------- scroll ---------- */
@@ -583,87 +572,4 @@ export function startHome() {
     if (visible.has(zodiac)) autoZodiac(now);
     requestAnimationFrame(frame);
   });
-}
-
-// korona gerhana digambar sekali ke canvas: cahaya dalam, kelopak streamer, ribuan serat, lalu kromosfer dan prominensa
-function paintCorona(canvas) {
-  const size = Math.round(canvas.clientWidth * Math.min(devicePixelRatio, 1.5));
-  canvas.width = size;
-  canvas.height = size;
-  const ctx = canvas.getContext('2d');
-  const c = size / 2;
-  const r = size / 6;
-  const px = size / 1000;
-  const at = (angle, radius) => [c + Math.cos(angle) * radius, c + Math.sin(angle) * radius];
-  ctx.globalCompositeOperation = 'lighter';
-  ctx.lineCap = 'round';
-
-  const glow = ctx.createRadialGradient(c, c, r, c, c, r * 2.6);
-  glow.addColorStop(0, 'rgba(255, 246, 228, 0.95)');
-  glow.addColorStop(0.04, 'rgba(255, 236, 200, 0.5)');
-  glow.addColorStop(0.2, 'rgba(242, 205, 150, 0.16)');
-  glow.addColorStop(0.55, 'rgba(217, 170, 110, 0.05)');
-  glow.addColorStop(1, 'rgba(217, 170, 110, 0)');
-  ctx.fillStyle = glow;
-  ctx.fillRect(0, 0, size, size);
-
-  // kelopak streamer: panjang di sekitar khatulistiwa matahari, pendek di kutub; diburamkan supaya tidak bertepi tajam
-  ctx.filter = `blur(${18 * px}px)`;
-  for (const [angle, length] of [[-0.25, 1.9], [0.4, 1.3], [2.8, 1.8], [3.45, 1.4], [1.55, 0.7], [4.75, 0.6], [5.5, 1]]) {
-    const tip = r * (1 + length);
-    const spread = 0.2;
-    ctx.beginPath();
-    ctx.moveTo(...at(angle - spread, r));
-    ctx.quadraticCurveTo(...at(angle - spread / 2, r + (tip - r) * 0.5), ...at(angle, tip));
-    ctx.quadraticCurveTo(...at(angle + spread / 2, r + (tip - r) * 0.5), ...at(angle + spread, r));
-    ctx.closePath();
-    const petal = ctx.createRadialGradient(c, c, r, c, c, tip);
-    petal.addColorStop(0, 'rgba(255, 238, 210, 0.16)');
-    petal.addColorStop(1, 'rgba(255, 238, 210, 0)');
-    ctx.fillStyle = petal;
-    ctx.fill();
-  }
-  ctx.filter = 'none';
-
-  for (let i = 0; i < 1800; i++) {
-    const angle = Math.random() * Math.PI * 2;
-    const reach = 0.3 + 0.7 * Math.abs(Math.cos(angle + 0.25));
-    const start = r * (0.99 + Math.random() * 0.03);
-    const end = start + r * (0.1 + Math.random() ** 2.4 * 2 * reach);
-    const bend = (Math.random() - 0.5) * 0.06;
-    const alpha = 0.03 + Math.random() * 0.1;
-    const stroke = ctx.createLinearGradient(...at(angle, start), ...at(angle + bend, end));
-    stroke.addColorStop(0, `rgba(255, 242, 220, ${alpha})`);
-    stroke.addColorStop(1, 'rgba(255, 242, 220, 0)');
-    ctx.strokeStyle = stroke;
-    ctx.lineWidth = (0.6 + Math.random() * 1.4) * px;
-    ctx.beginPath();
-    ctx.moveTo(...at(angle, start));
-    ctx.quadraticCurveTo(...at(angle + bend / 2, (start + end) / 2), ...at(angle + bend, end));
-    ctx.stroke();
-  }
-
-  // kromosfer: cincin tipis kemerahan tepat di tepi bulan
-  ctx.globalCompositeOperation = 'source-over';
-  ctx.shadowColor = 'rgba(255, 140, 120, 0.8)';
-  ctx.shadowBlur = 6 * px;
-  ctx.strokeStyle = 'rgba(255, 200, 175, 0.7)';
-  ctx.lineWidth = 1.6 * px;
-  ctx.beginPath();
-  ctx.arc(c, c, r * 1.003, 0, Math.PI * 2);
-  ctx.stroke();
-
-  // prominensa: lidah gas panas kecil yang mencuat dari tepi
-  ctx.shadowBlur = 0;
-  ctx.filter = `blur(${1.5 * px}px)`;
-  ctx.fillStyle = 'rgba(255, 130, 115, 0.75)';
-  for (const [angle, height] of [[0.95, 0.03], [2.35, 0.02], [4.15, 0.04], [5.25, 0.018]]) {
-    const width = 0.035;
-    ctx.beginPath();
-    ctx.moveTo(...at(angle - width, r * 0.995));
-    ctx.bezierCurveTo(...at(angle - width * 1.2, r * (1 + height * 1.4)), ...at(angle + width * 0.4, r * (1 + height * 1.8)), ...at(angle + width * 0.2, r * (1 + height)));
-    ctx.quadraticCurveTo(...at(angle + width * 0.6, r * (1 + height * 0.4)), ...at(angle + width, r * 0.995));
-    ctx.closePath();
-    ctx.fill();
-  }
 }

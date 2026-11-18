@@ -1453,284 +1453,52 @@
   font-style: italic;
 }
 
-/* ---------- kontak: gerhana total sebagai adegan penutup ---------- */
+/* ---------- kontak: form berbentuk surat yang dikirim lewat amplop ---------- */
 .contact {
-  --phase: 0;
-  position: relative;
-  padding-block: 80px 40px;
-  /* korona jauh lebih lebar dari layar; jangan sampai halaman bisa digeser ke samping */
-  overflow-x: clip;
-}
-
-/* tiap kolom yang terisi benar menggeser bulan sedikit; terkirim = cahaya lolos penuh */
-.contact:is(:has(#contact-name:valid), :has(#contact-email:valid), :has(#contact-message:valid)) {
-  --phase: 1;
-}
-
-.contact:is(:has(#contact-name:valid):has(#contact-email:valid), :has(#contact-name:valid):has(#contact-message:valid), :has(#contact-email:valid):has(#contact-message:valid)) {
-  --phase: 2;
-}
-
-.contact:has(#contact-name:valid):has(#contact-email:valid):has(#contact-message:valid) {
-  --phase: 3;
-}
-
-.contact:has(.contact-form__status[data-state='success']) {
-  --phase: 4;
-}
-
-.contact__scene {
-  --moon: min(46svh, 44vw);
-  position: relative;
   display: grid;
-  place-items: center;
-  height: 100svh;
-  min-height: 560px;
-  view-timeline-name: --totality;
-}
-
-/* kotak korona tiga kali diameter bulan; bulan tepat di sepertiga tengahnya */
-.totality {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: calc(var(--moon) * 3);
-  aspect-ratio: 1;
-  translate: -50% -50%;
-  pointer-events: none;
-}
-
-.totality > span {
-  position: absolute;
-}
-
-.totality__glow {
-  inset: 0;
-}
-
-.totality__corona {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.contact.is-live .totality__corona {
-  animation: corona-turn 420s linear infinite;
-}
-
-@keyframes corona-turn {
-  to { rotate: 1turn; }
-}
-
-.totality__sun,
-.totality__track {
-  top: 33.333%;
-  left: 33.333%;
-  width: 33.334%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-}
-
-/* matahari hanya terlihat sebagai sabit sebelum totalitas */
-.totality__sun {
-  background: radial-gradient(circle, #fff 0 55%, #fff4de);
-  box-shadow: 0 0 60px 20px rgba(255, 236, 200, 0.55), 0 0 220px 90px rgba(255, 220, 170, 0.18);
-  opacity: 0;
-}
-
-.totality__moon {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: radial-gradient(circle at 36% 32%, rgba(242, 238, 230, 0.05), transparent 60%), #040406;
-  translate: calc(var(--phase) * -1.2%) calc(var(--phase) * 1.2%);
-  transition: translate 1.6s var(--ease);
-}
-
-/* cincin berlian: titik matahari yang lolos dari tepi bulan saat bulan bergeser */
-.totality__bead {
-  top: 38.2%;
-  left: 61.8%;
-  width: 12px;
-  height: 12px;
-  margin: -6px 0 0 -6px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #fff, rgba(255, 244, 222, 0.9) 45%, transparent 72%);
-  opacity: calc(var(--phase) * 0.25);
-  scale: calc(0.6 + var(--phase) * 0.25);
-  transition: opacity 1.2s var(--ease), scale 1.2s var(--ease);
-}
-
-.totality__bead::before,
-.totality__bead::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-}
-
-.totality__bead::before {
-  width: 120px;
-  height: 120px;
-  margin: -60px 0 0 -60px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 240, 215, 0.6), rgba(255, 220, 170, 0.12) 40%, transparent 70%);
-}
-
-/* kilau silang seperti pada foto gerhana */
-.totality__bead::after {
-  width: 220px;
-  height: 110px;
-  margin: -55px 0 0 -110px;
-  background:
-    linear-gradient(90deg, transparent, rgba(255, 244, 222, 0.85), transparent) center / 100% 1px no-repeat,
-    linear-gradient(transparent, rgba(255, 244, 222, 0.6), transparent) center / 1px 100% no-repeat;
-}
-
-.contact:has(.contact-form__status[data-state='success']) .totality__bead {
-  animation: diamond-flare 2.4s var(--ease) both;
-}
-
-@keyframes diamond-flare {
-  0% { scale: 1.2; }
-  30% { scale: 3; }
-  100% { scale: 1.8; }
-}
-
-.totality__leaders {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-}
-
-.totality__leaders path {
-  fill: none;
-  stroke: rgba(217, 194, 154, 0.55);
-  stroke-width: 1;
-  vector-effect: non-scaling-stroke;
-}
-
-.totality__leaders circle {
-  fill: var(--gold);
-}
-
-.totality__note {
-  position: absolute;
-  display: grid;
-  gap: 2px;
-  max-width: 15rem;
-  color: var(--muted);
-  font: 400 11px/1.5 var(--font-mono);
-  letter-spacing: 0.04em;
-}
-
-.totality__note b {
-  color: var(--fg);
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
-.totality__note--ring {
-  bottom: 69.5%;
-  left: 77.5%;
-}
-
-.totality__note--corona {
-  right: 78.5%;
-  bottom: 34.5%;
-  text-align: right;
-}
-
-/* judul duduk di bayangan bulan dan ikut bergeser bersamanya */
-.contact__heading {
-  position: relative;
-  display: grid;
-  justify-items: center;
-  gap: 18px;
-  text-align: center;
-  translate: calc(var(--phase) * var(--moon) * -0.012) calc(var(--phase) * var(--moon) * 0.012);
-  transition: translate 1.6s var(--ease);
-}
-
-.contact__heading .section-title {
-  font-size: calc(var(--moon) * 0.21);
-  line-height: 0.95;
-}
-
-.contact__heading em {
-  display: block;
-}
-
-.contact__heading .chapter i {
-  width: calc(var(--moon) * 0.08);
-}
-
-/* gerhana terjadi sambil digulir: bulan menutup matahari, lalu korona dan judul muncul saat totalitas */
-@media (prefers-reduced-motion: no-preference) {
-  @supports (animation-timeline: view()) {
-    .totality__track,
-    .totality__sun,
-    .totality__glow,
-    .totality__leaders,
-    .totality__note,
-    .contact__heading {
-      animation: linear both;
-      animation-timeline: --totality;
-      animation-range: entry 0% entry 100%;
-    }
-
-    .totality__track {
-      animation-name: moon-approach;
-    }
-
-    .totality__sun {
-      animation-name: sun-fade;
-    }
-
-    .totality__glow,
-    .totality__leaders,
-    .totality__note,
-    .contact__heading {
-      animation-name: corona-reveal;
-    }
-  }
-}
-
-@keyframes moon-approach {
-  from { translate: -46% 30%; }
-  to { translate: 0 0; }
-}
-
-@keyframes sun-fade {
-  0%, 82% { opacity: 1; }
-  100% { opacity: 0; }
-}
-
-@keyframes corona-reveal {
-  0%, 78% { opacity: 0; }
-  100% { opacity: 1; }
-}
-
-.contact__body {
-  display: grid;
-  gap: 40px;
-  max-width: calc(48rem + 48px);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 36rem);
+  align-items: center;
+  gap: 56px clamp(40px, 6vw, 96px);
+  padding-block: 160px 40px;
 }
 
 .contact__intro {
-  max-width: 32rem;
+  max-width: 28rem;
+  margin-top: 22px;
   color: var(--muted);
+}
+
+/* tiga langkah singkat supaya pengunjung yakin pesannya benar-benar sampai */
+.contact__steps {
+  display: grid;
+  gap: 12px;
+  margin: 32px 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+
+.contact__steps li {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr);
+  align-items: baseline;
+  color: var(--fg);
+  counter-increment: step;
+}
+
+.contact__steps li::before {
+  content: '0' counter(step);
+  color: var(--gold);
+  font: 400 11px/1.5 var(--font-mono);
+  letter-spacing: 0.16em;
 }
 
 .contact__channels {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px 28px;
-  margin: 0;
-  padding: 24px 0 0;
+  gap: 10px 26px;
+  margin: 36px 0 0;
+  padding: 22px 0 0;
   border-top: 1px solid var(--line);
   font: 400 12px/1.5 var(--font-mono);
   letter-spacing: 0.08em;
@@ -1868,16 +1636,9 @@
     gap: 8px;
   }
 
-  .contact__scene {
-    --moon: min(40svh, 62vw);
-    height: 68svh;
-    min-height: 440px;
-  }
-
-  /* di layar sempit anotasi tidak muat di samping gerhana */
-  .totality__leaders,
-  .totality__note {
-    display: none;
+  .contact {
+    grid-template-columns: minmax(0, 1fr);
+    padding-top: 120px;
   }
 
   .readout div {
