@@ -38,9 +38,9 @@ const messages = {
     </span>
     <div class="mail__row mail__row--to">
       <span class="mail__key">{dictionary.to}</span>
-      {/* kartu penerima seperti di aplikasi email; fotonya sama dengan di bagian Tentang, jadi sudah ada di cache */}
+      {/* alamat penerima bergaya surat dengan pas foto; fotonya sama dengan di bagian Tentang, jadi sudah ada di cache */}
       <span class="mail__to">
-        <span class="mail__avatar"><img src={portrait.src} alt="" width={portrait.width} height={portrait.height} loading="lazy" decoding="async" /></span>
+        <span class="mail__photo"><img src={portrait.src} alt="" width={portrait.width} height={portrait.height} loading="lazy" decoding="async" /></span>
         <span class="mail__to-text">
           <strong>{name}</strong>
           {email && <small>{email}</small>}
@@ -361,34 +361,31 @@ const messages = {
   }
 
   .mail__to {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    gap: 10px;
-    justify-self: start;
-    max-width: 100%;
-    padding: 4px 16px 4px 4px;
-    border: 1px solid rgba(217, 194, 154, 0.35);
-    border-radius: 999px;
-    background: linear-gradient(90deg, rgba(217, 194, 154, 0.12), rgba(217, 194, 154, 0.02));
+    gap: 14px;
+    min-width: 0;
+    padding-block: 10px;
   }
 
-  /* potongan foto tanpa latar diberi latar emas gelap dan cincin tipis; fotonya diperbesar supaya lingkaran hanya berisi wajah */
-  .mail__avatar {
+  /* pas foto bersudut tegas dengan bingkai emas tipis; fotonya diperbesar supaya bingkai hanya berisi wajah dan bahu */
+  .mail__photo {
     flex: none;
-    width: 36px;
-    height: 36px;
+    width: 42px;
+    height: 52px;
+    margin: 3px;
     overflow: hidden;
-    border-radius: 50%;
-    background: radial-gradient(circle at 50% 30%, #3a3226, #15120d);
-    box-shadow: 0 0 0 1px var(--gold), 0 0 0 3px rgba(217, 194, 154, 0.15);
+    outline: 1px solid rgba(217, 194, 154, 0.55);
+    outline-offset: 2px;
+    background: linear-gradient(180deg, #3a3226, #15120d);
   }
 
-  .mail__avatar img {
+  .mail__photo img {
     display: block;
-    width: 78px;
+    width: 84px;
     max-width: none;
     height: auto;
-    margin: -7px 0 0 -21px;
+    margin: -3px 0 0 -21px;
   }
 
   .mail__to-text {
@@ -398,14 +395,14 @@ const messages = {
 
   .mail__to strong {
     color: var(--fg);
-    font: italic 400 18px/1.15 var(--font-serif);
+    font: italic 400 20px/1.2 var(--font-serif);
   }
 
   .mail__to small {
     overflow: hidden;
     color: var(--gold);
-    font: 400 11px/1.4 var(--font-mono);
-    letter-spacing: 0.04em;
+    font: 400 14px/1.5 var(--font-mono);
+    letter-spacing: 0.02em;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
