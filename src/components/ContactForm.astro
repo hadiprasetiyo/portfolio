@@ -1,7 +1,6 @@
 ---
 import { env } from 'cloudflare:workers';
 import { getDictionary, type Locale } from '../i18n';
-import portrait from '../assets/portrait.webp';
 import { HONEYPOT_FIELD } from '../lib/contact';
 import Button from './Button.astro';
 
@@ -38,13 +37,9 @@ const messages = {
     </span>
     <div class="mail__row mail__row--to">
       <span class="mail__key">{dictionary.to}</span>
-      {/* alamat penerima bergaya surat dengan pas foto; fotonya sama dengan di bagian Tentang, jadi sudah ada di cache */}
       <span class="mail__to">
-        <span class="mail__photo"><img src={portrait.src} alt="" width={portrait.width} height={portrait.height} loading="lazy" decoding="async" /></span>
-        <span class="mail__to-text">
-          <strong>{name}</strong>
-          {email && <small>{email}</small>}
-        </span>
+        <strong>{name}</strong>
+        {email && <small>{email}</small>}
       </span>
     </div>
     <div class="mail__row">
@@ -361,39 +356,9 @@ const messages = {
   }
 
   .mail__to {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    min-width: 0;
-    padding-block: 10px;
-  }
-
-  /* pas foto 4:5 setinggi blok nama + email, latarnya sama dengan foto Tentang */
-  .mail__photo {
-    flex: none;
-    width: 36px;
-    height: 45px;
-    margin: 3px;
-    overflow: hidden;
-    outline: 1px solid rgba(217, 194, 154, 0.55);
-    outline-offset: 2px;
-    background:
-      radial-gradient(46% 34% at 50% 30%, rgba(217, 194, 154, 0.12), transparent 72%),
-      radial-gradient(120% 85% at 50% 8%, #131317, #0b0b0e 58%, #07070a);
-  }
-
-  /* sedikit diperbesar dari atas supaya wajah terbaca di ukuran kecil, bahu tetap terlihat */
-  .mail__photo img {
-    display: block;
-    width: 135%;
-    max-width: none;
-    height: auto;
-    margin: -2px 0 0 -17.5%;
-  }
-
-  .mail__to-text {
     display: grid;
     min-width: 0;
+    padding-block: 10px;
   }
 
   .mail__to strong {
