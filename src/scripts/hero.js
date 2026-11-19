@@ -1170,6 +1170,8 @@ export function startHero() {
   }, { passive: true });
 
   // kursor terhisap ke inti lubang hitam selama hero masih di layar
+  // menu indeks menutupi hero, jadi kursor di atasnya tidak boleh ikut terhisap
+  const siteIndex = document.getElementById('site-index');
   setCursorAttractor(() => {
     if (!corona) return null;
     // panggung sticky menempel di atas layar sampai ujung hero, lalu ikut naik
@@ -1179,7 +1181,7 @@ export function startHero() {
       x: sky.cx,
       y: stageTop + sky.cy,
       horizon: sky.radius * (restDistance / view.dist),
-      active: bottom > 0 && heroProgress < 0.6,
+      active: bottom > 0 && heroProgress < 0.6 && !siteIndex?.classList.contains('is-open'),
     };
   });
 
