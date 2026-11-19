@@ -28,8 +28,11 @@ const messages = {
         <svg viewBox="0 0 160 100" preserveAspectRatio="none"><path d="M0 0L80 52L160 0M0 100L62 62M160 100L98 62"></path></svg>
         <span class="mail__cover-to"><small>{dictionary.to}</small>{name}</span>
       </span>
-      <span class="mail__cover-flap"><span></span></span>
-      <svg class="mail__cover-star" viewBox="-10 -10 20 20"><path d="M0 -10Q0.22 -0.22 5 0Q0.22 0.22 0 10Q-0.22 0.22 -5 0Q-0.22 -0.22 0 -10Z"></path></svg>
+      <span class="mail__cover-flap">
+        <span></span>
+        <svg class="mail__cover-art" viewBox="0 0 160 56"><path d="M12.7 4H147.3L80 51.1Z"></path><path d="M96.3 41.3A22 22 0 0 0 63.7 41.3M102.3 35.9A30 30 0 0 0 57.7 35.9M101.2 34.8L104.0 32.0M98.9 32.7L100.1 31.1M96.3 30.8L97.4 29.2M93.6 29.3L94.5 27.5M90.8 28.0L91.5 26.1M87.8 27.0L88.8 23.2M84.7 26.4L85.0 24.4M81.6 26.0L81.7 24.0M78.4 26.0L78.3 24.0M75.3 26.4L75.0 24.4M72.2 27.0L71.2 23.2M69.2 28.0L68.5 26.1M66.4 29.3L65.5 27.5M63.7 30.8L62.6 29.2M61.1 32.7L59.9 31.1M58.8 34.8L56.0 32.0"></path><path class="mail__cover-dots" d="M36 10h.01M58 17h.01M80 9h.01M102 17h.01M124 10h.01"></path></svg>
+        <svg class="mail__cover-clasp" viewBox="-12 -16 24 32"><path d="M0 -15L11 0L0 15L-11 0Z"></path><path class="mail__cover-clasp-line" d="M0 -11L8 0L0 11L-8 0Z"></path><path class="mail__cover-clasp-star" d="M0 -6Q0.3 -0.3 3.5 0Q0.3 0.3 0 6Q-0.3 0.3 -3.5 0Q-0.3 -0.3 0 -6Z"></path></svg>
+      </span>
     </span>
     <span class="mail__cover-cta">{dictionary.open}</span>
   </button>
@@ -137,7 +140,7 @@ const messages = {
     cover.addEventListener('click', async () => {
       if (form.dataset.sealed) return;
       form.dataset.sealed = 'opening';
-      await wait(1300);
+      await wait(1500);
       const reveal = () => delete form.dataset.sealed;
       // surat di amplop dan surat penuh diberi nama transisi sama, browser yang memekarkan satu jadi yang lain
       if (document.startViewTransition && !calm) {
@@ -295,7 +298,7 @@ const messages = {
     }
 
     /* amplop lebih pendek di HP: bintang dikecilkan supaya tidak menimpa nama penerima */
-    .mail .mail__cover-star {
+    .mail .mail__cover-clasp {
       width: 22px;
     }
 
@@ -750,16 +753,44 @@ const messages = {
     clip-path: polygon(0 0, 100% 0, 50% 100%);
   }
 
-  .mail__cover-star {
+  .mail__cover-art {
     position: absolute;
-    top: 56%;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: var(--gold);
+    stroke-width: 0.35;
+    opacity: 0.45;
+    transition: opacity 0.5s var(--ease);
+  }
+
+  .mail__cover-dots {
+    stroke-width: 1;
+    stroke-linecap: round;
+  }
+
+  /* gesper belah ketupat di ujung tutup; ikut berputar bersama tutup karena menempel padanya */
+  .mail__cover-clasp {
+    position: absolute;
+    top: 100%;
     left: 50%;
-    z-index: 4;
-    width: 30px;
+    width: 28px;
     translate: -50% -50%;
     fill: var(--gold);
-    filter: drop-shadow(0 0 6px rgba(242, 213, 160, 0.55));
-    transition: scale 0.5s var(--ease), rotate 0.5s var(--ease), opacity 0.4s var(--ease);
+    filter: drop-shadow(0 0 8px rgba(242, 213, 160, 0.35));
+    transition: rotate 0.4s cubic-bezier(0.45, 0, 0.2, 1);
+  }
+
+  .mail__cover-clasp-line {
+    fill: none;
+    stroke: #2a2216;
+    stroke-width: 0.6;
+    opacity: 0.5;
+  }
+
+  .mail__cover-clasp-star {
+    fill: #2a2216;
   }
 
   /* tombol yang jelas tertulis, supaya orang awam tahu amplop ini dibuka untuk menulis pesan */
@@ -796,9 +827,12 @@ const messages = {
       translate: 0 -6%;
     }
 
-    .mail__cover:hover .mail__cover-star {
-      scale: 1.15;
-      rotate: 45deg;
+    .mail__cover:hover .mail__cover-art {
+      opacity: 0.8;
+    }
+
+    .mail__cover:hover .mail__cover-clasp {
+      rotate: 20deg;
     }
 
     .mail__cover:hover .mail__cover-cta {
@@ -807,15 +841,13 @@ const messages = {
     }
   }
 
-  /* urutan buka: bintang lepas, tutup terbuka, surat naik, lalu amplop memudar meninggalkan suratnya */
+  /* urutan buka: gesper diputar, tutup terbuka, surat naik, lalu amplop memudar meninggalkan suratnya */
   .mail[data-sealed='opening'] .mail__cover {
     pointer-events: none;
   }
 
-  .mail[data-sealed='opening'] .mail__cover-star {
-    scale: 0.3;
-    rotate: 135deg;
-    opacity: 0;
+  .mail[data-sealed='opening'] .mail__cover-clasp {
+    rotate: 90deg;
   }
 
   /* tutup pindah ke belakang surat begitu melewati tegak, supaya surat naik di depannya */
@@ -823,18 +855,18 @@ const messages = {
     z-index: 0;
     rotate: x 180deg;
     opacity: 0;
-    transition: rotate 0.7s cubic-bezier(0.45, 0, 0.2, 1) 0.05s, z-index 0s 0.4s, opacity 0.35s var(--ease) 0.95s;
+    transition: rotate 0.7s cubic-bezier(0.45, 0, 0.2, 1) 0.3s, z-index 0s 0.65s, opacity 0.35s var(--ease) 1.15s;
   }
 
   .mail[data-sealed='opening'] .mail__cover-letter {
     translate: 0 -48%;
-    transition: translate 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.45s;
+    transition: translate 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.7s;
   }
 
   .mail[data-sealed='opening'] .mail__cover-env::before,
   .mail[data-sealed='opening'] .mail__cover-pocket {
     opacity: 0;
-    transition-delay: 0.95s;
+    transition-delay: 1.15s;
   }
 
   .mail[data-sealed='opening'] .mail__cover-cta {
