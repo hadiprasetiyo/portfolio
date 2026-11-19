@@ -25,14 +25,15 @@ const messages = {
     <span class="mail__cover-env" aria-hidden="true">
       <span class="mail__cover-letter"></span>
       <span class="mail__cover-pocket">
-        <svg viewBox="0 0 160 100" preserveAspectRatio="none"><path d="M0 0L80 52L160 0M0 100L62 62M160 100L98 62"></path></svg>
+        <svg viewBox="0 0 160 100" preserveAspectRatio="none"><path d="M0 0L80 52L160 0M0 100L62 62M160 100L98 62"></path><path class="mail__cover-frame" d="M4 6.5V94H156V6.5"></path></svg>
         <span class="mail__cover-to"><small>{dictionary.to}</small>{name}</span>
       </span>
       <span class="mail__cover-flap">
         <span></span>
         <svg class="mail__cover-art" viewBox="0 0 160 56"><path d="M12.7 4H147.3L80 51.1Z"></path><path d="M96.3 41.3A22 22 0 0 0 63.7 41.3M102.3 35.9A30 30 0 0 0 57.7 35.9M101.2 34.8L104.0 32.0M98.9 32.7L100.1 31.1M96.3 30.8L97.4 29.2M93.6 29.3L94.5 27.5M90.8 28.0L91.5 26.1M87.8 27.0L88.8 23.2M84.7 26.4L85.0 24.4M81.6 26.0L81.7 24.0M78.4 26.0L78.3 24.0M75.3 26.4L75.0 24.4M72.2 27.0L71.2 23.2M69.2 28.0L68.5 26.1M66.4 29.3L65.5 27.5M63.7 30.8L62.6 29.2M61.1 32.7L59.9 31.1M58.8 34.8L56.0 32.0"></path><path class="mail__cover-dots" d="M36 10h.01M58 17h.01M80 9h.01M102 17h.01M124 10h.01"></path></svg>
-        <svg class="mail__cover-clasp" viewBox="-12 -16 24 32"><path d="M0 -15L11 0L0 15L-11 0Z"></path><path class="mail__cover-clasp-line" d="M0 -11L8 0L0 11L-8 0Z"></path><path class="mail__cover-clasp-star" d="M0 -6Q0.3 -0.3 3.5 0Q0.3 0.3 0 6Q-0.3 0.3 -3.5 0Q-0.3 -0.3 0 -6Z"></path></svg>
+        <svg class="mail__cover-clasp" viewBox="-12 -16 24 32"><defs><linearGradient id="clasp-gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6e3bb"></stop><stop offset="0.5" stop-color="#d9c29a"></stop><stop offset="1" stop-color="#8f7348"></stop></linearGradient></defs><path d="M0 -15L11 0L0 15L-11 0Z" fill="url(#clasp-gold)"></path><path class="mail__cover-clasp-line" d="M0 -11L8 0L0 11L-8 0Z"></path><path class="mail__cover-clasp-star" d="M0 -6Q0.3 -0.3 3.5 0Q0.3 0.3 0 6Q-0.3 0.3 -3.5 0Q-0.3 -0.3 0 -6Z"></path></svg>
       </span>
+      <span class="mail__cover-sheen"></span>
     </span>
     <span class="mail__cover-cta">{dictionary.open}</span>
   </button>
@@ -638,7 +639,7 @@ const messages = {
     width: 100%;
     padding: 40px 0 0;
     border: 0;
-    background: none;
+    background: radial-gradient(ellipse 55% 45% at 50% 48%, rgba(217, 194, 154, 0.07), transparent 70%);
     cursor: pointer;
   }
 
@@ -653,6 +654,8 @@ const messages = {
     width: 100%;
     aspect-ratio: 1.6;
     perspective: 1400px;
+    rotate: -1.2deg;
+    transition: rotate 0.6s var(--ease);
   }
 
   /* bagian dalam amplop berlapis peta bintang, baru terlihat saat tutupnya terbuka */
@@ -666,7 +669,7 @@ const messages = {
       radial-gradient(rgba(242, 213, 160, 0.55) 0.6px, transparent 1.2px) 0 0 / 23px 23px,
       radial-gradient(rgba(242, 213, 160, 0.3) 0.6px, transparent 1.2px) 11px 7px / 37px 41px,
       linear-gradient(180deg, #0f0d0a, #080807);
-    box-shadow: 0 40px 60px -36px rgba(0, 0, 0, 0.9);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4), 0 24px 48px -16px rgba(0, 0, 0, 0.75), 0 70px 90px -50px rgba(0, 0, 0, 0.9);
     transition: opacity 0.35s var(--ease);
   }
 
@@ -688,8 +691,8 @@ const messages = {
     z-index: 2;
     background:
       var(--grain),
-      radial-gradient(ellipse 60% 50% at 50% 100%, rgba(217, 194, 154, 0.06), transparent),
-      linear-gradient(180deg, #1c1913, #12100d);
+      radial-gradient(ellipse 60% 50% at 50% 100%, rgba(217, 194, 154, 0.05), transparent),
+      linear-gradient(160deg, #1a1815, #11100e 55%, #0c0b0a);
     clip-path: polygon(0 0, 50% 52%, 100% 0, 100% 100%, 0 100%);
     transition: opacity 0.35s var(--ease);
   }
@@ -705,6 +708,28 @@ const messages = {
 
   .mail__cover-pocket path {
     vector-effect: non-scaling-stroke;
+  }
+
+  .mail__cover-frame {
+    stroke: rgba(217, 194, 154, 0.18);
+  }
+
+  /* kilau cahaya menyapu foil sekali saat disorot; dipotong di sini supaya tutup yang berayun tidak ikut terpotong */
+  .mail__cover-sheen {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .mail__cover-sheen::before {
+    content: '';
+    position: absolute;
+    inset: -10% auto -10% 0;
+    width: 35%;
+    background: linear-gradient(100deg, transparent, rgba(242, 213, 160, 0.07) 40%, rgba(242, 213, 160, 0.13) 50%, rgba(242, 213, 160, 0.07) 60%, transparent);
+    translate: -110% 0;
   }
 
   .mail__cover-to {
@@ -748,8 +773,8 @@ const messages = {
     inset: 0;
     background:
       var(--grain),
-      radial-gradient(ellipse 40% 60% at 50% 100%, rgba(217, 194, 154, 0.1), transparent),
-      linear-gradient(180deg, #1a1712, #25201a);
+      radial-gradient(ellipse 40% 60% at 50% 100%, rgba(217, 194, 154, 0.09), transparent),
+      linear-gradient(170deg, #1d1b17, #141310 60%, #191713);
     clip-path: polygon(0 0, 100% 0, 50% 100%);
   }
 
@@ -827,6 +852,15 @@ const messages = {
       translate: 0 -6%;
     }
 
+    .mail__cover:hover .mail__cover-env {
+      rotate: 0deg;
+    }
+
+    .mail__cover:hover .mail__cover-sheen::before {
+      translate: 300% 0;
+      transition: translate 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
     .mail__cover:hover .mail__cover-art {
       opacity: 0.8;
     }
@@ -844,6 +878,14 @@ const messages = {
   /* urutan buka: gesper diputar, tutup terbuka, surat naik, lalu amplop memudar meninggalkan suratnya */
   .mail[data-sealed='opening'] .mail__cover {
     pointer-events: none;
+  }
+
+  .mail[data-sealed='opening'] .mail__cover-env {
+    rotate: 0deg;
+  }
+
+  .mail[data-sealed='opening'] .mail__cover-sheen {
+    opacity: 0;
   }
 
   .mail[data-sealed='opening'] .mail__cover-clasp {
